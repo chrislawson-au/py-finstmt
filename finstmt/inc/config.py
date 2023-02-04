@@ -14,20 +14,13 @@ INCOME_STATEMENT_INPUT_ITEMS = [
         "revenue",
         "Revenue",
         extract_names=[
-            "total revenue",
-            "total rev",
-            "total sales",
-            "total sale",
-            "revenue",
-            "rev",
-            "sales",
-            "sale",
+            "rev"
         ],
     ),
     ItemConfig(
         "cogs",
         "Cost of Goods Sold",
-        extract_names=["cost of revenue", "cost of goods sold", "cogs", "cor"],
+        extract_names=["cogs"],
         forecast_config=ForecastItemConfig(pct_of="revenue"),
     ),
     ItemConfig(
