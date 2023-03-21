@@ -1,6 +1,6 @@
 import warnings
 from copy import deepcopy
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, make_dataclass
 from typing import Dict, List, Optional, Sequence, Union, cast
 
 import numpy as np
@@ -23,11 +23,45 @@ class FinDataBase:
     items_config: DataConfigManager = field(repr=False)
     prior_statement: Optional["FinDataBase"] = field(default=None, repr=False)
     unextracted_names: List[str] = field(default_factory=lambda: [], repr=False)
-    items_config_list: List[ItemConfig] = field(default_factory=lambda: [], repr=False)
+    # items_config_list: List[ItemConfig] = field(default_factory=lambda: [], repr=False)
     t = symbols("t", cls=Idx)
 
+    # def __init__(self, *args, **kwargs):
+    #     raise NotImplementedError
+
     def __init__(self, *args, **kwargs):
-        raise NotImplementedError
+        _fields = [
+            (
+                item.key,
+                np.float64,
+                field(default=0, repr=item.show_on_statement),
+            )
+            for item in kwargs['items_config']
+            # for item in self.items_config_list
+        ]
+        _class = make_dataclass(
+            "FinDataBase",
+            fields=_fields,
+            bases=(FinDataBase,),
+        )
+        _class.__module__ = "finstmt.bs.data"
+        self.__class__ = _class
+
+        for key, value in kwargs.items():
+            # print(f"{key}: {value}")
+            setattr(self, key, value)
+
+        self.items_config = DataConfigManager(deepcopy(self.items_config))
+
+        for item in self.items_config:
+            if item.force_positive and item.extract_names is not None:
+                # If extracted and need to force positive, take absolute value
+                value = getattr(self, item.key)
+                if value is None:
+                    continue
+                positive_value = abs(value)
+                setattr(self, item.key, positive_value)
+
 
     def _repr_html_(self):
         series = self.to_series()
@@ -160,3 +194,4 @@ class FinDataBase:
                     sub_list.append((ns_sym[t], self.__getattribute__(str(ns_sym))))
             # print(key, sub_list)
             return np.float64(sym_expr.subs(sub_list))
+

@@ -5,6 +5,8 @@ import pandas as pd
 
 from finstmt.bs.data import BalanceSheetData
 from finstmt.findata.statementsbase import FinStatementsBase
+from finstmt.bs.config import BALANCE_SHEET_INPUT_ITEMS
+from finstmt.findata.database import FinDataBase
 
 
 @dataclass
@@ -18,7 +20,10 @@ class BalanceSheets(FinStatementsBase):
         >>> bs_data = BalanceSheets.from_df(bs_df)
     """
 
-    statements: Dict[pd.Timestamp, BalanceSheetData]  # type: ignore
+    # statements: Dict[pd.Timestamp, BalanceSheetData]  # type: ignore
+    statements: Dict[pd.Timestamp, FinDataBase]  # type: ignore
 
-    statement_cls = BalanceSheetData  # type: ignore
+    # statement_cls = BalanceSheetData  # type: ignore
     statement_name = "Balance Sheet"
+
+    items_config_list = BALANCE_SHEET_INPUT_ITEMS

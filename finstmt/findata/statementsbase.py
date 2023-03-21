@@ -1,5 +1,5 @@
 import operator
-from typing import Callable, Dict, List, Optional, Sequence, Tuple
+from typing import Callable, Dict, List, Optional, Sequence, Tuple, cast
 
 import pandas as pd
 from tqdm import tqdm
@@ -121,6 +121,9 @@ class FinStatementsBase:
         dates.sort(key=lambda t: pd.to_datetime(t))
         for col in dates:
             try:
+                if items_config is None:
+                    items_config = cast(Sequence[ItemConfig], cls.items_config_list)
+
                 statement = cls.statement_cls.from_series(
                     df[col], items_config=items_config
                 )
