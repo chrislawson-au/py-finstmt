@@ -3,10 +3,9 @@ from typing import Dict
 
 import pandas as pd
 
-from finstmt.bs.data import BalanceSheetData
-from finstmt.findata.statementsbase import FinStatementsBase
 from finstmt.bs.config import BALANCE_SHEET_INPUT_ITEMS
 from finstmt.findata.database import FinDataBase
+from finstmt.findata.statementsbase import FinStatementsBase
 
 
 @dataclass

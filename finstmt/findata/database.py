@@ -1,7 +1,7 @@
 import warnings
 from copy import deepcopy
 from dataclasses import dataclass, field, make_dataclass
-from typing import Dict, List, Optional, Sequence, Union, cast
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -10,7 +10,6 @@ from sympy import Idx, IndexedBase, symbols, sympify
 from finstmt.clean.name import standardize_names_in_series_index
 from finstmt.config_manage.data import DataConfigManager
 from finstmt.exc import CouldNotParseException
-from finstmt.items.config import ItemConfig
 
 
 @dataclass
@@ -36,7 +35,7 @@ class FinDataBase:
                 np.float64,
                 field(default=0, repr=item.show_on_statement),
             )
-            for item in kwargs['items_config']
+            for item in kwargs["items_config"]
             # for item in self.items_config_list
         ]
         _class = make_dataclass(
@@ -62,7 +61,6 @@ class FinDataBase:
                 positive_value = abs(value)
                 setattr(self, item.key, positive_value)
 
-
     def _repr_html_(self):
         series = self.to_series()
         df = pd.DataFrame(series)
@@ -74,12 +72,12 @@ class FinDataBase:
     def from_series(
         cls,
         series: pd.Series,
+        items_config: DataConfigManager,  # Optional[Sequence[ItemConfig]] = None,
         prior_statement: Optional["FinDataBase"] = None,
-        items_config: Optional[Sequence[ItemConfig]] = None,
     ):
-        # If no item_config was provided, then use the default list
-        if items_config is None:
-            items_config = cast(Sequence[ItemConfig], cls.items_config_list)
+        # This should be handled by the statements class now
+        # if items_config is None:
+        #     items_config = cast(Sequence[ItemConfig], cls.items_config_list)
 
         for_lookup = deepcopy(series)
         standardize_names_in_series_index(for_lookup)
@@ -194,4 +192,3 @@ class FinDataBase:
                     sub_list.append((ns_sym[t], self.__getattribute__(str(ns_sym))))
             # print(key, sub_list)
             return np.float64(sym_expr.subs(sub_list))
-
