@@ -44,7 +44,7 @@ class FinDataBase:
             fields=_fields,
             bases=(FinDataBase,),
         )
-        _class.__module__ = "finstmt.bs.data"
+        _class.__module__ = "finstmt.findata.database"
         self.__class__ = _class
 
         for key, value in kwargs.items():
