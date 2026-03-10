@@ -1,7 +1,7 @@
 '''
-finstmt.forecast.statements.ForecastedFinancialStatements(
-    statements=[
-        finstmt.findata.statementsbase.FinStatementsBase(
+finstmt.forecast.forecasted_statements.ForecastedStatements(
+    statements={
+        'Income Statement': finstmt.core.statement_series.StatementSeries(
             statements={
                 datetime.datetime(
                     2019,
@@ -11,12 +11,12 @@ finstmt.forecast.statements.ForecastedFinancialStatements(
   "revenue": 55.0,
   "cogs": 36.0,
   "sga": 5.0,
-  "tax_exp": 7.0,
+  "tax_exp": 1.0,
   "rd_exp": 2.0,
   "op_exp": 6.0,
   "ebit": 12.0,
   "ebt": 12.0,
-  "net_income": 5.0
+  "net_income": 10.0
 },
                 datetime.datetime(
                     2020,
@@ -26,17 +26,17 @@ finstmt.forecast.statements.ForecastedFinancialStatements(
   "revenue": 55.0,
   "cogs": 35.0,
   "sga": 4.0,
-  "tax_exp": 8.0,
-  "rd_exp": 1.0,
+  "tax_exp": 1.0,
+  "rd_exp": 2.0,
   "op_exp": 6.0,
   "ebit": 13.0,
   "ebt": 13.0,
-  "net_income": 5.0
+  "net_income": 11.0
 }
             },
             statement_name='Income Statement'
         ),
-        finstmt.findata.statementsbase.FinStatementsBase(
+        'Balance Sheet': finstmt.core.statement_series.StatementSeries(
             statements={
                 datetime.datetime(
                     2019,
@@ -52,22 +52,21 @@ finstmt.forecast.statements.ForecastedFinancialStatements(
   "dep": 16.0,
   "net_ppe": 15.0,
   "goodwill": 6.0,
-  "def_tax_lt": 1.0,
   "other_lt_assets": 1.0,
-  "total_non_current_assets": 24.0,
-  "total_assets": 52.0,
+  "total_non_current_assets": 23.0,
+  "total_assets": 50.0,
   "payables": 8.0,
   "other_current_liab": 3.0,
   "total_current_liab": 11.0,
-  "lt_debt": 10.0,
-  "total_debt": 10.0,
+  "lt_debt": 12.0,
+  "total_debt": 12.0,
   "other_lt_liab": 3.0,
-  "total_non_current_liab": 14.0,
-  "total_liab": 25.0,
+  "total_non_current_liab": 15.0,
+  "total_liab": 26.0,
   "common_stock": 6.0,
   "retained_earnings": 26.0,
   "total_equity": 33.0,
-  "total_liab_and_equity": 58.0
+  "total_liab_and_equity": 59.0
 },
                 datetime.datetime(
                     2020,
@@ -83,28 +82,27 @@ finstmt.forecast.statements.ForecastedFinancialStatements(
   "dep": 16.0,
   "net_ppe": 15.0,
   "goodwill": 6.0,
-  "def_tax_lt": 1.0,
   "other_lt_assets": 1.0,
-  "total_non_current_assets": 24.0,
-  "total_assets": 52.0,
+  "total_non_current_assets": 23.0,
+  "total_assets": 50.0,
   "payables": 8.0,
   "other_current_liab": 3.0,
   "total_current_liab": 12.0,
-  "lt_debt": 10.0,
-  "total_debt": 10.0,
+  "lt_debt": 11.0,
+  "total_debt": 11.0,
   "other_lt_liab": 3.0,
-  "total_non_current_liab": 13.0,
-  "total_liab": 25.0,
+  "total_non_current_liab": 15.0,
+  "total_liab": 26.0,
   "common_stock": 6.0,
   "other_income": 1.0,
   "retained_earnings": 26.0,
   "total_equity": 33.0,
-  "total_liab_and_equity": 58.0
+  "total_liab_and_equity": 60.0
 }
             },
             statement_name='Balance Sheet'
         ),
-        finstmt.findata.statementsbase.FinStatementsBase(
+        'Metrics': finstmt.core.statement_series.StatementSeries(
             statements={
                 datetime.datetime(
                     2019,
@@ -120,57 +118,55 @@ finstmt.forecast.statements.ForecastedFinancialStatements(
                 ): {
   "capex": 16.0,
   "non_cash_expenses": 16.0,
-  "fcf": 6.0
+  "fcf": 11.0
 }
             },
             statement_name='Metrics'
         )
-    ],
+    },
     calculate=False,
     forecasts={
-        'revenue': finstmt.forecast.main.Forecast(
+        'revenue': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    55.0
 2015-12-31    47.0
 2016-12-31    39.0
 2017-12-31    45.0
 2018-12-31    55.0
 Name: Revenue, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='revenue',
                 display_name='Revenue',
                 extract_names=[
                     'total revenue',
+                    'revenue',
                     'total rev',
                     'total sales',
                     'total sale',
-                    'revenue',
                     'rev',
                     'sales',
                     'sale'
                 ]
-            )
+            ),
+            _result=2019-12-31    54630.065183
+2020-12-31    54538.284820
+Freq: YE-DEC, Name: mean, dtype: float64
         ),
-        'cogs': finstmt.forecast.main.Forecast(
+        'cogs': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    41.0
 2015-12-31    34.0
 2016-12-31    28.0
 2017-12-31    31.0
 2018-12-31    37.0
 Name: Cost of Goods Sold, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='trend',
-                pct_of='revenue'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='cogs',
                 display_name='Cost of Goods Sold',
                 extract_names=[
@@ -179,7 +175,7 @@ Name: Cost of Goods Sold, dtype: float64,
                     'cogs',
                     'cor'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
+                forecast=finstmt.config.item.ForecastItemConfig(
                     method='trend',
                     pct_of='revenue'
                 )
@@ -190,34 +186,36 @@ Name: Cost of Goods Sold, dtype: float64,
 2017-12-31    45.0
 2018-12-31    55.0
 Name: Revenue, dtype: float64,
-            pct_of_config=finstmt.items.config.ItemConfig(
+            pct_of_config=finstmt.config.item.ItemConfig(
                 key='revenue',
                 display_name='Revenue',
                 extract_names=[
                     'total revenue',
+                    'revenue',
                     'total rev',
                     'total sales',
                     'total sale',
-                    'revenue',
                     'rev',
                     'sales',
                     'sale'
                 ]
-            )
+            ),
+            _result_pct=2019-12-31    0.663718
+2020-12-31    0.648767
+Name: mean, dtype: float64
         ),
-        'sga': finstmt.forecast.main.Forecast(
+        'sga': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    6.0
 2015-12-31    4.0
 2016-12-31    4.0
 2017-12-31    4.0
 2018-12-31    5.0
 Name: SG&A Expense, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='sga',
                 display_name='SG&A Expense',
                 extract_names=[
@@ -242,24 +240,23 @@ Name: SG&A Expense, dtype: float64,
                     'selling general admin expenses',
                     'selling general admin exp'
                 ]
-            )
+            ),
+            _result=2019-12-31    4613.797118
+2020-12-31    4429.280868
+Freq: YE-DEC, Name: mean, dtype: float64
         ),
-        'int_exp': finstmt.forecast.main.Forecast(
+        'int_exp': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    0.0
 2015-12-31    1.0
 2016-12-31    1.0
 2017-12-31    1.0
 2018-12-31    0.0
 Name: Interest Expense, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='mean',
-                pct_of='total_debt'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='int_exp',
                 display_name='Interest Expense',
                 extract_names=[
@@ -272,7 +269,7 @@ Name: Interest Expense, dtype: float64,
                     'interest expenses',
                     'interest exp'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
+                forecast=finstmt.config.item.ForecastItemConfig(
                     method='mean',
                     pct_of='total_debt'
                 )
@@ -283,32 +280,31 @@ Name: Interest Expense, dtype: float64,
 2017-12-31    35.0
 2018-12-31    37.0
 Name: Total Debt, dtype: float64,
-            pct_of_config=finstmt.items.config.ItemConfig(
+            pct_of_config=finstmt.config.item.ItemConfig(
                 key='total_debt',
                 display_name='Total Debt',
                 extract_names=['total debt'],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
+                forecast=finstmt.config.item.ForecastItemConfig(
                     make_forecast=False
                 ),
                 expr_str='st_debt[t] + lt_debt[t]'
-            )
+            ),
+            _result_pct=2019-12-31    0.013118
+2020-12-31    0.013118
+Name: mean, dtype: float64
         ),
-        'tax_exp': finstmt.forecast.main.Forecast(
+        'tax_exp': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    1.0
 2015-12-31    1.0
 2016-12-31    0.0
 2017-12-31    3.0
 2018-12-31    2.0
 Name: Income Tax Expense, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='mean',
-                pct_of='ebt'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='tax_exp',
                 display_name='Income Tax Expense',
                 extract_names=[
@@ -325,68 +321,24 @@ Name: Income Tax Expense, dtype: float64,
                     'income tax exp'
                 ],
                 force_positive=False,
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
-                    method='mean',
-                    pct_of='ebt'
-                )
+                forecast=finstmt.config.item.ForecastItemConfig(method='mean')
             ),
-            pct_of_series=2014-12-31    3.0
-2015-12-31    3.0
-2016-12-31    0.0
-2017-12-31    4.0
-2018-12-31    8.0
-Name: Earnings Before Tax, dtype: float64,
-            pct_of_config=finstmt.items.config.ItemConfig(
-                key='ebt',
-                display_name='Earnings Before Tax',
-                extract_names=[
-                    'ebt',
-                    'earnings before taxes',
-                    'earnings before tax',
-                    'earn before tax',
-                    'earn before taxes',
-                    'ebt including unusual items',
-                    'earnings before taxes including unusual items',
-                    'earnings before tax including unusual items',
-                    'earn before tax including unusual items',
-                    'earn before taxes including unusual items',
-                    'ebt inc unusual items',
-                    'earnings before taxes inc unusual items',
-                    'earnings before tax inc unusual items',
-                    'earn before tax inc unusual items',
-                    'earn before taxes inc unusual items',
-                    'ebt incl unusual items',
-                    'earnings before taxes incl unusual items',
-                    'earnings before tax incl unusual items',
-                    'earn before tax incl unusual items',
-                    'earn before taxes incl unusual items',
-                    'pretax income',
-                    'pre tax income',
-                    'income pretax',
-                    'income pre tax'
-                ],
-                force_positive=False,
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
-                    make_forecast=False
-                ),
-                expr_str='ebit[t] - int_exp[t]'
-            )
+            _result=2019-12-31    1367.4
+2020-12-31    1367.4
+Name: mean, dtype: float64
         ),
-        'rd_exp': finstmt.forecast.main.Forecast(
+        'rd_exp': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    2.0
 2015-12-31    2.0
 2016-12-31    2.0
 2017-12-31    2.0
 2018-12-31    2.0
 Name: R&D Expense, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='auto'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='rd_exp',
                 display_name='R&D Expense',
                 extract_names=[
@@ -399,26 +351,24 @@ Name: R&D Expense, dtype: float64,
                     'research and development exp',
                     'research and development'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
-                    method='auto'
-                )
-            )
+                forecast=finstmt.config.item.ForecastItemConfig(method='mean')
+            ),
+            _result=2019-12-31    2008.8
+2020-12-31    2008.8
+Name: mean, dtype: float64
         ),
-        'other_op_exp': finstmt.forecast.main.Forecast(
+        'other_op_exp': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    0.0
 2015-12-31    0.0
 2016-12-31    0.0
 2017-12-31    0.0
 2018-12-31    0.0
 Name: Other Operating Expenses, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='mean'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='other_op_exp',
                 display_name='Other Operating Expenses',
                 extract_names=[
@@ -469,26 +419,24 @@ Name: Other Operating Expenses, dtype: float64,
                     'other exps inc',
                     'other exp inc'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
-                    method='mean'
-                )
-            )
+                forecast=finstmt.config.item.ForecastItemConfig(method='mean')
+            ),
+            _result=2019-12-31    51.4
+2020-12-31    51.4
+Name: mean, dtype: float64
         ),
-        'gain_on_sale_invest': finstmt.forecast.main.Forecast(
+        'gain_on_sale_invest': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    0.0
 2015-12-31    0.0
 2016-12-31    0.0
 2017-12-31    0.0
 2018-12-31   -0.0
 Name: Gain on Sale of Investments, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='mean'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='gain_on_sale_invest',
                 display_name='Gain on Sale of Investments',
                 extract_names=[
@@ -506,26 +454,24 @@ Name: Gain on Sale of Investments, dtype: float64,
                     'gain sale investments'
                 ],
                 force_positive=False,
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
-                    method='mean'
-                )
-            )
+                forecast=finstmt.config.item.ForecastItemConfig(method='mean')
+            ),
+            _result=2019-12-31    83.4
+2020-12-31    83.4
+Name: mean, dtype: float64
         ),
-        'impairment': finstmt.forecast.main.Forecast(
+        'impairment': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    0.0
 2015-12-31    0.0
 2016-12-31    1.0
 2017-12-31    0.0
 2018-12-31    0.0
 Name: Impairment Expense, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='mean'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='impairment',
                 display_name='Impairment Expense',
                 extract_names=[
@@ -567,62 +513,85 @@ Name: Impairment Expense, dtype: float64,
                     'asset write down',
                     'assets write down'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
-                    method='mean'
-                )
-            )
+                forecast=finstmt.config.item.ForecastItemConfig(method='mean')
+            ),
+            _result=2019-12-31    119.0
+2020-12-31    119.0
+Name: mean, dtype: float64
         ),
-        'cash': finstmt.forecast.main.Forecast(
+        'op_exp': finstmt.forecast.forecast_item_series.ForecastItemSeries(
+            orig_series=2014-12-31    8.0
+2015-12-31    7.0
+2016-12-31    6.0
+2017-12-31    6.0
+2018-12-31    7.0
+Name: Operating Expense, dtype: float64,
+            config=finstmt.config.forecast.ForecastConfig(
+                periods=2,
+                freq='YE-DEC'
+            ),
+            item_config=finstmt.config.item.ItemConfig(
+                key='op_exp',
+                display_name='Operating Expense',
+                extract_names=[
+                    'op expense',
+                    'op expenses',
+                    'op exp',
+                    'operating expense',
+                    'operating expenses',
+                    'operating exp'
+                ],
+                expr_str='rd_exp[t] + dep_exp[t] + sga[t] + other_op_exp[t]'
+            ),
+            _result=2019-12-31    6468.067770
+2020-12-31    6202.505659
+Freq: YE-DEC, Name: mean, dtype: float64
+        ),
+        'cash': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    6.0
 2015-12-31    5.0
 2016-12-31    5.0
 2017-12-31    7.0
 2018-12-31    7.0
 Name: Cash and Cash Equivalents, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='manual',
-                manual_forecasts={'levels': [7, 8], 'growth': []},
-                plug=True
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='cash',
                 display_name='Cash and Cash Equivalents',
                 extract_names=[
-                    'cash',
-                    'cash and cash equivalents',
+                    'cashalents',
                     'cash and equivalents',
+                    'cash and cash equiv',
                     'cash and equiv',
                     'cash cash equivalents',
                     'cash equivalents',
                     'cash equiv'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
+                forecast=finstmt.config.item.ForecastItemConfig(
                     method='manual',
                     manual_forecasts={'levels': [7, 8], 'growth': []},
                     plug=True
                 )
-            )
+            ),
+            _result=2019-12-31    7255.5
+2020-12-31    7589.8
+Name: mean, dtype: float64
         ),
-        'receivables': finstmt.forecast.main.Forecast(
+        'receivables': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    8.0
 2015-12-31    7.0
 2016-12-31    6.0
 2017-12-31    7.0
 2018-12-31    9.0
 Name: Receivables, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='mean',
-                pct_of='revenue'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='receivables',
                 display_name='Receivables',
                 extract_names=[
@@ -631,7 +600,7 @@ Name: Receivables, dtype: float64,
                     'accounts receivable',
                     'ar'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
+                forecast=finstmt.config.item.ForecastItemConfig(
                     method='mean',
                     pct_of='revenue'
                 )
@@ -642,41 +611,40 @@ Name: Receivables, dtype: float64,
 2017-12-31    45.0
 2018-12-31    55.0
 Name: Revenue, dtype: float64,
-            pct_of_config=finstmt.items.config.ItemConfig(
+            pct_of_config=finstmt.config.item.ItemConfig(
                 key='revenue',
                 display_name='Revenue',
                 extract_names=[
                     'total revenue',
+                    'revenue',
                     'total rev',
                     'total sales',
                     'total sale',
-                    'revenue',
                     'rev',
                     'sales',
                     'sale'
                 ]
-            )
+            ),
+            _result_pct=2019-12-31    0.151325
+2020-12-31    0.151325
+Name: mean, dtype: float64
         ),
-        'inventory': finstmt.forecast.main.Forecast(
+        'inventory': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    12.0
 2015-12-31    10.0
 2016-12-31     9.0
 2017-12-31    10.0
 2018-12-31    12.0
 Name: Inventory, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='trend',
-                pct_of='revenue'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='inventory',
                 display_name='Inventory',
                 extract_names=['inv', 'inventory', 'inventories'],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
+                forecast=finstmt.config.item.ForecastItemConfig(
                     method='trend',
                     pct_of='revenue'
                 )
@@ -687,36 +655,36 @@ Name: Inventory, dtype: float64,
 2017-12-31    45.0
 2018-12-31    55.0
 Name: Revenue, dtype: float64,
-            pct_of_config=finstmt.items.config.ItemConfig(
+            pct_of_config=finstmt.config.item.ItemConfig(
                 key='revenue',
                 display_name='Revenue',
                 extract_names=[
                     'total revenue',
+                    'revenue',
                     'total rev',
                     'total sales',
                     'total sale',
-                    'revenue',
                     'rev',
                     'sales',
                     'sale'
                 ]
-            )
+            ),
+            _result_pct=2019-12-31    0.214330
+2020-12-31    0.213636
+Name: mean, dtype: float64
         ),
-        'def_tax_st': finstmt.forecast.main.Forecast(
+        'def_tax_st': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    2.0
 2015-12-31    0.0
 2016-12-31    0.0
 2017-12-31    0.0
 2018-12-31    0.0
 Name: Deferred Tax Assets, Current, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='mean'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='def_tax_st',
                 display_name='Deferred Tax Assets, Current',
                 extract_names=[
@@ -751,26 +719,24 @@ Name: Deferred Tax Assets, Current, dtype: float64,
                     'deferred tax assets st',
                     'tax assets st'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
-                    method='mean'
-                )
-            )
+                forecast=finstmt.config.item.ForecastItemConfig(method='mean')
+            ),
+            _result=2019-12-31    328.8
+2020-12-31    328.8
+Name: mean, dtype: float64
         ),
-        'other_current_assets': finstmt.forecast.main.Forecast(
+        'other_current_assets': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    0.0
 2015-12-31    0.0
 2016-12-31    0.0
 2017-12-31    0.0
 2018-12-31    0.0
 Name: Other Current Assets, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='mean'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='other_current_assets',
                 display_name='Other Current Assets',
                 extract_names=[
@@ -780,26 +746,24 @@ Name: Other Current Assets, dtype: float64,
                     'other curr asset',
                     'oca'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
-                    method='mean'
-                )
-            )
+                forecast=finstmt.config.item.ForecastItemConfig(method='mean')
+            ),
+            _result=2019-12-31    26.2
+2020-12-31    26.2
+Name: mean, dtype: float64
         ),
-        'gross_ppe': finstmt.forecast.main.Forecast(
+        'gross_ppe': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    32.0
 2015-12-31    32.0
 2016-12-31    32.0
 2017-12-31    32.0
 2018-12-31    30.0
 Name: Gross Property, Plant & Equipment, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='mean'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='gross_ppe',
                 display_name='Gross Property, Plant & Equipment',
                 extract_names=[
@@ -816,26 +780,24 @@ Name: Gross Property, Plant & Equipment, dtype: float64,
                     'property plant equipment grs',
                     'property plant and equipment grs'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
-                    method='mean'
-                )
-            )
+                forecast=finstmt.config.item.ForecastItemConfig(method='mean')
+            ),
+            _result=2019-12-31    31361.6
+2020-12-31    31361.6
+Name: mean, dtype: float64
         ),
-        'dep': finstmt.forecast.main.Forecast(
+        'dep': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    15.0
 2015-12-31    16.0
 2016-12-31    17.0
 2017-12-31    17.0
 2018-12-31    16.0
 Name: Accumulated Depreciation, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='mean'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='dep',
                 display_name='Accumulated Depreciation',
                 extract_names=[
@@ -848,26 +810,24 @@ Name: Accumulated Depreciation, dtype: float64,
                     'acc dep',
                     'accum dep'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
-                    method='mean'
-                )
-            )
+                forecast=finstmt.config.item.ForecastItemConfig(method='mean')
+            ),
+            _result=2019-12-31    16218.0
+2020-12-31    16218.0
+Name: mean, dtype: float64
         ),
-        'goodwill': finstmt.forecast.main.Forecast(
+        'goodwill': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    7.0
 2015-12-31    7.0
 2016-12-31    6.0
 2017-12-31    6.0
 2018-12-31    6.0
 Name: Goodwill and Intangible Assets, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='mean'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='goodwill',
                 display_name='Goodwill and Intangible Assets',
                 extract_names=[
@@ -882,26 +842,24 @@ Name: Goodwill and Intangible Assets, dtype: float64,
                     'goodwill intangible assets total',
                     'goodwill intangibles total'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
-                    method='mean'
-                )
-            )
+                forecast=finstmt.config.item.ForecastItemConfig(method='mean')
+            ),
+            _result=2019-12-31    6335.6
+2020-12-31    6335.6
+Name: mean, dtype: float64
         ),
-        'lt_invest': finstmt.forecast.main.Forecast(
+        'lt_invest': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    0.0
 2015-12-31    0.0
 2016-12-31    0.0
 2017-12-31    0.0
 2018-12-31    0.0
 Name: Long-Term Investments, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='recent'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='lt_invest',
                 display_name='Long-Term Investments',
                 extract_names=[
@@ -912,77 +870,26 @@ Name: Long-Term Investments, dtype: float64,
                     'longterm invest',
                     'longterm investments'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
+                forecast=finstmt.config.item.ForecastItemConfig(
                     method='recent'
                 )
-            )
-        ),
-        'def_tax_lt': finstmt.forecast.main.Forecast(
-            orig_series=2014-12-31    1.0
-2015-12-31    2.0
-2016-12-31    3.0
-2017-12-31    2.0
-2018-12-31    1.0
-Name: Deferred Tax Assets, Long-Term, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
-                periods=2,
-                freq='A-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(),
-            base_config=finstmt.items.config.ItemConfig(
-                key='def_tax_lt',
-                display_name='Deferred Tax Assets, Long-Term',
-                extract_names=[
-                    'def tax asset long term',
-                    'deferred tax asset long term',
-                    'tax asset long term',
-                    'def tax assets long term',
-                    'deferred tax assets long term',
-                    'tax assets long term',
-                    'def tax asset longterm',
-                    'deferred tax asset longterm',
-                    'tax asset longterm',
-                    'def tax assets longterm',
-                    'deferred tax assets longterm',
-                    'tax assets longterm',
-                    'def tax asset lt',
-                    'deferred tax asset lt',
-                    'tax asset lt',
-                    'def tax assets lt',
-                    'deferred tax assets lt',
-                    'tax assets lt',
-                    'def tax asset',
-                    'deferred tax asset',
-                    'tax asset',
-                    'def tax assets',
-                    'deferred tax assets',
-                    'tax assets',
-                    'long term assets tax deferred',
-                    'lt assets tax deferred',
-                    'lt assets tax def',
-                    'long term assets tax def',
-                    'long term assets deferred tax',
-                    'lt assets deferred tax',
-                    'lt assets def tax',
-                    'long term assets def tax'
-                ]
-            )
+            _result=2019-12-31    0.0
+2020-12-31    0.0
+Name: mean, dtype: float64
         ),
-        'other_lt_assets': finstmt.forecast.main.Forecast(
+        'other_lt_assets': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    1.0
 2015-12-31    2.0
 2016-12-31    2.0
 2017-12-31    1.0
 2018-12-31    1.0
 Name: Other Long-Term Assets, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='mean'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='other_lt_assets',
                 display_name='Other Long-Term Assets',
                 extract_names=[
@@ -999,27 +906,24 @@ Name: Other Long-Term Assets, dtype: float64,
                     'long term assets other',
                     'long term asset other'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
-                    method='mean'
-                )
-            )
+                forecast=finstmt.config.item.ForecastItemConfig(method='mean')
+            ),
+            _result=2019-12-31    1168.6
+2020-12-31    1168.6
+Name: mean, dtype: float64
         ),
-        'payables': finstmt.forecast.main.Forecast(
+        'payables': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    7.0
 2015-12-31    5.0
 2016-12-31    5.0
 2017-12-31    6.0
 2018-12-31    7.0
 Name: Payables, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='trend',
-                pct_of='revenue'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='payables',
                 display_name='Payables',
                 extract_names=[
@@ -1043,7 +947,7 @@ Name: Payables, dtype: float64,
                     'payable and acc exps',
                     'payable and acc exp'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
+                forecast=finstmt.config.item.ForecastItemConfig(
                     method='trend',
                     pct_of='revenue'
                 )
@@ -1054,36 +958,36 @@ Name: Payables, dtype: float64,
 2017-12-31    45.0
 2018-12-31    55.0
 Name: Revenue, dtype: float64,
-            pct_of_config=finstmt.items.config.ItemConfig(
+            pct_of_config=finstmt.config.item.ItemConfig(
                 key='revenue',
                 display_name='Revenue',
                 extract_names=[
                     'total revenue',
+                    'revenue',
                     'total rev',
                     'total sales',
                     'total sale',
-                    'revenue',
                     'rev',
                     'sales',
                     'sale'
                 ]
-            )
+            ),
+            _result_pct=2019-12-31    0.140464
+2020-12-31    0.146206
+Name: mean, dtype: float64
         ),
-        'st_debt': finstmt.forecast.main.Forecast(
+        'st_debt': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    0.0
 2015-12-31    0.0
 2016-12-31    0.0
 2017-12-31    0.0
 2018-12-31    0.0
 Name: Short-Term Debt, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                pct_of='total_debt'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='st_debt',
                 display_name='Short-Term Debt',
                 extract_names=[
@@ -1092,11 +996,12 @@ Name: Short-Term Debt, dtype: float64,
                     'shortterm debt',
                     'st borrow',
                     'short term borrow',
-                    'shortterm borrowst borrowings',
+                    'shortterm borrow',
+                    'st borrowings',
                     'short term borrowings',
                     'shortterm borrowings'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
+                forecast=finstmt.config.item.ForecastItemConfig(
                     pct_of='total_debt'
                 )
             ),
@@ -1106,32 +1011,31 @@ Name: Short-Term Debt, dtype: float64,
 2017-12-31    35.0
 2018-12-31    37.0
 Name: Total Debt, dtype: float64,
-            pct_of_config=finstmt.items.config.ItemConfig(
+            pct_of_config=finstmt.config.item.ItemConfig(
                 key='total_debt',
                 display_name='Total Debt',
                 extract_names=['total debt'],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
+                forecast=finstmt.config.item.ForecastItemConfig(
                     make_forecast=False
                 ),
                 expr_str='st_debt[t] + lt_debt[t]'
-            )
+            ),
+            _result_pct=2019-12-31    0.0
+2020-12-31    0.0
+Freq: YE-DEC, Name: mean, dtype: float64
         ),
-        'current_lt_debt': finstmt.forecast.main.Forecast(
+        'current_lt_debt': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    1.0
 2015-12-31    1.0
 2016-12-31    1.0
 2017-12-31    0.0
 2018-12-31    0.0
 Name: Current Portion of Long-Term Debt, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='mean',
-                pct_of='total_debt'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='current_lt_debt',
                 display_name='Current Portion of Long-Term Debt',
                 extract_names=[
@@ -1184,7 +1088,7 @@ Name: Current Portion of Long-Term Debt, dtype: float64,
                     'current part of debt',
                     'current part debt'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
+                forecast=finstmt.config.item.ForecastItemConfig(
                     method='mean',
                     pct_of='total_debt'
                 )
@@ -1195,31 +1099,31 @@ Name: Current Portion of Long-Term Debt, dtype: float64,
 2017-12-31    35.0
 2018-12-31    37.0
 Name: Total Debt, dtype: float64,
-            pct_of_config=finstmt.items.config.ItemConfig(
+            pct_of_config=finstmt.config.item.ItemConfig(
                 key='total_debt',
                 display_name='Total Debt',
                 extract_names=['total debt'],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
+                forecast=finstmt.config.item.ForecastItemConfig(
                     make_forecast=False
                 ),
                 expr_str='st_debt[t] + lt_debt[t]'
-            )
+            ),
+            _result_pct=2019-12-31    0.008161
+2020-12-31    0.008161
+Name: mean, dtype: float64
         ),
-        'tax_liab_st': finstmt.forecast.main.Forecast(
+        'tax_liab_st': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    0.0
 2015-12-31    0.0
 2016-12-31    0.0
 2017-12-31    0.0
 2018-12-31    0.0
 Name: Tax Liabilities, Short-Term, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='mean'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='tax_liab_st',
                 display_name='Tax Liabilities, Short-Term',
                 extract_names=[
@@ -1350,26 +1254,24 @@ Name: Tax Liabilities, Short-Term, dtype: float64,
                     'deferred non current tax liability',
                     'deferred non current tax liabilities'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
-                    method='mean'
-                )
-            )
+                forecast=finstmt.config.item.ForecastItemConfig(method='mean')
+            ),
+            _result=2019-12-31    82.8
+2020-12-31    82.8
+Name: mean, dtype: float64
         ),
-        'other_current_liab': finstmt.forecast.main.Forecast(
+        'other_current_liab': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    4.0
 2015-12-31    3.0
 2016-12-31    3.0
 2017-12-31    3.0
 2018-12-31    4.0
 Name: Other Current Liabilities, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='mean'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='other_current_liab',
                 display_name='Other Current Liabilities',
                 extract_names=[
@@ -1382,28 +1284,24 @@ Name: Other Current Liabilities, dtype: float64,
                     'other liabilities curr',
                     'other liab curr'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
-                    method='mean'
-                )
-            )
+                forecast=finstmt.config.item.ForecastItemConfig(method='mean')
+            ),
+            _result=2019-12-31    3499.0
+2020-12-31    3499.0
+Name: mean, dtype: float64
         ),
-        'lt_debt': finstmt.forecast.main.Forecast(
+        'lt_debt': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    9.0
 2015-12-31    9.0
 2016-12-31    8.0
 2017-12-31    7.0
 2018-12-31    8.0
 Name: Long-Term Debt, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='manual',
-                manual_forecasts={'levels': [10, 10], 'growth': []},
-                plug=True
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='lt_debt',
                 display_name='Long-Term Debt',
                 extract_names=[
@@ -1426,28 +1324,28 @@ Name: Long-Term Debt, dtype: float64,
                     'long term borrowings total',
                     'longterm borrowings total'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
+                forecast=finstmt.config.item.ForecastItemConfig(
                     method='manual',
-                    manual_forecasts={'levels': [10, 10], 'growth': []},
+                    manual_forecasts={'levels': [12, 11], 'growth': []},
                     plug=True
                 )
-            )
+            ),
+            _result=2019-12-31    11811.386994
+2020-12-31    11468.881881
+Freq: YE-DEC, Name: mean, dtype: float64
         ),
-        'tax_liab_lt': finstmt.forecast.main.Forecast(
+        'tax_liab_lt': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    0.0
 2015-12-31    0.0
 2016-12-31    0.0
 2017-12-31    0.0
 2018-12-31    0.0
 Name: Tax Liabilities, Long-Term, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='mean'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='tax_liab_lt',
                 display_name='Tax Liabilities, Long-Term',
                 extract_names=[
@@ -1617,26 +1515,24 @@ Name: Tax Liabilities, Long-Term, dtype: float64,
                     'tax liability',
                     'tax liabilities'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
-                    method='mean'
-                )
-            )
+                forecast=finstmt.config.item.ForecastItemConfig(method='mean')
+            ),
+            _result=2019-12-31    82.8
+2020-12-31    82.8
+Name: mean, dtype: float64
         ),
-        'other_lt_liab': finstmt.forecast.main.Forecast(
+        'other_lt_liab': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    3.0
 2015-12-31    3.0
 2016-12-31    3.0
 2017-12-31    4.0
 2018-12-31    3.0
 Name: Other Long-Term Liabilities, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='mean'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='other_lt_liab',
                 display_name='Other Long-Term Liabilities',
                 extract_names=[
@@ -1697,26 +1593,24 @@ Name: Other Long-Term Liabilities, dtype: float64,
                     'liab noncurr other',
                     'liab non curr other'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
-                    method='mean'
-                )
-            )
+                forecast=finstmt.config.item.ForecastItemConfig(method='mean')
+            ),
+            _result=2019-12-31    3236.0
+2020-12-31    3236.0
+Name: mean, dtype: float64
         ),
-        'common_stock': finstmt.forecast.main.Forecast(
+        'common_stock': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    5.0
 2015-12-31    5.0
 2016-12-31    5.0
 2017-12-31    6.0
 2018-12-31    6.0
 Name: Common Stock, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='trend'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='common_stock',
                 display_name='Common Stock',
                 extract_names=[
@@ -1725,43 +1619,44 @@ Name: Common Stock, dtype: float64,
                     'total common shares',
                     'total shares',
                     'common stock',
-                    'stockcommon shares',
+                    'stock',
+                    'common shares',
                     'shares',
                     'net total common stock',
                     'net total stock',
                     'net total common shares',
                     'net total shares',
                     'net common stock',
-                    'net stocknet common shares',
+                    'net stock',
+                    'net common shares',
                     'net shares',
                     'total common stock net',
                     'total stock net',
                     'total common shares net',
                     'total shares net',
                     'common stock net',
-                    'stock netcommon shares net',
+                    'stock net',
+                    'common shares net',
                     'shares net'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
-                    method='trend'
-                )
-            )
+                forecast=finstmt.config.item.ForecastItemConfig(method='trend')
+            ),
+            _result=2019-12-31    5983.3
+2020-12-31    6181.0
+Name: mean, dtype: float64
         ),
-        'other_income': finstmt.forecast.main.Forecast(
+        'other_income': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31   -6.0
 2015-12-31   -2.0
 2016-12-31   -2.0
 2017-12-31   -1.0
 2018-12-31   -2.0
 Name: Other Comprehensive Income, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='trend'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='other_income',
                 display_name='Other Comprehensive Income',
                 extract_names=[
@@ -1771,35 +1666,33 @@ Name: Other Comprehensive Income, dtype: float64,
                     'comp income',
                     'comprehensive income',
                     'comprehensive income and other',
+                    'comp income other',
                     'comp income and other',
                     'comp inc and other',
                     'comprehensive inc and other',
                     'comprehensive income other',
-                    'comp income other',
                     'comp inc other',
                     'comprehensive inc other'
                 ],
                 force_positive=False,
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
-                    method='trend'
-                )
-            )
+                forecast=finstmt.config.item.ForecastItemConfig(method='trend')
+            ),
+            _result=2019-12-31     424.9
+2020-12-31    1458.6
+Name: mean, dtype: float64
         ),
-        'retained_earnings': finstmt.forecast.main.Forecast(
+        'retained_earnings': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    34.0
 2015-12-31    29.0
 2016-12-31    27.0
 2017-12-31    26.0
 2018-12-31    30.0
 Name: Retained Earnings, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='trend'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='retained_earnings',
                 display_name='Retained Earnings',
                 extract_names=[
@@ -1809,26 +1702,24 @@ Name: Retained Earnings, dtype: float64,
                     're deficit'
                 ],
                 force_positive=False,
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
-                    method='trend'
-                )
-            )
+                forecast=finstmt.config.item.ForecastItemConfig(method='trend')
+            ),
+            _result=2019-12-31    26488.1
+2020-12-31    25501.6
+Name: mean, dtype: float64
         ),
-        'minority_interest': finstmt.forecast.main.Forecast(
+        'minority_interest': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    0.0
 2015-12-31    0.0
 2016-12-31    0.0
 2017-12-31    0.0
 2018-12-31    0.0
 Name: Minority Interest, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='A-DEC'
+                freq='YE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='mean'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='minority_interest',
                 display_name='Minority Interest',
                 extract_names=[
@@ -1837,10 +1728,11 @@ Name: Minority Interest, dtype: float64,
                     'min int',
                     'min interest'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
-                    method='mean'
-                )
-            )
+                forecast=finstmt.config.item.ForecastItemConfig(method='mean')
+            ),
+            _result=2019-12-31    68.4
+2020-12-31    68.4
+Name: mean, dtype: float64
         )
     }
 )

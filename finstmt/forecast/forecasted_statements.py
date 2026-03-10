@@ -1,14 +1,13 @@
 import math
 import warnings
 from dataclasses import dataclass, field
-from typing import Dict, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, Optional, Sequence, Tuple
 
 import matplotlib.pyplot as plt
-from matplotlib.axes import Subplot
 from typing_extensions import Self
 
-from finstmt.findata.combinator import ForecastedFinancialStatementsCombinator
-from finstmt.findata.statements import FinancialStatements
+from finstmt._plot_helpers import get_selected_ax, is_last_plot_in_col, plot_finished
+from finstmt.core.statements import FinancialStatements
 from finstmt.forecast.forecast_item_series import ForecastItemSeries
 
 NUM_PLOT_COLUMNS = 3
@@ -16,16 +15,39 @@ DEFAULT_WIDTH = 15
 DEFAULT_HEIGHT_PER_ROW = 3
 
 
-
-
 @dataclass
-class ForecastedFinancialStatements(FinancialStatements):
-    # forecasts are just used for plotting
+class ForecastedStatements(FinancialStatements):
+    """Financial statements extended with forecast data.
+
+    Inherits all capabilities of :class:`FinancialStatements` and adds
+    forecast-specific features like plotting forecasted vs. historical values.
+
+    The ``forecasts`` dict holds :class:`ForecastItemSeries` objects keyed by
+    item key, used for plotting. Accessing item attributes (e.g.
+    ``forecasted.revenue``) returns the forecasted values as a ``pd.Series``.
+
+    Examples:
+        >>> forecasted = stmts.forecast(periods=5)
+        >>> forecasted.revenue  # pd.Series of forecasted revenue
+        >>> forecasted.plot()   # plot all forecasted items
+    """
     forecasts: Dict[str, ForecastItemSeries] = field(default_factory=lambda: {})
 
-    def __post_init__(self):
-        self._combinator = ForecastedFinancialStatementsCombinator()
-        super().__post_init__()
+    def __round__(self, n: Optional[int] = None) -> Self:
+        result = super().__round__(n)
+        new_forecasts = {k: round(v, n) for k, v in self.forecasts.items()}
+        return result.copy(forecasts=new_forecasts)
+
+    def _apply_op(self, other: Any, op: Callable) -> Self:
+        """Apply arithmetic to both statements and forecasts."""
+        result = super()._apply_op(other, op)
+        if isinstance(other, (float, int)):
+            new_forecasts = {k: op(v, other) for k, v in self.forecasts.items()}
+        elif hasattr(other, 'forecasts'):
+            new_forecasts = {k: op(v, other.forecasts[k]) for k, v in self.forecasts.items()}
+        else:
+            new_forecasts = self.forecasts
+        return result.copy(forecasts=new_forecasts)
 
     def plot(
         self,
@@ -56,18 +78,18 @@ class ForecastedFinancialStatements(FinancialStatements):
                 action="ignore", message="Attempting to set identical bottom == top"
             )
             for i, (item_key, forecast) in enumerate(plot_items.items()):
-                selected_ax = _get_selected_ax(
+                selected_ax = get_selected_ax(
                     axes, row, col, num_plot_rows, num_plot_columns
                 )
                 forecast.plot(ax=selected_ax)
 
                 # For before final row, don't display x-axis
-                if not _is_last_plot_in_col(
+                if not is_last_plot_in_col(
                     row, col, num_plot_rows, num_plot_columns, len(plot_items)
                 ):
                     selected_ax.get_xaxis().set_visible(False)
 
-                if i == len(plot_items) - 1 or _plot_finished(
+                if i == len(plot_items) - 1 or plot_finished(
                     row, col, num_plot_rows, num_plot_columns
                 ):
                     break
@@ -75,56 +97,10 @@ class ForecastedFinancialStatements(FinancialStatements):
                 if col == num_plot_columns:
                     row += 1
                     col = 0
-        while not _plot_finished(row, col, num_plot_rows, num_plot_columns):
+        while not plot_finished(row, col, num_plot_rows, num_plot_columns):
             col += 1
             if col == num_plot_columns:
                 row += 1
                 col = 0
             fig.delaxes(axes[row][col])
         return fig
-
-    # def __round__(self, n=None) -> Self:
-    #     new_fcst = super().__round__(n)
-    #     new_fcst.forecasts = {k: round(v, n) for k, v in self.forecasts.items()}  # type: ignore[call-overload]
-    #     return new_fcst
-
-
-def _plot_finished(row: int, col: int, max_rows: int, max_cols: int) -> bool:
-    return row == max_rows - 1 and col == max_cols - 1
-
-
-def _get_selected_ax(
-    axes: plt.GridSpec, row: int, col: int, num_plot_rows: int, num_plot_columns: int
-) -> Subplot:
-    if num_plot_rows == num_plot_columns == 1:
-        # No array if single row and column
-        return axes
-    elif num_plot_rows == 1:
-        # 1D array if single row
-        return axes[col]
-    elif num_plot_columns == 1:
-        # 1D array if single column
-        return axes[row]
-    else:
-        # 2D array if multiple rows
-        return axes[row, col]
-
-
-def _is_last_plot_in_col(
-    row: int, col: int, num_plot_rows: int, num_plot_columns: int, num_plots: int
-) -> bool:
-    # In last row, automatically last plot in col
-    if row == num_plot_rows - 1:
-        return True
-
-    # If earlier than next to last row, must not be last plot in rol
-    if row != num_plot_rows - 2:
-        return False
-
-    # Must be in next to last row. Determine if there is going to be a plot below
-    plot_number = row * num_plot_columns + (col + 1)
-    if plot_number + num_plot_columns > num_plots:
-        # Moving down one row would mean that is more plots than necessary
-        return True
-    else:
-        return False

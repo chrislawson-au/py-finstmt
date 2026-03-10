@@ -5,7 +5,7 @@ import pandas as pd
 import statsmodels.api as sm
 from statsmodels.regression.linear_model import RegressionResults
 
-from finstmt.exc import ForecastNotFitException
+from finstmt.exceptions import ForecastNotFitException
 from finstmt.forecast.models.base import ForecastModel
 
 

@@ -15,7 +15,7 @@ from _pytest.fixtures import FixtureRequest
 from syrupy import SnapshotAssertion
 
 from finstmt import FinancialStatements
-from finstmt.exc import BalanceSheetNotBalancedException
+from finstmt.exceptions import BalanceSheetNotBalancedException
 from tests.config import GENERATED_PATH
 from tests.fixtures.forecast.adjust_config import (
     FORECAST_ADJUSTS,
@@ -80,12 +80,12 @@ def test_forecast_annual_stockrow_cat_make_forecast_and_plug(
     annual_stockrow_stmts_cat: FinancialStatements, snapshot, request
 ):
     stmts = annual_stockrow_stmts_cat.copy()
-    stmts.config.update("total_debt", ["forecast_config", "make_forecast"], True)
-    stmts.config.update("st_debt", ["forecast_config", "make_forecast"], False)
-    stmts.config.update("def_tax_lt", ["forecast_config", "method"], "manual")
+    stmts.config.update("total_debt", ["forecast", "make_forecast"], True)
+    stmts.config.update("st_debt", ["forecast", "make_forecast"], False)
+    stmts.config.update("def_tax_lt", ["forecast", "method"], "manual")
     stmts.config.update(
         "def_tax_lt",
-        ["forecast_config", "manual_forecasts"],
+        ["forecast", "manual_forecasts"],
         {"levels": [], "growth": [4, 5]},
     )
 
@@ -98,8 +98,8 @@ def test_forecast_annual_stockrow_cat_make_forecast_and_plug(
             exclude=("gross_ppe", "dep"),
         )
 
-    stmts.config.update("total_debt", ["forecast_config", "plug"], True)
-    stmts.config.update("lt_debt", ["forecast_config", "plug"], False)
+    stmts.config.update("total_debt", ["forecast", "plug"], True)
+    stmts.config.update("lt_debt", ["forecast", "plug"], False)
 
     _forecast_test(
         stmts,
@@ -128,8 +128,8 @@ def test_forecast_annual_stockrow_mar(
     annual_stockrow_stmts_mar: FinancialStatements, snapshot, request
 ):
     stmts = annual_stockrow_stmts_mar
-    stmts.config.update("cash", ["forecast_config", "plug"], False)
-    stmts.config.update("cash_and_st_invest", ["forecast_config", "plug"], True)
+    stmts.config.update("cash", ["forecast", "plug"], False)
+    stmts.config.update("cash_and_st_invest", ["forecast", "plug"], True)
 
     _forecast_test(
         stmts,
@@ -144,9 +144,9 @@ def test_forecast_quarterly_stockrow_mar(
     quarterly_stockrow_stmts_mar: FinancialStatements, snapshot, request
 ):
     stmts = quarterly_stockrow_stmts_mar
-    stmts.config.update("cash", ["forecast_config", "plug"], False)
+    stmts.config.update("cash", ["forecast", "plug"], False)
     # I don't think this is valid any more. Cash is a plug and cash_and_st_invest is a calculated field
-    # stmts.config.update("cash_and_st_invest", ["forecast_config", "plug"], True)
+    # stmts.config.update("cash_and_st_invest", ["forecast", "plug"], True)
 
     _forecast_test(
         stmts,

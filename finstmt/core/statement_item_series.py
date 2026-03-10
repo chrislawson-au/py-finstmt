@@ -4,7 +4,7 @@ from typing import Optional, Tuple
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from finstmt.findata.item_config import ItemConfig
+from finstmt.config.item import ItemConfig
 
 PAD_PCT = 0.2
 
@@ -48,5 +48,5 @@ class StatementItemSeries:
         if title is not None:
             ax.set_title(title)
         plt.close()
-        
+
         return fig

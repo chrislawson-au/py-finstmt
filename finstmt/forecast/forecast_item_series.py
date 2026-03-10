@@ -7,12 +7,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from typing_extensions import Self
 
-from finstmt.exc import ForecastNotFitException, ForecastNotPredictedException
-from finstmt.findata.item_forecast_config import ForecastItemConfig
-from finstmt.forecast.config import ForecastConfig
+from finstmt.exceptions import ForecastNotFitException, ForecastNotPredictedException
+from finstmt.config.item import ForecastItemConfig
+from finstmt.config.forecast import ForecastConfig
 from finstmt.forecast.models.chooser import get_model
 from finstmt.forecast.models.manual import ManualForecastModel
-from finstmt.findata.item_config import ItemConfig
+from finstmt.config.item import ItemConfig
 
 T = TypeVar("T")
 
@@ -46,7 +46,7 @@ class ForecastItemSeries:
         #     self._result.name = self.item_config.primary_name
 
         # Handle percentage result if needed
-        if (self.item_config.forecast_config.pct_of is not None):
+        if (self.item_config.forecast.pct_of is not None):
             self._result_pct = result
         else:                    # Store results
             self._result = result
@@ -81,7 +81,7 @@ class ForecastItemSeries:
                 -1
             ]
 
-        self.item_config.forecast_config.method = "manual"
+        self.item_config.forecast.method = "manual"
 
         if adjustments is not None:
             if not isinstance(adjustments, dict) and len(adjustments) != len(values):
@@ -103,8 +103,12 @@ class ForecastItemSeries:
             for i, replace in replacements.items():
                 values[i] = replace
 
-        self.item_config.forecast_config.manual_forecasts["type"] = "levels" if use_levels else "growth"
-        self.item_config.forecast_config.manual_forecasts["values"] = list(values)
+        if use_levels:
+            self.item_config.forecast.manual_forecasts["levels"] = list(values)
+            self.item_config.forecast.manual_forecasts["growth"] = []
+        else:
+            self.item_config.forecast.manual_forecasts["levels"] = []
+            self.item_config.forecast.manual_forecasts["growth"] = list(values)
         self.model = ManualForecastModel(
             self.config, self.item_config
         )
@@ -176,9 +180,6 @@ def _apply_operation_to_forecast(
         updates["pct_of_config"] = func(
             forecast.pct_of_config, _get_attr_if_needed(other, "pct_of_config")
         )
-    updates["forecast_item_config"] = func(
-        forecast.forecast_item_config, _get_attr_if_needed(other, "forecast_item_config")
-    )
     updates["item_config"] = func(
         forecast.item_config, _get_attr_if_needed(other, "item_config")
     )
@@ -186,7 +187,7 @@ def _apply_operation_to_forecast(
 
 
 def _get_attr_if_needed(other: Any, attr: str) -> Any:
-    if isinstance(other, Forecast):
+    if isinstance(other, ForecastItemSeries):
         return getattr(other, attr)
     else:
         return other

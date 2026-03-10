@@ -3,26 +3,32 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple
 
 import pandas as pd
-from sympy import Eq, Indexed, IndexedBase, sympify
 from tqdm import tqdm
 
 from finstmt.check import item_series_is_empty
-from finstmt.config_manage.data import DataConfigManager, _key_pct_of_key
-from finstmt.config_manage.statementseries import StatementSeriesConfigManager
-from finstmt.exc import (
+from finstmt.exceptions import (
     CouldNotParseException,
     MixedFrequencyException,
     NoSuchItemException,
 )
-from finstmt.findata.statement_period_data import StatementPeriodData
-from finstmt.findata.statement_item_series import StatementItemSeries
-from finstmt.forecast.config import ForecastConfig
+from finstmt.core.statement_period_data import StatementPeriodData
+from finstmt.core.statement_item_series import StatementItemSeries
+from finstmt.config.forecast import ForecastConfig
 from finstmt.forecast.forecast_item_series import ForecastItemSeries
-from finstmt.findata.item_config import ItemConfig
-from finstmt.logger import logger
+from finstmt.config.item import ItemConfig
+from finstmt._logging import logger
 
 @dataclass
 class StatementSeries:
+    """A time-series of a single financial statement type (e.g. Income Statement).
+
+    Holds one :class:`StatementPeriodData` per date. Item values are accessible
+    as attributes: ``series.revenue`` returns a ``pd.Series`` indexed by date.
+
+    Examples:
+        >>> series = StatementSeries.from_df(df, "Income Statement", configs)
+        >>> series.revenue  # pd.Series of revenue over time
+    """
     statements: Dict[pd.Timestamp, StatementPeriodData]
     items_config_list: List[ItemConfig] = field(repr=False)
     statement_name: str
@@ -39,50 +45,6 @@ class StatementSeries:
                 self.statements[date].prior_statement = self.statements[prior_date]
             prior_date = date
 
-        # Create dictionary of individual time period configs to construct the entire statement config
-        configs_dict = {}
-        for date, statement in self.statements.items():
-            configs_dict[date] = statement.config_manager
-        self.config = StatementSeriesConfigManager(configs_dict)
-
-    def has_negative_time_index(self, symbols):
-        for sym in symbols:
-            if type(sym) is Indexed and sym.indices[0] < 0:
-                return True
-        return False
-
-    # Get the expression strings (which will include seed values, if
-    # they exist) from all statements and substitute the t index with
-    # and number for each statement
-    # If the resulting index of an item in an expression is less than 0, than don't include
-    # the statement item in the list of eqns to be solved
-    def get_expressions(
-        self, global_sympy_namespace: Dict[str, IndexedBase]
-    ):  #  finStmts: "FinancialStatements"):
-        eqns = []
-
-        for idx, period in enumerate(self.statements):
-            period_expressions = self.statements[
-                period
-            ].get_t_indexed_expression_strings()
-            for lhs_str, rhs_str in period_expressions:
-                if rhs_str is None:
-                    continue
-                lhs = sympify(lhs_str, locals=global_sympy_namespace).subs(
-                    global_sympy_namespace["t"], idx
-                )
-                rhs = sympify(rhs_str, locals=global_sympy_namespace).subs(
-                    global_sympy_namespace["t"], idx
-                )
-                if self.has_negative_time_index(rhs.free_symbols):
-                    continue
-                eqns.append(Eq(lhs, rhs))
-
-        return eqns
-        # for date, statement in self.statements.items():
-        #     statement.resolve_expressions(date, finStmts)
-        # self.df = self.to_df()
-
     def update_statement_item_calculated_value(
         self, statement_item_key, period_index, statement_item_value
     ):
@@ -97,34 +59,29 @@ class StatementSeries:
     def _repr_html_(self):
         return self._formatted_df._repr_html_()
 
-    # Get pd.Series with date index (aka times series) for a statement item
+    def _get_item_config(self, item_key: str) -> ItemConfig:
+        """Look up an ItemConfig by key from items_config_list."""
+        for config in self.items_config_list:
+            if config.key == item_key:
+                return config
+        raise NoSuchItemException(item_key)
+
     def __getattr__(self, item):
         data_dict = {}
-        for (
-            date,
-            statement,
-        ) in self.statements.items():
+        for date, statement in self.statements.items():
             try:
-                statement_value = getattr(statement, item)
+                data_dict[date] = getattr(statement, item)
             except AttributeError:
-                # Should hit here on the first loop if this is an invalid item
-                # Raise attribute error like normal.
                 raise AttributeError(item)
-            # if pd.isnull(statement_value):
-            #     statement_value = 0
-            data_dict[date] = statement_value
-        item_config: Optional[ItemConfig] = None
         try:
-            item_config = self.config.get(item)
+            display_name = self._get_item_config(item).display_name
         except NoSuchItemException:
-            pass
-        return pd.Series(
-            data_dict, name=item_config.display_name if item_config else item
-        )
+            display_name = item
+        return pd.Series(data_dict, name=display_name)
 
     def get_statement_item_series(self, item_key: str) -> StatementItemSeries:
         return StatementItemSeries(
-            series=getattr(self, item_key), item_config=self.config.get(item_key)
+            series=getattr(self, item_key), item_config=self._get_item_config(item_key)
         )
 
     def __getitem__(self, item):
@@ -135,7 +92,7 @@ class StatementSeries:
         # Got multiple dates
         all_series = []
         for date_str in item:
-            series = self.df[date_str]
+            series = self.to_df(index_as_display_name=False)[date_str]
             date = pd.to_datetime(date_str)
             series.name = date
             all_series.append(series)
@@ -187,13 +144,13 @@ class StatementSeries:
         dates.sort(key=lambda t: pd.to_datetime(t))
 
         if items_config_list is None:
-            config_manager = DataConfigManager(cls.items_config_list.copy())
+            configs = list(cls.items_config_list)
         else:
-            config_manager = DataConfigManager(items_config_list.copy())
+            configs = list(items_config_list)
 
         for col in dates:
             try:
-                statement = StatementPeriodData.from_series(df[col], config_manager)
+                statement = StatementPeriodData.from_series(df[col], configs)
             except CouldNotParseException:
                 raise CouldNotParseException(
                     "Passed DataFrame did not have any statement items in the index. "
@@ -213,7 +170,7 @@ class StatementSeries:
                     f"Was not able to extract data from the following names: {all_unextracted_names}"
                 )
 
-        return cls(statements_dict, config_manager.items, statement_name)
+        return cls(statements_dict, configs, statement_name)
 
     # get a dataframe with a column for each date and the rows for each datapoint in the statements
     def to_df(self, index_as_display_name=True) -> pd.DataFrame:
@@ -242,25 +199,28 @@ class StatementSeries:
                     "frequencies in the data. Either pass an explicit freq to forecast or remove the "
                     "periods which do not match the frequency before running the forecast."
                 )
-            kwargs[
-                "freq"
-            ] = freq  # use historical frequency if desired frequency not passed
+            kwargs["freq"] = freq
 
         forecast_config = ForecastConfig(**kwargs)
         forecast_dict: Dict[str, ForecastItemSeries] = {}
         logger.info(f"Forecasting {self.statement_name}")
+        # Use configs from FinancialStatements.config (which has adjustments
+        # from _adjust_config_based_on_data) rather than self.items_config_list
+        adjusted_configs = statements.config.configs.get(
+            self.statement_name, self.items_config_list
+        )
         item: ItemConfig
-        for item in tqdm(self.config.items):
-            if not item.forecast_config.make_forecast:
+        for item in tqdm(adjusted_configs):
+            if not item.forecast.make_forecast:
                 # If user set to skip the forecast, skip it as well
                 # By default, all calculated items will be skipped
                 continue
             data = getattr(statements, item.key)
             pct_of_series = None
             pct_of_config = None
-            if item.forecast_config.pct_of is not None:
-                pct_of_series = getattr(statements, item.forecast_config.pct_of)
-                pct_of_config = statements.config.get(item.forecast_config.pct_of)
+            if item.forecast.pct_of is not None:
+                pct_of_series = getattr(statements, item.forecast.pct_of)
+                pct_of_config = statements.config.get(item.forecast.pct_of)
             forecast = ForecastItemSeries(
                 data,
                 forecast_config,
@@ -288,7 +248,7 @@ class StatementSeries:
 
     def __add__(self, other):
         if isinstance(other, (float, int)):
-            new_df = self.df + other
+            new_df = self.to_df(index_as_display_name=False) + other
         elif isinstance(other, StatementSeries):
             new_df = combine_statement_dfs(
                 self.to_df(index_as_display_name=False),
@@ -313,9 +273,13 @@ class StatementSeries:
 
     def __mul__(self, other):
         if isinstance(other, (float, int)):
-            new_df = self.df * other
+            new_df = self.to_df(index_as_display_name=False) * other
         elif isinstance(other, StatementSeries):
-            new_df = combine_statement_dfs(self.df, other.df, operation=operator.mul)
+            new_df = combine_statement_dfs(
+                self.to_df(index_as_display_name=False),
+                other.to_df(index_as_display_name=False),
+                operation=operator.mul,
+            )
         else:
             raise NotImplementedError(
                 f"cannot multiply type {type(other)} to type {type(self)}"
@@ -331,9 +295,13 @@ class StatementSeries:
 
     def __sub__(self, other):
         if isinstance(other, (float, int)):
-            new_df = self.df - other
+            new_df = self.to_df(index_as_display_name=False) - other
         elif isinstance(other, StatementSeries):
-            new_df = combine_statement_dfs(self.df, other.df, operation=operator.sub)
+            new_df = combine_statement_dfs(
+                self.to_df(index_as_display_name=False),
+                other.to_df(index_as_display_name=False),
+                operation=operator.sub,
+            )
         else:
             raise NotImplementedError(
                 f"cannot subtract type {type(other)} to type {type(self)}"
@@ -349,10 +317,12 @@ class StatementSeries:
 
     def __truediv__(self, other):
         if isinstance(other, (float, int)):
-            new_df = self.df / other
+            new_df = self.to_df(index_as_display_name=False) / other
         elif isinstance(other, StatementSeries):
             new_df = combine_statement_dfs(
-                self.df, other.df, operation=operator.truediv
+                self.to_df(index_as_display_name=False),
+                other.to_df(index_as_display_name=False),
+                operation=operator.truediv,
             )
         else:
             raise NotImplementedError(
@@ -366,7 +336,7 @@ class StatementSeries:
 
     def __rtruediv__(self, other):
         if isinstance(other, (float, int)):
-            new_df = other / self.df
+            new_df = other / self.to_df(index_as_display_name=False)
         else:
             raise NotImplementedError(
                 f"cannot divide type {type(other)} to type {type(self)}"
@@ -378,7 +348,7 @@ class StatementSeries:
         return new_statements
 
     def __round__(self, n=None) -> "StatementSeries":
-        new_df = round(self.df, n)
+        new_df = round(self.to_df(index_as_display_name=False), n)
         new_statements = type(self).from_df(
             new_df, self.statement_name, self.items_config_list, disp_unextracted=False
         )

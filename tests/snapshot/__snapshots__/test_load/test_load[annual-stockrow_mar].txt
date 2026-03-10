@@ -1,7 +1,7 @@
 '''
-finstmt.combined.statements.FinancialStatements(
-    statements=[
-        finstmt.findata.statementsbase.FinStatementsBase(
+finstmt.core.statements.FinancialStatements(
+    statements={
+        'Income Statement': finstmt.core.statement_series.StatementSeries(
             statements={
                 datetime.datetime(
                     2009,
@@ -146,7 +146,7 @@ finstmt.combined.statements.FinancialStatements(
             },
             statement_name='Income Statement'
         ),
-        finstmt.findata.statementsbase.FinStatementsBase(
+        'Balance Sheet': finstmt.core.statement_series.StatementSeries(
             statements={
                 datetime.datetime(
                     2009,
@@ -161,7 +161,6 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 1362000000.0,
   "goodwill": 1606000000.0,
   "lt_invest": 249000000.0,
-  "def_tax_lt": 1020000000.0,
   "other_lt_assets": 393000000.0,
   "total_non_current_assets": 5082000000.0,
   "total_assets": 7933000000.0,
@@ -194,7 +193,6 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 1307000000.0,
   "goodwill": 1643000000.0,
   "lt_invest": 250000000.0,
-  "def_tax_lt": 932000000.0,
   "other_lt_assets": 205000000.0,
   "total_non_current_assets": 5601000000.0,
   "total_assets": 8983000000.0,
@@ -227,7 +225,6 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 1168000000.0,
   "goodwill": 1721000000.0,
   "lt_invest": 265000000.0,
-  "def_tax_lt": 873000000.0,
   "other_lt_assets": 261000000.0,
   "total_non_current_assets": 4586000000.0,
   "total_assets": 5910000000.0,
@@ -258,7 +255,6 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 1539000000.0,
   "goodwill": 1989000000.0,
   "lt_invest": 216000000.0,
-  "def_tax_lt": 676000000.0,
   "other_lt_assets": 267000000.0,
   "total_non_current_assets": 4867000000.0,
   "total_assets": 6342000000.0,
@@ -289,7 +285,6 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 1543000000.0,
   "goodwill": 2005000000.0,
   "lt_invest": 222000000.0,
-  "def_tax_lt": 647000000.0,
   "other_lt_assets": 332000000.0,
   "total_non_current_assets": 4891000000.0,
   "total_assets": 6794000000.0,
@@ -319,7 +314,6 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 1460000000.0,
   "goodwill": 2245000000.0,
   "lt_invest": 224000000.0,
-  "def_tax_lt": 819000000.0,
   "other_lt_assets": 260000000.0,
   "total_non_current_assets": 5223000000.0,
   "total_assets": 6833000000.0,
@@ -349,7 +343,6 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 1029000000.0,
   "goodwill": 2394000000.0,
   "lt_invest": 165000000.0,
-  "def_tax_lt": 672000000.0,
   "other_lt_assets": 223000000.0,
   "total_non_current_assets": 4698000000.0,
   "total_assets": 6082000000.0,
@@ -379,7 +372,6 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 2335000000.0,
   "goodwill": 16868000000.0,
   "lt_invest": 728000000.0,
-  "def_tax_lt": 116000000.0,
   "other_lt_assets": 477000000.0,
   "total_non_current_assets": 20769000000.0,
   "total_assets": 24140000000.0,
@@ -409,7 +401,6 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 1793000000.0,
   "goodwill": 17751000000.0,
   "lt_invest": 734000000.0,
-  "def_tax_lt": 93000000.0,
   "other_lt_assets": 593000000.0,
   "total_non_current_assets": 21106000000.0,
   "total_assets": 23846000000.0,
@@ -438,7 +429,6 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 1956000000.0,
   "goodwill": 17419000000.0,
   "lt_invest": 732000000.0,
-  "def_tax_lt": 171000000.0,
   "other_lt_assets": 587000000.0,
   "total_non_current_assets": 20990000000.0,
   "total_assets": 23696000000.0,
@@ -458,7 +448,7 @@ finstmt.combined.statements.FinancialStatements(
             },
             statement_name='Balance Sheet'
         ),
-        finstmt.findata.statementsbase.FinStatementsBase(
+        'Metrics': finstmt.core.statement_series.StatementSeries(
             statements={
                 datetime.datetime(2009, 12, 31): {},
                 datetime.datetime(
@@ -536,6 +526,6 @@ finstmt.combined.statements.FinancialStatements(
             },
             statement_name='Metrics'
         )
-    ]
+    }
 )
 '''

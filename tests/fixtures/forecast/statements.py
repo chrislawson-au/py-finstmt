@@ -1,7 +1,7 @@
 import pytest
 
 from finstmt import FinancialStatements
-from finstmt.forecast.statements import ForecastedFinancialStatements
+from finstmt.forecast.forecasted_statements import ForecastedStatements
 from tests.fixtures.forecast.adjust_config import (
     FORECAST_ADJUSTS,
     adjust_forecast_methods,
@@ -11,7 +11,7 @@ from tests.fixtures.forecast.adjust_config import (
 @pytest.fixture(scope="session")
 def ro_annual_capiq_fcst_stmts(
     ro_annual_capiq_stmts: FinancialStatements,
-) -> ForecastedFinancialStatements:
+) -> ForecastedStatements:
     stmts = ro_annual_capiq_stmts
 
     to_fcst = stmts.copy()

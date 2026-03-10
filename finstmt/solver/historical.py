@@ -3,12 +3,12 @@ from typing import Dict, List
 import pandas as pd
 from sympy import Eq, IndexedBase, sympify
 
-from finstmt.findata.statements import FinancialStatements
-from finstmt.resolver.base import ResolverBase
-from finstmt.resolver.solve import solve_equations, sympy_dict_to_results_dict
+from finstmt.core.statements import FinancialStatements
+from finstmt.solver.base import SolverBase
+from finstmt.solver.engine import expr_for, solve_equations, sympy_dict_to_results_dict
 
 
-class StatementsResolver(ResolverBase):
+class HistoricalSolver(SolverBase):
     def to_statements(self, **kwargs) -> FinancialStatements:
         if self.solve_eqs:
             solutions_dict = solve_equations(self.solve_eqs, self.subs_dict)
@@ -23,11 +23,12 @@ class StatementsResolver(ResolverBase):
 
         all_results = pd.concat(list(new_results.values()), axis=1).T
         stmts = {}
-        for stmt in self.stmts.statements.values():
+        for stmt_name, stmt in self.stmts.statements.items():
+            configs = self.stmts.config.configs.get(stmt_name, stmt.items_config_list)
             stmt.from_df(
                 all_results,
                 stmt.statement_name,
-                stmt.config.items,
+                configs,
                 disp_unextracted=False,
             )
             stmts[stmt.statement_name] = stmt
@@ -37,17 +38,19 @@ class StatementsResolver(ResolverBase):
 
     @property
     def t_indexed_eqs(self) -> List[Eq]:
-        config_managers = []
-        for stmt in self.stmts.statements.values():
-            config_managers.append(stmt.config.items)
+        config_lists = []
+        for stmt_name, stmt in self.stmts.statements.items():
+            config_lists.append(
+                self.stmts.config.configs.get(stmt_name, stmt.items_config_list)
+            )
         all_eqs = []
-        for config_manage in config_managers:
+        for config_manage in config_lists:
             for config in config_manage:
                 lhs = sympify(
-                    config.key + "[t]", locals=self.stmts.config.sympy_namespace
+                    config.key + "[t]", locals=self.sympy_namespace
                 )
                 if config.expr_str is not None:
-                    rhs = self.stmts.config.expr_for(config.key)
+                    rhs = expr_for(config.key, self.stmts.all_config_items, self.sympy_namespace)
                     eq = Eq(lhs, rhs)
                     all_eqs.append(eq)
         return all_eqs
@@ -80,7 +83,7 @@ class StatementsResolver(ResolverBase):
             key = config.key
             for period in range(nper):
                 t_key = f"{key}[{period}]"
-                lhs = sympify(t_key, locals=self.stmts.config.sympy_namespace)
+                lhs = sympify(t_key, locals=self.sympy_namespace)
                 value = getattr(self.stmts, key).iloc[period]
                 if config.expr_str is not None and value == 0:
                     # Don't have a value but it can be calculated, calculate it by not adding to substitutions

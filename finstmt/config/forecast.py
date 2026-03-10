@@ -29,4 +29,3 @@ class ForecastConfig:
     @property
     def make_future_df_kwargs(self) -> Dict[str, Union[int, str]]:
         return dict(periods=self.periods, freq=self.freq)
-

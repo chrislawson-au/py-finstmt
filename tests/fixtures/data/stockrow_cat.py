@@ -4,11 +4,11 @@ import pandas as pd
 import pytest
 
 from finstmt import FinancialStatements
-from finstmt.config.statement_config import (
+from finstmt.config.statement import (
     BALANCE_SHEET_CONFIG,
     INCOME_STATEMENT_CONFIG,
 )
-from finstmt.findata.statement_series import StatementSeries
+from finstmt.core.statement_series import StatementSeries
 from tests.fixtures.data.common import DATA_PATH
 
 STOCKROW_PATH = os.path.join(DATA_PATH, "stockrow")

@@ -2,11 +2,11 @@ from typing import Optional
 
 import pandas as pd
 
-from finstmt.exc import ImproperManualForecastException
-from finstmt.findata.item_forecast_config import ForecastItemConfig
-from finstmt.forecast.config import ForecastConfig
+from finstmt.exceptions import ImproperManualForecastException
+from finstmt.config.item import ForecastItemConfig
+from finstmt.config.forecast import ForecastConfig
 from finstmt.forecast.models.base import ForecastModel
-from finstmt.findata.item_config import ItemConfig
+from finstmt.config.item import ItemConfig
 
 # TODO: updated this to be more generic, but could break backwards compatibility
 # could consider having "levels" and "growth" for backwards compatibility for some time
@@ -34,8 +34,16 @@ class ManualForecastModel(ForecastModel):
             )
 
     def _set_manual_forecasts(self):
-        self.forecast_type = self.item_config.forecast_config.manual_forecasts["type"]
-        self.forecast_values = self.item_config.forecast_config.manual_forecasts["values"]
+        manual = self.item_config.forecast.manual_forecasts
+        if manual.get("levels"):
+            self.forecast_type = "levels"
+            self.forecast_values = manual["levels"]
+        elif manual.get("growth"):
+            self.forecast_type = "growth"
+            self.forecast_values = manual["growth"]
+        else:
+            self.forecast_type = "levels"
+            self.forecast_values = []
 
     def fit(self, series: pd.Series):
         self.recent = series.iloc[-1]

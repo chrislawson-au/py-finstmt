@@ -4,14 +4,14 @@ import pandas as pd
 import pytest
 
 from finstmt import FinancialStatements
-from finstmt.config.statement_config import (
+from finstmt.config.statement import (
     BALANCE_SHEET_CONFIG,
     INCOME_STATEMENT_CONFIG,
     METRICS_STATEMENT_CONFIG,
 )
-from finstmt.exc import MismatchingDatesException
-from finstmt.findata.statement_series import StatementSeries
-from finstmt.loaders.capiq import load_capiq_df
+from finstmt.exceptions import MismatchingDatesException
+from finstmt.core.statement_series import StatementSeries
+from finstmt.io.excel import load_capiq_df
 from tests.fixtures.data.common import DATA_PATH
 
 CAPIQ_PATH = os.path.join(DATA_PATH, "capiq")

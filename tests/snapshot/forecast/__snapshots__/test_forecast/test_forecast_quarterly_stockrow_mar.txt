@@ -1,24 +1,24 @@
 '''
-finstmt.forecast.statements.ForecastedFinancialStatements(
-    statements=[
-        finstmt.findata.statementsbase.FinStatementsBase(
+finstmt.forecast.forecasted_statements.ForecastedStatements(
+    statements={
+        'Balance Sheet': finstmt.core.statement_series.StatementSeries(
             statements={
                 datetime.datetime(2019, 12, 31): {},
                 datetime.datetime(2020, 3, 31): {}
             },
             statement_name='Balance Sheet'
         ),
-        finstmt.findata.statementsbase.FinStatementsBase(
+        'Income Statement': finstmt.core.statement_series.StatementSeries(
             statements={
                 datetime.datetime(2019, 12, 31): {},
                 datetime.datetime(2020, 3, 31): {}
             },
             statement_name='Income Statement'
         )
-    ],
+    },
     calculate=False,
     forecasts={
-        'cash': finstmt.forecast.main.Forecast(
+        'cash': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2009-12-31    0.0
 2010-03-31    0.0
 2010-06-30    0.0
@@ -60,31 +60,29 @@ finstmt.forecast.statements.ForecastedFinancialStatements(
 2019-06-30    0.0
 2019-09-30    0.0
 Name: Cash and Cash Equivalents, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='Q-DEC'
+                freq='QE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='trend'
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='cash',
                 display_name='Cash and Cash Equivalents',
                 extract_names=[
-                    'cash',
-                    'cash and cash equivalents',
+                    'cashalents',
                     'cash and equivalents',
+                    'cash and cash equiv',
                     'cash and equiv',
                     'cash cash equivalents',
                     'cash equivalents',
                     'cash equiv'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
-                    method='trend'
-                )
-            )
+                forecast=finstmt.config.item.ForecastItemConfig(method='trend')
+            ),
+            _result=2019-12-31    0.0
+2020-03-31    0.0
+Name: mean, dtype: float64
         ),
-        'lt_debt': finstmt.forecast.main.Forecast(
+        'lt_debt': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2009-12-31    0.0
 2010-03-31    0.0
 2010-06-30    0.0
@@ -126,16 +124,11 @@ Name: Cash and Cash Equivalents, dtype: float64,
 2019-06-30    0.0
 2019-09-30    0.0
 Name: Long-Term Debt, dtype: float64,
-            config=finstmt.forecast.config.ForecastConfig(
+            config=finstmt.config.forecast.ForecastConfig(
                 periods=2,
-                freq='Q-DEC'
+                freq='QE-DEC'
             ),
-            item_config=finstmt.forecast.config.ForecastItemConfig(
-                method='manual',
-                manual_forecasts={'levels': [0, 0], 'growth': []},
-                plug=True
-            ),
-            base_config=finstmt.items.config.ItemConfig(
+            item_config=finstmt.config.item.ItemConfig(
                 key='lt_debt',
                 display_name='Long-Term Debt',
                 extract_names=[
@@ -158,12 +151,15 @@ Name: Long-Term Debt, dtype: float64,
                     'long term borrowings total',
                     'longterm borrowings total'
                 ],
-                forecast_config=finstmt.forecast.config.ForecastItemConfig(
+                forecast=finstmt.config.item.ForecastItemConfig(
                     method='manual',
                     manual_forecasts={'levels': [0, 0], 'growth': []},
                     plug=True
                 )
-            )
+            ),
+            _result=2019-12-31   -0.0
+2020-03-31   -0.0
+Freq: QE-DEC, Name: mean, dtype: float64
         )
     }
 )

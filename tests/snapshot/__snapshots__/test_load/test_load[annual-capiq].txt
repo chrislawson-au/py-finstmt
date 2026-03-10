@@ -1,7 +1,7 @@
 '''
-finstmt.combined.statements.FinancialStatements(
-    statements=[
-        finstmt.findata.statementsbase.FinStatementsBase(
+finstmt.core.statements.FinancialStatements(
+    statements={
+        'Income Statement': finstmt.core.statement_series.StatementSeries(
             statements={
                 datetime.datetime(
                     2014,
@@ -97,7 +97,7 @@ finstmt.combined.statements.FinancialStatements(
             },
             statement_name='Income Statement'
         ),
-        finstmt.findata.statementsbase.FinStatementsBase(
+        'Balance Sheet': finstmt.core.statement_series.StatementSeries(
             statements={
                 datetime.datetime(
                     2014,
@@ -116,9 +116,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 16577.0,
   "goodwill": 6677.0,
   "lt_invest": 257.0,
-  "def_tax_lt": 1267.0,
   "other_lt_assets": 528.0,
-  "total_non_current_assets": 25306.0,
+  "total_non_current_assets": 24039.0,
   "total_assets": 84681.0,
   "payables": 6515.0,
   "st_debt": 9.0,
@@ -155,9 +154,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 16090.0,
   "goodwill": 6598.0,
   "lt_invest": 246.0,
-  "def_tax_lt": 2367.0,
   "other_lt_assets": 1874.0,
-  "total_non_current_assets": 27175.0,
+  "total_non_current_assets": 24808.0,
   "total_assets": 78342.0,
   "payables": 5023.0,
   "st_debt": 9.0,
@@ -192,9 +190,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 15322.0,
   "goodwill": 6003.0,
   "lt_invest": 249.0,
-  "def_tax_lt": 2683.0,
   "other_lt_assets": 1529.0,
-  "total_non_current_assets": 25786.0,
+  "total_non_current_assets": 23103.0,
   "total_assets": 74704.0,
   "payables": 4614.0,
   "st_debt": 209.0,
@@ -228,9 +225,8 @@ finstmt.combined.statements.FinancialStatements(
   "dep": 17383.0,
   "net_ppe": 14155.0,
   "goodwill": 6183.0,
-  "def_tax_lt": 1569.0,
   "other_lt_assets": 950.0,
-  "total_non_current_assets": 22857.0,
+  "total_non_current_assets": 21288.0,
   "total_assets": 76962.0,
   "payables": 6487.0,
   "st_debt": 1.0,
@@ -264,9 +260,8 @@ finstmt.combined.statements.FinancialStatements(
   "dep": 16207.0,
   "net_ppe": 13574.0,
   "goodwill": 6217.0,
-  "def_tax_lt": 1363.0,
   "other_lt_assets": 962.0,
-  "total_non_current_assets": 22116.0,
+  "total_non_current_assets": 20753.0,
   "total_assets": 78509.0,
   "payables": 7051.0,
   "current_lt_debt": 10.0,
@@ -287,7 +282,7 @@ finstmt.combined.statements.FinancialStatements(
             },
             statement_name='Balance Sheet'
         ),
-        finstmt.findata.statementsbase.FinStatementsBase(
+        'Metrics': finstmt.core.statement_series.StatementSeries(
             statements={
                 datetime.datetime(
                     2014,
@@ -335,6 +330,6 @@ finstmt.combined.statements.FinancialStatements(
             },
             statement_name='Metrics'
         )
-    ]
+    }
 )
 '''

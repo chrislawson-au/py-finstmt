@@ -1,9 +1,9 @@
 import numpy as np
 from sympy import nan
-from finstmt.findata.statements import FinancialStatements
-from finstmt.findata.statement_item import StatementItem
-from finstmt.findata.statement_series import StatementSeries
-from finstmt.findata.item_config import ItemConfig
+from finstmt.core.statements import FinancialStatements
+from finstmt.core.statement_item import StatementItem
+from finstmt.core.statement_series import StatementSeries
+from finstmt.config.item import ItemConfig
 
 def test_seed_value_is_none():
     item_config = ItemConfig(

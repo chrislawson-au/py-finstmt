@@ -6,9 +6,9 @@ from typing import TYPE_CHECKING, Dict, List, Optional, cast
 
 import pandas as pd
 
-from finstmt.clean.name import standardize_names_in_series_index
-from finstmt.config_manage.data import DataConfigManager
-from finstmt.findata.statement_item import StatementItem
+from finstmt.clean import standardize_names_in_series_index
+from finstmt.config.item import ItemConfig
+from finstmt.core.statement_item import StatementItem
 
 
 class StatementPeriodData:
@@ -16,7 +16,7 @@ class StatementPeriodData:
     Base class for financial statement data. Should not be used directly.
     """
 
-    config_manager: DataConfigManager
+    configs: List[ItemConfig]
     prior_statement: Optional["StatementPeriodData"]
     unextracted_names: List[str]
     statement_items: Dict[str, StatementItem]
@@ -27,16 +27,16 @@ class StatementPeriodData:
     def __init__(
         self,
         data_dict: Dict[str, float],
-        config_manager: DataConfigManager,
+        configs: List[ItemConfig],
         unextracted_names: List[str],
         prior_statement: Optional["StatementPeriodData"] = None,
     ):
-        self.config_manager = DataConfigManager(deepcopy(config_manager.configs))
+        self.configs = deepcopy(list(configs))
         self.prior_statement = prior_statement
         self.unextracted_names = unextracted_names
 
         self.statement_items = {}
-        for item in self.config_manager:
+        for item in self.configs:
             item_value = data_dict.get(item.key, None)
 
             self.statement_items[item.key] = StatementItem(
@@ -59,10 +59,6 @@ class StatementPeriodData:
             self.statement_items[
                 str(statement_item_key)
             ].update_statement_item_calculated_value(statement_item_value)
-
-    # def resolve_expressions(self, date, finStmts: "FinancialStatements"):
-    #     for statement_item in self.statement_items.values():
-    #         statement_item.resolve_eq(date, finStmts)
 
     def _repr_html_(self):
         series = self.to_series()
@@ -93,7 +89,7 @@ class StatementPeriodData:
 
     def __dir__(self):
         normal_attrs = [
-            "config_manager",
+            "configs",
             "prior_statement",
             "unextracted_names",
             "statement_items",
@@ -107,7 +103,7 @@ class StatementPeriodData:
     def from_series(
         cls,
         series: pd.Series,
-        config_manager: DataConfigManager,
+        configs: List[ItemConfig],
         prior_statement: Optional["StatementPeriodData"] = None,
     ):
         for_lookup = deepcopy(series)
@@ -119,7 +115,7 @@ class StatementPeriodData:
 
         for i, name in enumerate(for_lookup.index):
             orig_name = series.index[i]
-            for item_config in config_manager:
+            for item_config in configs:
                 if item_config.extract_names is None:
                     # Not an extractable item, must be a calculated item
                     continue
@@ -160,7 +156,7 @@ class StatementPeriodData:
                 unextracted_names.append(orig_name)
         return cls(
             data_dict=data_dict,
-            config_manager=config_manager,
+            configs=configs,
             unextracted_names=unextracted_names,
             prior_statement=prior_statement,
         )
@@ -169,7 +165,7 @@ class StatementPeriodData:
     # Any formulas that refer to other items from this statement should be solved by the time thie formula returns
     def to_series(self, index_as_display_name=True) -> pd.Series:
         data_dict = {}
-        for item_config in self.config_manager:
+        for item_config in self.configs:
             if index_as_display_name:
                 data_dict[item_config.display_name] = getattr(self, item_config.key)
             else:
@@ -179,13 +175,6 @@ class StatementPeriodData:
                     else item_config.key
                 ] = getattr(self, item_config.key)
 
-        # return pd.Series(data_dict).fillna(0)
-        # Maybe Filling NA shuold be a display level functionality
-        # Because when copying a statment, having a value of None/Nan is meaningful
-        # it means the value WASN'T explicitly provided
-        # If it is 0, it means the value was explicitly provided and when copying the 0
-        #  the 0 will persit and supercede and calculation logic
-
         return pd.Series(data_dict)
 
     def __getattr__(self, key: str):
@@ -193,5 +182,4 @@ class StatementPeriodData:
             statement_item = self.statement_items[key]
         except KeyError:
             raise AttributeError(key)
-        # return np.float64(self.resolve_eq(statement_item.value))
         return statement_item.value
