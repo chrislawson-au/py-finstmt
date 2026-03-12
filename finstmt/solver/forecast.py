@@ -82,7 +82,7 @@ class ForecastSolver(SolverBase):
         return solutions_dict
 
     def to_statements(self) -> ForecastedStatements:
-        if self.balance:
+        if self.balance and self.plug_configs:
             solutions_dict = self.resolve_balance_sheet()
         else:
             if self.solve_eqs:
@@ -375,7 +375,7 @@ class ForecastSolver(SolverBase):
         for config in self.plug_configs:
             x_arrs.append(self.forecast_dict[config.key].result)
         if len(x_arrs) == 0:  # No plugs
-            return []
+            return np.array([])
         x0 = np.concatenate(x_arrs) / PLUG_SCALE
         return x0
 
