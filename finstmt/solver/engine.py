@@ -337,6 +337,8 @@ def _x_arr_to_plug_solutions(
         >>> #    debt[3]: 6e11
         >>> # }
     """
+    if len(plug_keys) == 0:
+        return {}
     x_arrs = np.split(x * PLUG_SCALE, len(plug_keys))
     plug_dict = {key: pd.Series(x_arrs[i]) for i, key in enumerate(plug_keys)}
     # TODO: Is Expr or IndexedBase the correct type?
