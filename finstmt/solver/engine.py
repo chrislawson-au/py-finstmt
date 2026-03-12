@@ -362,6 +362,8 @@ def _symbolic_to_matrix(exprs: Sequence[Expr], variables: Sequence[Symbol]):
 
 
 def numpy_solve(exprs: Sequence[Expr], variables: Sequence[Symbol]):
+    if not exprs:
+        return {}
     a_arr, b_arr = _symbolic_to_matrix(exprs, variables)
     x = np.linalg.solve(a_arr, b_arr)
     solution_dict = {var: x[i] for i, var in enumerate(variables)}
