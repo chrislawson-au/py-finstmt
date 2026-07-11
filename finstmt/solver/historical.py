@@ -1,20 +1,17 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import pandas as pd
-from sympy import Eq, IndexedBase, sympify
+from sympy import Eq, Expr, IndexedBase, sympify
 
-from finstmt.core.statement_series import StatementSeries
+from finstmt.config.item import ItemConfig
 from finstmt.core.statements import FinancialStatements
 from finstmt.solver.base import SolverBase
-from finstmt.solver.engine import expr_for, solve_equations, sympy_dict_to_results_dict
+from finstmt.solver.engine import expr_for, sympy_dict_to_results_dict
 
 
 class HistoricalSolver(SolverBase):
     def to_statements(self, **kwargs) -> FinancialStatements:
-        if self.solve_eqs:
-            solutions_dict = solve_equations(self.solve_eqs, self.subs_dict)
-        else:
-            solutions_dict = self.subs_dict
+        solutions_dict = self._solved_values()
 
         new_results = sympy_dict_to_results_dict(
             solutions_dict,
@@ -22,38 +19,13 @@ class HistoricalSolver(SolverBase):
             self.stmts.all_config_items,
         )
 
-        all_results = pd.concat(list(new_results.values()), axis=1).T
-        stmts = {}
-        for stmt_name, stmt in self.stmts.statements.items():
-            configs = self.stmts.config.configs.get(stmt_name, stmt.items_config_list)
-            stmts[stmt.statement_name] = StatementSeries.from_df(
-                all_results,
-                stmt.statement_name,
-                configs,
-                disp_unextracted=False,
-            )
+        stmts = self._results_to_statement_series(new_results)
+        return FinancialStatements(stmts, calculate=False, **kwargs)
 
-        obj = FinancialStatements(stmts, calculate=False, **kwargs)
-        return obj
-
-    @property
-    def t_indexed_eqs(self) -> List[Eq]:
-        config_lists = []
-        for stmt_name, stmt in self.stmts.statements.items():
-            config_lists.append(
-                self.stmts.config.configs.get(stmt_name, stmt.items_config_list)
-            )
-        all_eqs = []
-        for config_manage in config_lists:
-            for config in config_manage:
-                lhs = sympify(
-                    config.key + "[t]", locals=self.sympy_namespace
-                )
-                if config.expr_str is not None:
-                    rhs = expr_for(config.key, self.stmts.all_config_items, self.sympy_namespace)
-                    eq = Eq(lhs, rhs)
-                    all_eqs.append(eq)
-        return all_eqs
+    def _t_indexed_rhs(self, config: ItemConfig) -> Optional[Expr]:
+        if config.expr_str is None:
+            return None
+        return expr_for(config.key, self.stmts.all_config_items, self.sympy_namespace)
 
     @property
     def all_eqs(self) -> List[Eq]:
@@ -61,14 +33,12 @@ class HistoricalSolver(SolverBase):
         out_eqs = []
         subs_dict = self.sympy_subs_dict
         for period in range(self.num_periods):
-            this_t_eqs = []
             for eq in t_eqs:
                 period_eq = eq.subs({self.t: period})
                 if period_eq.lhs in subs_dict:
                     # Already have data for this, no need to calculate
                     continue
-                this_t_eqs.append(period_eq)
-            out_eqs.extend(this_t_eqs)
+                out_eqs.append(period_eq)
         return out_eqs
 
     @property

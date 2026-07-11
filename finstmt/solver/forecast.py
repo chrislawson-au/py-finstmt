@@ -17,7 +17,6 @@ from finstmt.exceptions import (
     InvalidForecastEquationException,
     MissingDataException,
 )
-from finstmt.core.statement_series import StatementSeries
 from finstmt.forecast.forecast_item_series import ForecastItemSeries
 from finstmt.forecast.forecasted_statements import ForecastedStatements
 from finstmt.config.item import ItemConfig
@@ -38,7 +37,6 @@ from finstmt.solver.engine import (
     _symbolic_to_matrix,
     _x_arr_to_plug_solutions,
     expr_for as engine_expr_for,
-    solve_equations,
     sympy_dict_to_results_dict,
 )
 
@@ -81,14 +79,11 @@ class ForecastSolver(SolverBase):
 
         return solutions_dict
 
-    def to_statements(self) -> ForecastedStatements:
+    def to_statements(self, **kwargs) -> ForecastedStatements:
         if self.balance and self.plug_configs:
             solutions_dict = self.resolve_balance_sheet()
         else:
-            if self.solve_eqs:
-                solutions_dict = solve_equations(self.solve_eqs, self.subs_dict)
-            else:
-                solutions_dict = self.subs_dict
+            solutions_dict = self._solved_values()
 
         new_results = sympy_dict_to_results_dict(
             solutions_dict, self.forecast_dates, self.stmts.all_config_items, t_offset=1
@@ -101,18 +96,7 @@ class ForecastSolver(SolverBase):
                     use_levels=True, replacements=new_results[config.key].values
                 )
 
-        all_results = pd.concat(list(new_results.values()), axis=1).T
-
-        stmt_dfs = {}
-        for stmt_name, stmt in self.stmts.statements.items():
-            configs = self.stmts.config.configs.get(stmt_name, stmt.items_config_list)
-            stmt_df = StatementSeries.from_df(
-                all_results,
-                stmt.statement_name,
-                configs,
-                disp_unextracted=False,
-            )
-            stmt_dfs[stmt.statement_name] = stmt_df
+        stmt_dfs = self._results_to_statement_series(new_results)
 
         # type ignore added because for some reason mypy is not picking up structure
         # correctly since it is a dataclass
@@ -120,19 +104,14 @@ class ForecastSolver(SolverBase):
         obj = ForecastedStatements(stmt_dfs, forecasts=self.forecast_dict, calculate=False)  # type: ignore
         return obj
 
-    @property
-    def t_indexed_eqs(self) -> List[Eq]:
+    def _t_indexed_rhs(self, config: ItemConfig) -> Optional[Expr]:
         """
-        Generate time-indexed equations for each calculated financial statement item.
+        Right-hand side of the time-indexed equation for one item.
 
-        Returns a list of SymPy equations where variables are indexed with 't' to
-        represent time periods. For each calculated item, generates either:
-        1. The equation defined in expr_str if it exists
-        2. A percentage equation if pct_of is defined and make_forecast is True
-        3. The identity equation (lhs = lhs) otherwise
-
-        Returns:
-            List[Eq]: List of SymPy equations with time index 't'
+        For each item, generates either:
+        1. The expression defined in expr_str if it exists
+        2. A percentage expression if pct_of is defined and make_forecast is True
+        3. None otherwise (no equation for this item)
 
         Examples:
             >>> # Given configuration:
@@ -171,42 +150,23 @@ class ForecastSolver(SolverBase):
                 Eq(interest[t], interest_pct_debt[t] * (debt[t] + debt[t-1])/2)
             ]
         """
-        config_lists = []
-        for stmt_name, stmt in self.stmts.statements.items():
-            config_lists.append(
-                self.stmts.config.configs.get(stmt_name, stmt.items_config_list)
+        if config.expr_str is not None:
+            return engine_expr_for(
+                config.key, self.stmts.all_config_items, self.sympy_namespace
             )
-        all_eqs = []
-        for config_manage in config_lists:
-            for config in config_manage:
-                lhs = sympify(
-                    config.key + "[t]", locals=self.sympy_namespace
-                )
-                if config.expr_str is not None:
-                    rhs = engine_expr_for(config.key, self.stmts.all_config_items, self.sympy_namespace)
-                elif (
-                    config.forecast.pct_of is not None
-                    and config.forecast.make_forecast
-                ):
-                    pct_key = _key_pct_of_key(
-                        config.key, config.forecast.pct_of
-                    )
-                    if config.forecast.use_average:
-                        # Use average of current and previous period
-                        base = f"({config.forecast.pct_of}[t] + {config.forecast.pct_of}[t-1])/2"
-                    else:
-                        base = f"{config.forecast.pct_of}[t]"
-                    rhs = sympify(
-                        f"{base} * {pct_key}[t]",
-                        locals=self.sympy_namespace,
-                    )
-                else:
-                    # Not a calculated item and not forecasted as pct_of, skip
-                    rhs = lhs
-                if rhs != lhs:
-                    eq = Eq(lhs, rhs)
-                    all_eqs.append(eq)
-        return all_eqs
+        if config.forecast.pct_of is not None and config.forecast.make_forecast:
+            pct_key = _key_pct_of_key(config.key, config.forecast.pct_of)
+            if config.forecast.use_average:
+                # Use average of current and previous period
+                base = f"({config.forecast.pct_of}[t] + {config.forecast.pct_of}[t-1])/2"
+            else:
+                base = f"{config.forecast.pct_of}[t]"
+            return sympify(
+                f"{base} * {pct_key}[t]",
+                locals=self.sympy_namespace,
+            )
+        # Not a calculated item and not forecasted as pct_of, no equation
+        return None
 
     @property
     def all_eqs(self) -> List[Eq]:
