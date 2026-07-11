@@ -114,6 +114,11 @@ def test_forecast_quarterly_stockrow_cat(
     quarterly_stockrow_stmts_cat: FinancialStatements, snapshot, request
 ):
     stmts = quarterly_stockrow_stmts_cat
+    # Cash is empty in the quarterly CAT data, so cash_and_st_invest is
+    # forecasted directly rather than calculated and the plug must move there
+    # for it to flow through to total_assets.
+    stmts.config.update("cash", ["forecast", "plug"], False)
+    stmts.config.update("cash_and_st_invest", ["forecast", "plug"], True)
 
     _forecast_test(
         stmts,
