@@ -3,6 +3,7 @@ from typing import Dict, List
 import pandas as pd
 from sympy import Eq, IndexedBase, sympify
 
+from finstmt.core.statement_series import StatementSeries
 from finstmt.core.statements import FinancialStatements
 from finstmt.solver.base import SolverBase
 from finstmt.solver.engine import expr_for, solve_equations, sympy_dict_to_results_dict
@@ -25,13 +26,12 @@ class HistoricalSolver(SolverBase):
         stmts = {}
         for stmt_name, stmt in self.stmts.statements.items():
             configs = self.stmts.config.configs.get(stmt_name, stmt.items_config_list)
-            stmt.from_df(
+            stmts[stmt.statement_name] = StatementSeries.from_df(
                 all_results,
                 stmt.statement_name,
                 configs,
                 disp_unextracted=False,
             )
-            stmts[stmt.statement_name] = stmt
 
         obj = FinancialStatements(stmts, calculate=False, **kwargs)
         return obj

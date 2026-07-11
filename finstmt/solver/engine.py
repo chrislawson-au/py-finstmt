@@ -37,18 +37,6 @@ def expr_for(item_key: str, item_configs: List[ItemConfig], ns: Dict[str, Indexe
     raise NoSuchItemException(item_key)
 
 
-def eq_subs_dict(
-    values_dict: Dict[str, float], ns: Dict[str, IndexedBase], t_offset: int = 0
-) -> Dict[IndexedBase, float]:
-    """Convert plain key->value dict to sympy indexed substitution dict."""
-    out_dict = {}
-    t = ns["t"]
-    for key, sym in ns.items():
-        if key in values_dict:
-            out_dict[sym[t + t_offset]] = values_dict[key]
-    return out_dict
-
-
 def resolve_initial_expressions(
     all_configs: List[ItemConfig],
     period_expression_strings: List[List[Tuple[str, str]]],
@@ -256,6 +244,7 @@ def get_solve_eqs_and_full_subs_dict(
                 next_eqs_to_sub.append(subbed)
         if not next_eqs_to_sub or eqs_for_sub == next_eqs_to_sub:
             # Either all solved, or no progress was made this iteration
+            eqs_for_sub = next_eqs_to_sub
             break
         eqs_for_sub = next_eqs_to_sub
     return eqs_for_sub, subs_dict
@@ -265,7 +254,6 @@ def solve_equations(
     solve_eqs: List[Eq],
     subs_dict: Dict[IndexedBase, float],
     substitute: bool = True,
-    round_results: bool = True,
 ):
     solutions_dict = subs_dict.copy()
 
@@ -273,6 +261,10 @@ def solve_equations(
         solve_eqs, solutions_dict = get_solve_eqs_and_full_subs_dict(
             solve_eqs, solutions_dict
         )
+    if not solve_eqs:
+        # Nothing left to solve: the system was empty or fully resolved by
+        # substitution. This is success, not an unsolvable system.
+        return solutions_dict
     solve_exprs = []
     to_solve_for = []
     for eq in solve_eqs:
