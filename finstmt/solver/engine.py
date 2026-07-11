@@ -167,8 +167,7 @@ def results_dict_to_sympy_dict(
         for i, val in enumerate(arr):
             # Result arrays hold forecast periods, which are 1-based in the
             # sympy system (index 0 is the last historical period)
-            t_str = f"{key}[{FORECAST_INDEXING.sympy_index(i)}]"
-            lhs = sympify(t_str, locals=sympy_namespace)
+            lhs = sympy_namespace[key][FORECAST_INDEXING.sympy_index(i)]
             out_dict[lhs] = val
     return out_dict
 

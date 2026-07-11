@@ -6,7 +6,7 @@ from typing import Dict, List, Optional, Sequence, Tuple
 import numpy as np
 import pandas as pd
 from scipy.optimize import OptimizeResult, minimize
-from sympy import Eq, Expr, IndexedBase, solve, sympify
+from sympy import Eq, Expr, IndexedBase, solve
 from sympy.core.numbers import NaN
 
 from finstmt.core.statements import FinancialStatements
@@ -160,15 +160,15 @@ class ForecastSolver(SolverBase):
             )
         if config.forecast.pct_of is not None and config.forecast.make_forecast:
             pct_key = _key_pct_of_key(config.key, config.forecast.pct_of)
+            t = self.t
+            pct_of_sym = self.sympy_namespace[config.forecast.pct_of]
+            pct_sym = self.sympy_namespace[pct_key]
             if config.forecast.use_average:
                 # Use average of current and previous period
-                base = f"({config.forecast.pct_of}[t] + {config.forecast.pct_of}[t-1])/2"
+                base = (pct_of_sym[t] + pct_of_sym[t - 1]) / 2
             else:
-                base = f"{config.forecast.pct_of}[t]"
-            return sympify(
-                f"{base} * {pct_key}[t]",
-                locals=self.sympy_namespace,
-            )
+                base = pct_of_sym[t]
+            return base * pct_sym[t]
         # Not a calculated item and not forecasted as pct_of, no equation
         return None
 
@@ -260,10 +260,11 @@ class ForecastSolver(SolverBase):
                 revenue[0]: 1000.0,     # Historical value
                 revenue[1]: 1100.0,     # Forecasted value
                 revenue[2]: 1200.0,     # Forecasted value
-                cash[0]: 100.0,         # Historical value
                 cash_pct_revenue[1]: 0.12,  # Forecasted percentage
                 cash_pct_revenue[2]: 0.12   # Forecasted percentage
             }
+            >>> # Note: pct-of items contribute only their percentage keys;
+            >>> # there is no historical cash_pct_revenue[0] value
             >>> # Note: cash[1] and cash[2] will be calculated as:
             >>> # cash[1] = revenue[1] * cash_pct_revenue[1] = 1100 * 0.12 = 132
             >>> # cash[2] = revenue[2] * cash_pct_revenue[2] = 1200 * 0.12 = 144
@@ -271,37 +272,33 @@ class ForecastSolver(SolverBase):
         nper = self.num_periods
         subs_dict = {}
         for config in self.stmts.all_config_items:
-            if config.forecast.pct_of:
+            is_pct_item = config.forecast.pct_of is not None
+            if is_pct_item:
                 key = _key_pct_of_key(config.key, config.forecast.pct_of)
             else:
                 key = config.key
 
             for period in range(nper):
-                t_key = f"{key}[{period}]"
-                lhs = sympify(t_key, locals=self.sympy_namespace)
+                lhs = self.sympy_namespace[key][period]
                 if period == 0:
                     # period 0 is last historical period, not forecasted period
-                    try:
-                        value = getattr(self.stmts, key).iloc[-1]
-                        # sometimes the value (rhs) can be none. for example, if we have only ONE period in the history
-                        # and capex needs to periods in it's definition, then capex[0] will be none.
-                        # we will not include it on the list.
-                        if value is None:
-                            continue
-                    except AttributeError as e:
-                        if "_pct_" in str(e):
-                            # Got a percentage of item, only in forecasted results, skip
-                            continue
-                        else:
-                            raise e
+                    if is_pct_item:
+                        # pct-of keys exist only in forecasted results; there
+                        # is no historical value for them
+                        continue
+                    value = getattr(self.stmts, key).iloc[-1]
+                    # sometimes the value (rhs) can be none. for example, if we have only ONE period in the history
+                    # and capex needs two periods in its definition, then capex[0] will be none.
+                    # we will not include it on the list.
+                    if value is None:
+                        continue
                 else:
                     # period 1 or later, forecasted period, get from forecast results
                     # If it is a plug item, don't get forecasted values
                     if self.exclude_plugs and config.forecast.plug:
                         continue
                     try:
-                        # series = self.results[key]
-                        if config.forecast.pct_of:
+                        if is_pct_item:
                             series = self.forecast_dict[config.key].result_pct
                         else:
                             series = self.forecast_dict[config.key].result
@@ -318,10 +315,8 @@ class ForecastSolver(SolverBase):
         for balance_set in self.stmts.config.balance_groups:
             for period in range(1, self.num_periods):
                 for combo in itertools.combinations(balance_set, 2):
-                    lhs_key = f"{combo[0]}[{period}]"
-                    lhs = sympify(lhs_key, locals=self.sympy_namespace)
-                    rhs_key = f"{combo[1]}[{period}]"
-                    rhs = sympify(rhs_key, locals=self.sympy_namespace)
+                    lhs = self.sympy_namespace[combo[0]][period]
+                    rhs = self.sympy_namespace[combo[1]][period]
                     eqs.append(Eq(lhs, rhs))
         return eqs
 

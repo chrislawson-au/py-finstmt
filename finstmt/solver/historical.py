@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional
 
 import pandas as pd
-from sympy import Eq, Expr, IndexedBase, sympify
+from sympy import Eq, Expr, IndexedBase
 
 from finstmt.config.item import ItemConfig
 from finstmt.core.statements import FinancialStatements
@@ -52,8 +52,7 @@ class HistoricalSolver(SolverBase):
         for config in self.stmts.all_config_items:
             key = config.key
             for period in range(nper):
-                t_key = f"{key}[{period}]"
-                lhs = sympify(t_key, locals=self.sympy_namespace)
+                lhs = self.sympy_namespace[key][period]
                 value = getattr(self.stmts, key).iloc[period]
                 if config.expr_str is not None and value == 0:
                     # Don't have a value but it can be calculated, calculate it by not adding to substitutions

@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Optional
 
 import pandas as pd
-from sympy import Eq, Expr, Idx, IndexedBase, sympify
+from sympy import Eq, Expr, Idx, IndexedBase
 
 from finstmt.config.item import ItemConfig
 from finstmt.core.statement_series import StatementSeries
@@ -76,7 +76,7 @@ class SolverBase(ABC):
                 rhs = self._t_indexed_rhs(config)
                 if rhs is None:
                     continue
-                lhs = sympify(config.key + "[t]", locals=self.sympy_namespace)
+                lhs = self.sympy_namespace[config.key][self.t]
                 all_eqs.append(Eq(lhs, rhs))
         return all_eqs
 
