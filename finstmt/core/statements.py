@@ -110,10 +110,43 @@ class FinancialStatements:
         self._create_config_from_statements()
 
         if self.calculate:
-            solver = HistoricalSolver(self)
-            new_stmts = solver.to_statements(auto_adjust_config=self.auto_adjust_config)
+            self._validate_dates()
+            solver = HistoricalSolver(
+                self._effective_statement_configs(), self._item_values()
+            )
+            stmts = self._statement_series_from_results(solver.solve())
+            new_stmts = FinancialStatements(
+                stmts, calculate=False, auto_adjust_config=self.auto_adjust_config
+            )
             self.statements = dict(new_stmts.statements)
             self._create_config_from_statements()
+
+    def _effective_statement_configs(self) -> Dict[str, List[ItemConfig]]:
+        """Item configs per statement, preferring the (possibly adjusted)
+        configs on this object's ConfigManager."""
+        return {
+            stmt_name: self.config.configs.get(stmt_name, stmt.items_config_list)
+            for stmt_name, stmt in self.statements.items()
+        }
+
+    def _item_values(self) -> Dict[str, pd.Series]:
+        """One series of values by date per item key, as solver input."""
+        return {config.key: getattr(self, config.key) for config in self.all_config_items}
+
+    def _statement_series_from_results(
+        self, results: Dict[str, pd.Series]
+    ) -> Dict[str, StatementSeries]:
+        """Rebuild one StatementSeries per statement from solver results."""
+        all_results = pd.concat(list(results.values()), axis=1).T
+        stmts = {}
+        for stmt_name, configs in self._effective_statement_configs().items():
+            stmts[stmt_name] = StatementSeries.from_df(
+                all_results,
+                stmt_name,
+                configs,
+                disp_unextracted=False,
+            )
+        return stmts
 
     def _create_config_from_statements(self):
         config_dict = {}
@@ -275,6 +308,7 @@ class FinancialStatements:
             >>> stmts.forecast(periods=2)
 
         """
+        from finstmt.forecast.forecasted_statements import ForecastedStatements
         from finstmt.solver.forecast import ForecastSolver
 
         bs_diff_max = kwargs.get("bs_diff_max", ForecastConfig.bs_diff_max)
@@ -288,11 +322,41 @@ class FinancialStatements:
             statement_forecast_dict = statement_series._forecast(self, **kwargs)
             all_forecast_dict.update(statement_forecast_dict)
 
-        solver = ForecastSolver(
-            self, all_forecast_dict, bs_diff_max, timeout, balance=balance
-        )
+        # Solvers take plain data: the percentage series for pct-of items,
+        # the value series otherwise
+        forecast_results = {
+            key: (
+                item_series.result_pct
+                if item_series.item_config.forecast.pct_of is not None
+                else item_series.result
+            )
+            for key, item_series in all_forecast_dict.items()
+        }
 
-        return solver.to_statements()
+        solver = ForecastSolver(
+            self._effective_statement_configs(),
+            self._item_values(),
+            forecast_results,
+            self.config.balance_groups,
+            bs_diff_max,
+            timeout,
+            balance=balance,
+        )
+        results = solver.solve()
+
+        if balance:
+            # Write solved plug values back into the forecasts so plots and
+            # further adjustments reflect the balanced values
+            for config in solver.plug_configs:
+                all_forecast_dict[config.key].to_manual(
+                    use_levels=True, replacements=results[config.key].values
+                )
+
+        stmt_dfs = self._statement_series_from_results(results)
+        # the forecasts passed are just used for plotting
+        return ForecastedStatements(
+            stmt_dfs, forecasts=all_forecast_dict, calculate=False
+        )
 
     @property
     def forecast_assumptions(self) -> pd.DataFrame:

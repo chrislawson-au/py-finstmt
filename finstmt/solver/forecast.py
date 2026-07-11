@@ -9,16 +9,12 @@ from scipy.optimize import OptimizeResult, minimize
 from sympy import Eq, Expr, IndexedBase, solve
 from sympy.core.numbers import NaN
 
-from finstmt.core.statements import FinancialStatements
-from finstmt.config.manager import ConfigManager
 from finstmt.exceptions import (
     BalanceSheetNotBalancedException,
     InvalidBalancePlugsException,
     InvalidForecastEquationException,
     MissingDataException,
 )
-from finstmt.forecast.forecast_item_series import ForecastItemSeries
-from finstmt.forecast.forecasted_statements import ForecastedStatements
 from finstmt.config.item import ItemConfig
 from finstmt._logging import logger
 from finstmt.solver.base import SolverBase
@@ -44,22 +40,35 @@ from finstmt.solver.engine import (
 
 
 class ForecastSolver(SolverBase):
+    """Solves the forecast equation system, optionally balancing plugs.
+
+    :param statement_configs: Item configs per statement name.
+    :param item_values: Item key mapped to its historical series of values.
+    :param forecast_results: Item key mapped to its forecasted series — the
+        percentage series for pct-of items, the value series otherwise.
+    :param balance_groups: Groups of item keys that must balance against
+        each other (see ``ConfigManager.balance_groups``).
+    """
+
     def __init__(
         self,
-        stmts: "FinancialStatements",
-        forecast_dict: Dict[str, ForecastItemSeries],
+        statement_configs: Dict[str, List[ItemConfig]],
+        item_values: Dict[str, pd.Series],
+        forecast_results: Dict[str, pd.Series],
+        balance_groups: List[List[str]],
         bs_diff_max: float,
         timeout: float,
         balance: bool = True,
     ):
-        self.forecast_dict = forecast_dict
+        self.forecast_results = forecast_results
+        self.balance_groups = balance_groups
         self.bs_diff_max = bs_diff_max
         self.timeout = timeout
         self.balance = balance
 
         self.exclude_plugs = balance
 
-        super().__init__(stmts)
+        super().__init__(statement_configs, item_values)
 
     def resolve_balance_sheet(self):
         logger.info("Balancing balance sheet")
@@ -71,43 +80,28 @@ class ForecastSolver(SolverBase):
             self.plug_keys,
             self.subs_dict,
             self.forecast_dates,
-            self.stmts.config,
+            self.all_config_items,
             self.sympy_namespace,
             self.bs_diff_max,
-            self.stmts.config.balance_groups,
+            self.balance_groups,
             self.timeout,
         )
         solutions_dict.update(new_solutions)
 
         return solutions_dict
 
-    def to_statements(self, **kwargs) -> ForecastedStatements:
+    def solve(self) -> Dict[str, pd.Series]:
         if self.balance and self.plug_configs:
             solutions_dict = self.resolve_balance_sheet()
         else:
             solutions_dict = self._solved_values()
 
-        new_results = sympy_dict_to_results_dict(
+        return sympy_dict_to_results_dict(
             solutions_dict,
             self.forecast_dates,
-            self.stmts.all_config_items,
+            self.all_config_items,
             FORECAST_INDEXING,
         )
-
-        if self.balance:
-            # Update forecast dict for plug values
-            for config in self.plug_configs:
-                self.forecast_dict[config.key].to_manual(
-                    use_levels=True, replacements=new_results[config.key].values
-                )
-
-        stmt_dfs = self._results_to_statement_series(new_results)
-
-        # type ignore added because for some reason mypy is not picking up structure
-        # correctly since it is a dataclass
-        # the forecasts passed are just used for plotting
-        obj = ForecastedStatements(stmt_dfs, forecasts=self.forecast_dict, calculate=False)  # type: ignore
-        return obj
 
     def _t_indexed_rhs(self, config: ItemConfig) -> Optional[Expr]:
         """
@@ -157,7 +151,7 @@ class ForecastSolver(SolverBase):
         """
         if config.expr_str is not None:
             return engine_expr_for(
-                config.key, self.stmts.all_config_items, self.sympy_namespace
+                config.key, self.all_config_items, self.sympy_namespace
             )
         if config.forecast.pct_of is not None and config.forecast.make_forecast:
             pct_key = _key_pct_of_key(config.key, config.forecast.pct_of)
@@ -209,7 +203,7 @@ class ForecastSolver(SolverBase):
         )
         all_hardcoded.update(self.sympy_subs_dict)
         new_eqs = _get_equations_reformed_for_needed_solutions(
-            out_eqs, all_hardcoded, self.stmts.all_config_items, self.sympy_namespace
+            out_eqs, all_hardcoded, self.all_config_items, self.sympy_namespace
         )
 
         return new_eqs
@@ -218,16 +212,11 @@ class ForecastSolver(SolverBase):
     def num_periods(self) -> int:
         # One sympy index per forecast period, plus index 0 for the last
         # historical period (see FORECAST_INDEXING)
-        periods = list(self.forecast_dict.values())[0].config.periods
-        return FORECAST_INDEXING.sympy_index(periods)
+        return FORECAST_INDEXING.sympy_index(len(self.forecast_dates))
 
     @property
     def forecast_dates(self) -> pd.DatetimeIndex:
-        forecast_item_series = list(self.forecast_dict.values())[0]
-        if forecast_item_series.result is not None:
-            return forecast_item_series.result.index
-        else:
-            return forecast_item_series.result_pct.index
+        return next(iter(self.forecast_results.values())).index
 
     @property
     def sympy_subs_dict(self) -> Dict[IndexedBase, float]:
@@ -272,7 +261,7 @@ class ForecastSolver(SolverBase):
         """
         nper = self.num_periods
         subs_dict = {}
-        for config in self.stmts.all_config_items:
+        for config in self.all_config_items:
             is_pct_item = config.forecast.pct_of is not None
             if is_pct_item:
                 key = _key_pct_of_key(config.key, config.forecast.pct_of)
@@ -287,7 +276,7 @@ class ForecastSolver(SolverBase):
                         # pct-of keys exist only in forecasted results; there
                         # is no historical value for them
                         continue
-                    value = getattr(self.stmts, key).iloc[-1]
+                    value = self.item_values[key].iloc[-1]
                     # sometimes the value (rhs) can be none. for example, if we have only ONE period in the history
                     # and capex needs two periods in its definition, then capex[0] will be none.
                     # we will not include it on the list.
@@ -299,10 +288,7 @@ class ForecastSolver(SolverBase):
                     if self.exclude_plugs and config.forecast.plug:
                         continue
                     try:
-                        if is_pct_item:
-                            series = self.forecast_dict[config.key].result_pct
-                        else:
-                            series = self.forecast_dict[config.key].result
+                        series = self.forecast_results[config.key]
                     except KeyError:
                         # Must not be a forecasted item, probably calculated item
                         continue
@@ -313,7 +299,7 @@ class ForecastSolver(SolverBase):
     @property
     def bs_balance_eqs(self) -> List[Eq]:
         eqs = []
-        for balance_set in self.stmts.config.balance_groups:
+        for balance_set in self.balance_groups:
             for period in range(1, self.num_periods):
                 for combo in itertools.combinations(balance_set, 2):
                     lhs = self.sympy_namespace[combo[0]][period]
@@ -324,7 +310,7 @@ class ForecastSolver(SolverBase):
     @property
     def plug_configs(self) -> List[ItemConfig]:
         return [
-            conf for conf in self.stmts.all_config_items if conf.forecast.plug
+            conf for conf in self.all_config_items if conf.forecast.plug
         ]
 
     @property
@@ -335,7 +321,7 @@ class ForecastSolver(SolverBase):
     def plug_x0(self) -> np.ndarray:
         x_arrs = []
         for config in self.plug_configs:
-            x_arrs.append(self.forecast_dict[config.key].result)
+            x_arrs.append(self.forecast_results[config.key])
         if len(x_arrs) == 0:  # No plugs
             return np.array([])
         x0 = np.concatenate(x_arrs) / PLUG_SCALE
@@ -371,7 +357,7 @@ def resolve_balance_sheet(
     plug_keys: Sequence[str],
     subs_dict: Dict[IndexedBase, float],
     forecast_dates: pd.DatetimeIndex,
-    config: ConfigManager,
+    item_configs: List[ItemConfig],
     sympy_namespace: Dict[str, IndexedBase],
     bs_diff_max: float,
     balance_groups: List[List[str]],
@@ -390,7 +376,7 @@ def resolve_balance_sheet(
         plug_keys: Names of variables that can be adjusted to achieve balance
         subs_dict: Known values for variables
         forecast_dates: Dates for which forecasting is being done
-        config: Configuration manager containing financial statement structure
+        item_configs: All item configs across the statements
         sympy_namespace: Dictionary mapping variable names to SymPy objects
         bs_diff_max: Maximum allowed difference between balance groups
         balance_groups: Groups of items that should be equal (e.g. [['assets', 'liabilities_and_equity']])
@@ -475,7 +461,7 @@ def resolve_balance_sheet(
 
     # Get better initial x0 by adding to appropriate plug
     _adjust_x0_to_initial_balance_guess(
-        x0, plug_keys, eq_arrs, forecast_dates, to_solve_for, config, balance_groups
+        x0, plug_keys, eq_arrs, forecast_dates, to_solve_for, item_configs, balance_groups
     )
 
     result = PlugResult(timeout=timeout)
@@ -532,7 +518,7 @@ def resolve_balance_sheet(
         )
     plug_solutions = _x_arr_to_plug_solutions(result.res, plug_keys, sympy_namespace)
     solutions_dict = _solve_eqs_with_plug_solutions(
-        eqs, plug_solutions, subs_dict, forecast_dates, config.items
+        eqs, plug_solutions, subs_dict, forecast_dates, item_configs
     )
     return solutions_dict
 
@@ -609,12 +595,13 @@ def _adjust_x0_to_initial_balance_guess(
     eq_arrs: Tuple[np.ndarray, np.ndarray],
     forecast_dates: pd.DatetimeIndex,
     solve_for: Sequence[IndexedBase],
-    config: ConfigManager,
+    item_configs: List[ItemConfig],
     balance_groups: List[List[str]],
 ):
     sol_arr = _eq_arrs_and_x_to_sol_arr(x0, eq_arrs)
     n_periods = len(forecast_dates)
-    dependencies = ItemDependencies(config.items)
+    config_by_key = {config.key: config for config in item_configs}
+    dependencies = ItemDependencies(item_configs)
     for balance_group in balance_groups:
         balance_arrs = _balance_group_to_balance_arrs(
             balance_group, sol_arr, solve_for, n_periods
@@ -625,7 +612,7 @@ def _adjust_x0_to_initial_balance_guess(
             possible_plug_keys = dependencies.item_determinant_keys(balance_item)
             plug_key: Optional[str] = None
             for key in possible_plug_keys:
-                if config.get(key).forecast.plug:
+                if config_by_key[key].forecast.plug:
                     plug_key = key  # e.g. cash
                     break
             balance_group_plug_keys.append(plug_key)
@@ -650,7 +637,7 @@ def _adjust_x0_to_initial_balance_guess(
 
                 if plug_key is None:
                     normally_calculated_but_not_keys: List[str] = []
-                    for item in config.items:
+                    for item in item_configs:
                         if (
                             item.expr_str is not None
                             and item.forecast.make_forecast

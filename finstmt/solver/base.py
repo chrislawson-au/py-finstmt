@@ -5,8 +5,6 @@ import pandas as pd
 from sympy import Eq, Expr, Idx, IndexedBase
 
 from finstmt.config.item import ItemConfig
-from finstmt.core.statement_series import StatementSeries
-from finstmt.core.statements import FinancialStatements
 from finstmt.solver.engine import (
     build_sympy_namespace,
     get_solve_eqs_and_full_subs_dict,
@@ -17,12 +15,21 @@ from finstmt.solver.engine import (
 class SolverBase(ABC):
     """Template for solving statement item equations across periods.
 
+    Solvers operate on plain data — item configs per statement and item
+    value series — and return plain per-item result series from ``solve``.
+    They have no knowledge of the statement classes; ``FinancialStatements``
+    orchestrates building solver inputs and rebuilding statements from
+    results.
+
     Subclasses supply the substitution values (``sympy_subs_dict``), the
     concrete per-period equations (``all_eqs``), and the right-hand side of
     each item's time-indexed equation (``_t_indexed_rhs``). The base class
-    owns the shared machinery: building the sympy namespace, iteratively
-    substituting known values, solving the residual system, and converting
-    solutions back into :class:`StatementSeries` objects.
+    owns the shared machinery: building the sympy namespace and iteratively
+    substituting known values.
+
+    :param statement_configs: Item configs per statement name, in statement
+        order.
+    :param item_values: Item key mapped to its series of values by date.
     """
 
     solve_eqs: List[Eq]
@@ -30,10 +37,19 @@ class SolverBase(ABC):
 
     def __init__(
         self,
-        stmts: FinancialStatements,
+        statement_configs: Dict[str, List[ItemConfig]],
+        item_values: Dict[str, pd.Series],
     ):
-        self.stmts = stmts
-        self.sympy_namespace = build_sympy_namespace(stmts.all_config_items)
+        self.statement_configs = statement_configs
+        self.item_values = item_values
+
+        all_items: Dict[str, ItemConfig] = {}
+        for configs in statement_configs.values():
+            for config in configs:
+                all_items.setdefault(config.key, config)
+        self.all_config_items: List[ItemConfig] = list(all_items.values())
+
+        self.sympy_namespace = build_sympy_namespace(self.all_config_items)
 
         self.set_solve_eqs_and_full_subs_dict()
 
@@ -59,12 +75,7 @@ class SolverBase(ABC):
 
     @property
     def config_lists(self) -> List[List[ItemConfig]]:
-        """Item configs per statement, preferring the (possibly adjusted)
-        configs on the parent FinancialStatements."""
-        return [
-            self.stmts.config.configs.get(stmt_name, stmt.items_config_list)
-            for stmt_name, stmt in self.stmts.statements.items()
-        ]
+        return list(self.statement_configs.values())
 
     @property
     def t_indexed_eqs(self) -> List[Eq]:
@@ -87,30 +98,14 @@ class SolverBase(ABC):
             return solve_equations(self.solve_eqs, self.subs_dict)
         return self.subs_dict
 
-    def _results_to_statement_series(
-        self, new_results: Dict[str, pd.Series]
-    ) -> Dict[str, StatementSeries]:
-        """Rebuild one StatementSeries per statement from solved item series."""
-        all_results = pd.concat(list(new_results.values()), axis=1).T
-        stmts = {}
-        for stmt_name, stmt in self.stmts.statements.items():
-            configs = self.stmts.config.configs.get(stmt_name, stmt.items_config_list)
-            stmts[stmt.statement_name] = StatementSeries.from_df(
-                all_results,
-                stmt.statement_name,
-                configs,
-                disp_unextracted=False,
-            )
-        return stmts
-
     @abstractmethod
     def _t_indexed_rhs(self, config: ItemConfig) -> Optional[Expr]:
         """Right-hand side of the time-indexed equation for one item, or
         None if the item has no equation in this solver."""
 
     @abstractmethod
-    def to_statements(self, **kwargs) -> FinancialStatements:
-        ...
+    def solve(self) -> Dict[str, pd.Series]:
+        """Solve the system and return one result series per item key."""
 
     @property
     @abstractmethod
