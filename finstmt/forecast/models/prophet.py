@@ -4,7 +4,6 @@ from typing import Optional, Tuple
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from finstmt.config.item import ForecastItemConfig
 from finstmt.config.forecast import ForecastConfig
 from finstmt.forecast.dataframe import add_cap_and_floor_to_df
 from finstmt.forecast.models.base import ForecastModel
@@ -23,8 +22,8 @@ class ProphetModel(ForecastModel):
         all_kwargs = {}
         if config.freq.lower() == "y":
             all_kwargs["yearly_seasonality"] = False
-        all_kwargs.update(item_config.forecast.prophet_kwargs)
         all_kwargs.update(config.prophet_kwargs)
+        all_kwargs.update(item_config.forecast.prophet_kwargs)
         model = Prophet(**all_kwargs)
         self.model = model
 
