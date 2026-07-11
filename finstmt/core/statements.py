@@ -130,6 +130,9 @@ class FinancialStatements:
             self._adjust_config_based_on_data()
 
     def _adjust_config_based_on_data(self):
+        from finstmt.solver.dependencies import ItemDependencies
+
+        dependencies = ItemDependencies(self.config.items)
         for item in self.config.items:
             if self.item_is_empty(item.key):
                 if self.config.get(item.key).forecast.plug:
@@ -145,7 +148,7 @@ class FinancialStatements:
                 # the data, then net_ppe should be forecasted directly.
 
                 # So first, get the keys involved in equations containing this item
-                relevant_keys = self.config.keys_in_equations_involving(item.key)
+                relevant_keys = dependencies.in_equations_involving(item.key)
                 relevant_keys.discard(item.key)
                 for key in relevant_keys:
                     if self.item_is_empty(key):
@@ -156,7 +159,7 @@ class FinancialStatements:
                         continue
 
                     # Check to make sure that all components of the calculated item are also empty
-                    component_keys = self.config.keys_referenced_by(key)
+                    component_keys = dependencies.referenced_by(key)
                     if not all(self.item_is_empty(c_key) for c_key in component_keys):
                         continue
                     # Now this is a calculated item which is non-empty, and all the components of the

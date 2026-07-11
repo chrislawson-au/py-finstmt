@@ -1,4 +1,3 @@
-import re
 from dataclasses import dataclass
 from typing import Any, Dict, List, Sequence, Set, Tuple, Union
 
@@ -15,7 +14,7 @@ from finstmt._logging import logger
 class ConfigManager:
     """Holds all item configurations organized by statement type.
 
-    Provides lookup, dependency analysis, and bulk updates for
+    Provides lookup and bulk updates for
     :class:`ItemConfig` objects. Access individual configs as attributes:
     ``config.revenue`` returns the ``ItemConfig`` for revenue.
 
@@ -106,99 +105,6 @@ class ConfigManager:
         """Update configuration for all items by nested config keys."""
         for item_key in self.keys:
             self.update(item_key, config_keys, value)
-
-    # --- String-based dependency analysis (no sympy) ---
-
-    def _extract_keys_from_expr(self, expr_str: str) -> List[str]:
-        """Extract item keys referenced in an expression string.
-
-        Parses strings like 'current_assets[t] + non_current_assets[t]'
-        and returns keys that match known config keys.
-        """
-        all_keys = set(self.keys)
-        return [m for m in re.findall(r'(\w+)\[', expr_str) if m in all_keys]
-
-    def keys_referenced_by(self, item_key: str) -> List[str]:
-        """Get keys that appear in the expression for item_key."""
-        config = self.get(item_key)
-        if config.expr_str is None:
-            return []
-        return self._extract_keys_from_expr(config.expr_str)
-
-    def keys_in_equations_involving(self, item_key: str) -> Set[str]:
-        """Get all keys that appear in equations containing item_key.
-
-        Includes both the LHS key and all RHS keys of any equation that
-        references item_key. Also includes keys from item_key's own expression.
-        """
-        relevant_keys: Set[str] = set()
-        for config in self.items:
-            if config.expr_str is None:
-                continue
-            referenced = self._extract_keys_from_expr(config.expr_str)
-            if item_key in referenced:
-                relevant_keys.add(config.key)  # the LHS
-                relevant_keys.update(referenced)  # all RHS keys
-        # Also add keys from this item's own expression
-        own_config = self.get(item_key)
-        if own_config.expr_str is not None:
-            relevant_keys.add(item_key)
-            relevant_keys.update(self._extract_keys_from_expr(own_config.expr_str))
-        return relevant_keys
-
-    def _calculated_item_determinant_keys(
-        self, item_key: str, for_forecast: bool = True
-    ) -> List[str]:
-        """Walk the dependency graph using string-based expression parsing."""
-        determinant_keys: List[str] = []
-        to_process_keys: List[str] = [item_key]
-        is_root = True
-        while to_process_keys:
-            process_key = to_process_keys.pop()
-            if not is_root:
-                determinant_keys.append(process_key)
-            is_root = False
-            involved = self.keys_in_equations_involving(process_key)
-            already_seen = set(to_process_keys + determinant_keys)
-            new_keys = [
-                key
-                for key in involved
-                if key != process_key and key not in already_seen
-            ]
-            if for_forecast:
-                accepted_keys: List[str] = []
-                for key in new_keys:
-                    if self.get(key).forecast.make_forecast:
-                        determinant_keys.append(key)
-                        continue
-                    accepted_keys.append(key)
-                new_keys = accepted_keys
-            to_process_keys.extend(new_keys)
-        return determinant_keys
-
-    def item_determinant_keys(
-        self, item_key: str, include_pct_of: bool = True, for_forecast: bool = True
-    ) -> List[str]:
-        determinant_keys = self._calculated_item_determinant_keys(
-            item_key, for_forecast=for_forecast
-        )
-        if include_pct_of:
-            for item in self.items:
-                # TODO [$5fed05c64df698000808428a]: multiple passes through determinants may be necessary for complicated pct_of structures
-                if (
-                    item.key in determinant_keys
-                    and item.forecast.pct_of is not None
-                ):
-                    pct_conf = self.get(item.forecast.pct_of)
-                    if pct_conf.expr_str is None:
-                        determinant_keys.append(item.forecast.pct_of)
-                    else:
-                        determinant_keys.extend(
-                            self._calculated_item_determinant_keys(pct_conf.key)
-                        )
-        # Order-preserving dedupe: set() iteration order is not deterministic
-        # across processes
-        return list(dict.fromkeys(determinant_keys))
 
     @property
     def balance_groups(self) -> List[List[str]]:

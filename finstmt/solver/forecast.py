@@ -22,6 +22,7 @@ from finstmt.forecast.forecasted_statements import ForecastedStatements
 from finstmt.config.item import ItemConfig
 from finstmt._logging import logger
 from finstmt.solver.base import SolverBase
+from finstmt.solver.dependencies import ItemDependencies
 from finstmt.solver.periods import FORECAST_INDEXING
 
 # TODO [#46]: clean up ForecastSolver
@@ -613,6 +614,7 @@ def _adjust_x0_to_initial_balance_guess(
 ):
     sol_arr = _eq_arrs_and_x_to_sol_arr(x0, eq_arrs)
     n_periods = len(forecast_dates)
+    dependencies = ItemDependencies(config.items)
     for balance_group in balance_groups:
         balance_arrs = _balance_group_to_balance_arrs(
             balance_group, sol_arr, solve_for, n_periods
@@ -620,7 +622,7 @@ def _adjust_x0_to_initial_balance_guess(
         # Get plug which corresponds to each balance item e.g. find cash for assets
         balance_group_plug_keys: List[Optional[str]] = []
         for balance_item in balance_group:
-            possible_plug_keys = config.item_determinant_keys(balance_item)
+            possible_plug_keys = dependencies.item_determinant_keys(balance_item)
             plug_key: Optional[str] = None
             for key in possible_plug_keys:
                 if config.get(key).forecast.plug:
@@ -657,7 +659,7 @@ def _adjust_x0_to_initial_balance_guess(
                     message = (
                         f"Trying to balance {adjust_side} but no plug affects it. One of the following "
                         f"items must have forecast.plug = True so that it can be balanced: "
-                        f"{config.item_determinant_keys(adjust_side)}. Current plugs: {plug_keys}. "
+                        f"{dependencies.item_determinant_keys(adjust_side)}. Current plugs: {plug_keys}. "
                     )
                     if normally_calculated_but_not_keys:
                         message += (
