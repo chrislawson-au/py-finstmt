@@ -1,6 +1,6 @@
 import operator
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, List
 
 import pandas as pd
 from tqdm import tqdm
@@ -35,15 +35,6 @@ class StatementSeries:
 
     def __post_init__(self):
         self.df = self.to_df()
-
-        # Hook up prior statements to statements
-        dates = list(self.statements.keys())
-        dates.sort()
-        prior_date = None
-        for i, date in enumerate(dates):
-            if i != 0:
-                self.statements[date].prior_statement = self.statements[prior_date]
-            prior_date = date
 
     def update_statement_item_calculated_value(
         self, statement_item_key, period_index, statement_item_value
@@ -117,7 +108,7 @@ class StatementSeries:
         cls,
         dict: dict,
         statement_name: str,
-        items_config_list: Optional[List[ItemConfig]] = None,
+        items_config_list: List[ItemConfig],
         disp_unextracted: bool = True,
     ):
         df = pd.DataFrame(dict)
@@ -133,7 +124,7 @@ class StatementSeries:
         cls,
         df: pd.DataFrame,
         statement_name: str,
-        items_config_list: Optional[List[ItemConfig]] = None,
+        items_config_list: List[ItemConfig],
         disp_unextracted: bool = True,
     ):
         """
@@ -143,10 +134,7 @@ class StatementSeries:
         dates = list(df.columns)
         dates.sort(key=lambda t: pd.to_datetime(t))
 
-        if items_config_list is None:
-            configs = list(cls.items_config_list)
-        else:
-            configs = list(items_config_list)
+        configs = list(items_config_list)
 
         for col in dates:
             try:

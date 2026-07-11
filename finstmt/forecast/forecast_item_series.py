@@ -8,11 +8,10 @@ import pandas as pd
 from typing_extensions import Self
 
 from finstmt.exceptions import ForecastNotFitException, ForecastNotPredictedException
-from finstmt.config.item import ForecastItemConfig
 from finstmt.config.forecast import ForecastConfig
+from finstmt.config.item import ItemConfig
 from finstmt.forecast.models.chooser import get_model
 from finstmt.forecast.models.manual import ManualForecastModel
-from finstmt.config.item import ItemConfig
 
 T = TypeVar("T")
 
@@ -28,8 +27,8 @@ class ForecastItemSeries:
     item_config: ItemConfig
     pct_of_series: Optional[pd.Series] = None
     pct_of_config: Optional[ItemConfig] = None
-    _result: Optional[pd.Series] = None  # Changed from result to _result
-    _result_pct: Optional[pd.Series] = None  # Changed from result_pct to _result_pct
+    _result: Optional[pd.Series] = None
+    _result_pct: Optional[pd.Series] = None
 
     def __post_init__(self):
         self.model = get_model(self.config, self.item_config)
@@ -41,16 +40,14 @@ class ForecastItemSeries:
         if not self.model.has_been_fit:
             raise ForecastNotFitException("call .fit before .predict")
         result = self.model.predict()
-        
-        # if result is not None:
-        #     self._result.name = self.item_config.primary_name
 
-        # Handle percentage result if needed
-        if (self.item_config.forecast.pct_of is not None):
+        # A pct-of item is forecasted as a ratio; the raw result is stored
+        # separately until the solver converts it back to a value
+        if self.item_config.forecast.pct_of is not None:
             self._result_pct = result
-        else:                    # Store results
+        else:
             self._result = result
-                        
+
         return result
 
     def plot(
@@ -72,10 +69,10 @@ class ForecastItemSeries:
             )
 
         if use_levels:
-            values = self._result.values  # Changed from result to _result
+            values = self._result.values
         else:
             # Growth
-            values = self._result.pct_change().values  # Changed from result to _result
+            values = self._result.pct_change().values
             # Fill in first growth
             values[0] = (self._result.iloc[0] - self.series.iloc[-1]) / self.series.iloc[
                 -1
@@ -128,7 +125,6 @@ class ForecastItemSeries:
             raise ForecastNotPredictedException(
                 "call .fit then .predict before .result"
             )
-        # return self.model.result
         return self._result
 
     @property
@@ -147,19 +143,19 @@ class ForecastItemSeries:
     def copy(self, **updates) -> Self:
         return dataclasses.replace(self, **updates)
 
-    def __round__(self, n: Optional[int] = None) -> "Forecast":
+    def __round__(self, n: Optional[int] = None) -> "ForecastItemSeries":
         return _apply_operation_to_forecast(self, n, round)  # type: ignore[arg-type]
 
-    def __add__(self, other: T) -> "Forecast":
+    def __add__(self, other: T) -> "ForecastItemSeries":
         return _apply_operation_to_forecast(self, other, operator.add)
 
-    def __sub__(self, other: T) -> "Forecast":
+    def __sub__(self, other: T) -> "ForecastItemSeries":
         return _apply_operation_to_forecast(self, other, operator.sub)
 
-    def __mul__(self, other: T) -> "Forecast":
+    def __mul__(self, other: T) -> "ForecastItemSeries":
         return _apply_operation_to_forecast(self, other, operator.mul)
 
-    def __truediv__(self, other: T) -> "Forecast":
+    def __truediv__(self, other: T) -> "ForecastItemSeries":
         return _apply_operation_to_forecast(self, other, operator.truediv)
 
 

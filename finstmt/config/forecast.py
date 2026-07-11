@@ -1,12 +1,5 @@
-import dataclasses
-import operator
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
-
-import pandas as pd
-from typing_extensions import Self
-
-T = TypeVar("T")
+from typing import Dict, Union
 
 
 @dataclass

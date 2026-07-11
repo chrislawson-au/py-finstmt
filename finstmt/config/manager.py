@@ -1,14 +1,11 @@
-import json
 import re
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from typing import Any, Dict, List, Sequence, Set, Tuple, Union
 
-import pandas as pd
 
 from finstmt.exceptions import (
     InvalidBalanceConfigException,
     NoSuchItemException,
-    NotACalculatedItemException,
 )
 from finstmt.config.item import ItemConfig
 from finstmt._logging import logger
@@ -87,15 +84,6 @@ class ConfigManager:
     def keys(self) -> List[str]:
         """All config keys across all statement types, maintaining order."""
         return [item.key for item in self.items]
-
-    def get_value(self, item_key: str, config_key: str) -> Any:
-        config = self.get(item_key)
-        return getattr(config, config_key)
-
-    def set_value(self, item_key: str, config_key: str, value: Any):
-        orig_config = self.get(item_key)
-        setattr(orig_config, config_key, value)
-        self.set(item_key, orig_config)
 
     def update(self, item_key: str, config_keys: Union[str, Sequence[str]], value: Any):
         """Update configuration for item by item key and nested config keys."""
@@ -245,12 +233,3 @@ class ConfigManager:
 
                 balance_sets.append(balance_group)
         return balance_sets
-
-    def dict(self) -> dict:
-        item_data: Dict[str, dict] = {}
-        for item in self.items:
-            item_data[item.key] = asdict(item)
-        return item_data
-
-    def json(self, **kwargs) -> str:
-        return json.dumps(self.dict(), **kwargs)

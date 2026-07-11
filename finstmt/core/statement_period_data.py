@@ -2,7 +2,7 @@ import json
 import math
 import warnings
 from copy import deepcopy
-from typing import TYPE_CHECKING, Dict, List, Optional, cast
+from typing import Dict, List, cast
 
 import pandas as pd
 
@@ -13,11 +13,10 @@ from finstmt.core.statement_item import StatementItem
 
 class StatementPeriodData:
     """
-    Base class for financial statement data. Should not be used directly.
+    A single financial statement for a single period.
     """
 
     configs: List[ItemConfig]
-    prior_statement: Optional["StatementPeriodData"]
     unextracted_names: List[str]
     statement_items: Dict[str, StatementItem]
 
@@ -29,10 +28,8 @@ class StatementPeriodData:
         data_dict: Dict[str, float],
         configs: List[ItemConfig],
         unextracted_names: List[str],
-        prior_statement: Optional["StatementPeriodData"] = None,
     ):
         self.configs = deepcopy(list(configs))
-        self.prior_statement = prior_statement
         self.unextracted_names = unextracted_names
 
         self.statement_items = {}
@@ -90,7 +87,6 @@ class StatementPeriodData:
     def __dir__(self):
         normal_attrs = [
             "configs",
-            "prior_statement",
             "unextracted_names",
             "statement_items",
             "from_series",
@@ -104,7 +100,6 @@ class StatementPeriodData:
         cls,
         series: pd.Series,
         configs: List[ItemConfig],
-        prior_statement: Optional["StatementPeriodData"] = None,
     ):
         for_lookup = deepcopy(series)
         standardize_names_in_series_index(for_lookup)
@@ -158,7 +153,6 @@ class StatementPeriodData:
             data_dict=data_dict,
             configs=configs,
             unextracted_names=unextracted_names,
-            prior_statement=prior_statement,
         )
 
     # Return a series of all the items in the current period

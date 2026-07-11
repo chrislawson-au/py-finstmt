@@ -149,8 +149,8 @@ class ForecastSolver(SolverBase):
             ...         )
             ...     )
             ... ]
-            >>> resolver = ForecastSolver(stmts, forecast_dict, bs_diff_max=1000, timeout=180)
-            >>> resolver.t_indexed_eqs
+            >>> solver = ForecastSolver(stmts, forecast_dict, bs_diff_max=1000, timeout=180)
+            >>> solver.t_indexed_eqs
             [
                 Eq(net_income[t], revenue[t] - expenses[t]),
                 Eq(cash[t], revenue[t] * cash_pct_revenue[t])
@@ -166,7 +166,7 @@ class ForecastSolver(SolverBase):
             ...         )
             ...     )
             ... ]
-            >>> resolver.t_indexed_eqs
+            >>> solver.t_indexed_eqs
             [
                 Eq(interest[t], interest_pct_debt[t] * (debt[t] + debt[t-1])/2)
             ]
@@ -224,7 +224,7 @@ class ForecastSolver(SolverBase):
             >>> # Given t_indexed_eqs with one equation:
             >>> # [Eq(net_income[t], revenue[t] - expenses[t])]
             >>> # And 2 forecast periods:
-            >>> resolver.all_eqs
+            >>> solver.all_eqs
             [
                 Eq(net_income[1], revenue[1] - expenses[1]),
                 Eq(net_income[2], revenue[2] - expenses[2])
@@ -289,7 +289,7 @@ class ForecastSolver(SolverBase):
             ...         )
             ...     )
             ... ]
-            >>> resolver.sympy_subs_dict
+            >>> solver.sympy_subs_dict
             {
                 revenue[0]: 1000.0,     # Historical value
                 revenue[1]: 1100.0,     # Forecasted value

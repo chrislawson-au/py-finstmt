@@ -11,7 +11,7 @@ from finstmt.config.statement import (
 )
 from finstmt.exceptions import MismatchingDatesException
 from finstmt.core.statement_series import StatementSeries
-from finstmt.io.excel import load_capiq_df
+from finstmt.io.capiq import load_capiq_df
 from tests.fixtures.data.common import DATA_PATH
 
 CAPIQ_PATH = os.path.join(DATA_PATH, "capiq")

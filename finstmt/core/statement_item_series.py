@@ -6,7 +6,6 @@ import pandas as pd
 
 from finstmt.config.item import ItemConfig
 
-PAD_PCT = 0.2
 
 @dataclass
 class StatementItemSeries:
@@ -34,11 +33,6 @@ class StatementItemSeries:
 
         ax.plot(self.series.index, self.series.values, "k.")
         ax.plot(self.series.index, self.series.values, ls="-", c="#0072B2")
-
-        max_point = self.series.values.max()
-        min_point = self.series.values.min()
-        y_lim_upper = max_point * (1 + PAD_PCT)
-        y_lim_lower = min_point * (1 - PAD_PCT)
 
         ax.grid(True, which="major", c="gray", ls="-", lw=1, alpha=0.2)
         if xlabel is not None:

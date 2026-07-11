@@ -1,16 +1,20 @@
 import dataclasses
-import math
 import operator
-import warnings
-from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Sequence, Set, Tuple
+from copy import deepcopy
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 import matplotlib.pyplot as plt
 import pandas as pd
 from typing_extensions import Self
 
 from finstmt._logging import logger
-from finstmt._plot_helpers import get_selected_ax, is_last_plot_in_col, plot_finished
+from finstmt._plot_helpers import (
+    DEFAULT_HEIGHT_PER_ROW,
+    DEFAULT_WIDTH,
+    NUM_PLOT_COLUMNS,
+    plot_grid,
+)
 from finstmt.check import item_series_is_empty
 from finstmt.config.forecast import ForecastConfig
 from finstmt.config.item import ItemConfig
@@ -19,11 +23,6 @@ from finstmt.config.statement import StatementConfig, load_statement_configs
 from finstmt.core.statement_item_series import StatementItemSeries
 from finstmt.core.statement_series import StatementSeries
 from finstmt.exceptions import MismatchingDatesException
-
-
-NUM_PLOT_COLUMNS = 3
-DEFAULT_WIDTH = 15
-DEFAULT_HEIGHT_PER_ROW = 3
 
 if TYPE_CHECKING:
     from finstmt.forecast.forecasted_statements import ForecastedStatements
@@ -111,13 +110,12 @@ class FinancialStatements:
         self._create_config_from_statements()
 
         if self.calculate:
-            resolver = HistoricalSolver(self)
-            new_stmts = resolver.to_statements(auto_adjust_config=self.auto_adjust_config)
+            solver = HistoricalSolver(self)
+            new_stmts = solver.to_statements(auto_adjust_config=self.auto_adjust_config)
             self.statements = dict(new_stmts.statements)
             self._create_config_from_statements()
 
     def _create_config_from_statements(self):
-        from copy import deepcopy
         config_dict = {}
         for statement_name, statement_series in self.statements.items():
             # Use deepcopied configs from first period's StatementPeriodData.
@@ -287,12 +285,11 @@ class FinancialStatements:
             statement_forecast_dict = statement_series._forecast(self, **kwargs)
             all_forecast_dict.update(statement_forecast_dict)
 
-        resolver = ForecastSolver(
+        solver = ForecastSolver(
             self, all_forecast_dict, bs_diff_max, timeout, balance=balance
         )
 
-        obj = resolver.to_statements()
-        return obj
+        return solver.to_statements()
 
     @property
     def forecast_assumptions(self) -> pd.DataFrame:
@@ -431,80 +428,9 @@ class FinancialStatements:
         :param separate_sheets: If True, creates separate sheet for each statement.
                               If False, combines all statements into one sheet
         """
-        with pd.ExcelWriter(filepath, engine='xlsxwriter') as writer:
-            workbook = writer.book
-            money_fmt = workbook.add_format({
-                'num_format': '$#,##0',
-                'align': 'right'
-            })
-            header_fmt = workbook.add_format({
-                'bold': True,
-                'align': 'center'
-            })
-            title_fmt = workbook.add_format({
-                'bold': True,
-                'font_size': 14,
-                'align': 'left'
-            })
+        from finstmt.io.excel import statements_to_excel
 
-            if separate_sheets:
-                for statement_series in self.statements.values():
-                    df = statement_series.df.copy()
-                    df.fillna(0, inplace=True)
-                    df.columns = [pd.to_datetime(col).strftime("%m/%d/%Y") for col in df.columns]
-
-                    sheet_name = statement_series.statement_name
-                    # Write statement name first, then data starting one row down
-                    df.to_excel(writer, sheet_name=sheet_name, startrow=1)
-
-                    worksheet = writer.sheets[sheet_name]
-                    worksheet.write(0, 0, sheet_name, title_fmt)
-
-                    for idx, col in enumerate(df.columns, start=1):
-                        worksheet.set_column(idx, idx, 15, money_fmt)
-
-                    worksheet.set_row(1, None, header_fmt)  # Headers now on row 1 instead of 0
-                    worksheet.set_column(0, 0, 30)
-            else:
-                all_dfs = []
-                current_row = 0
-
-                for (statement_name, statement_series) in self.statements.items():
-                    df = statement_series.df.copy()
-                    df.fillna(0, inplace=True)
-                    df.index = [f"{idx}" for idx in df.index]
-                    all_dfs.append((statement_name, df))
-
-                # Create single worksheet
-                worksheet = workbook.add_worksheet('Financial Statements')
-
-                # Write each statement with its header
-                for stmt_name, df in all_dfs:
-                    # Write statement header
-                    worksheet.write(current_row, 0, stmt_name, title_fmt)
-                    current_row += 1
-
-                    # Convert df to formatted dates
-                    df.columns = [pd.to_datetime(col).strftime("%m/%d/%Y") for col in df.columns]
-
-                    # Write column headers
-                    for idx, col in enumerate(df.columns):
-                        worksheet.write(current_row, idx + 1, col, header_fmt)
-
-                    # Write index
-                    for idx, row in enumerate(df.index):
-                        worksheet.write(current_row + 1 + idx, 0, row)
-
-                    # Write data
-                    for row_idx, row in enumerate(df.values):
-                        for col_idx, value in enumerate(row):
-                            worksheet.write(current_row + 1 + row_idx, col_idx + 1, value, money_fmt)
-
-                    current_row += len(df.index) + 2  # Move past data plus add a blank row
-
-                # Set column widths
-                worksheet.set_column(0, 0, 30)  # First column wider for labels
-                worksheet.set_column(1, len(df.columns), 15)  # Data columns
+        statements_to_excel(self.statements, filepath, separate_sheets)
 
     def plot(
         self,
@@ -519,46 +445,10 @@ class FinancialStatements:
         else:
             plot_items = {item.key: self.get_statement_item_series(item.key) for item in self.all_config_items}
 
-        num_plot_rows = math.ceil(len(plot_items) / num_cols)
-        num_plot_columns = min(len(plot_items), num_cols)
-
-        if figsize is None:
-            figsize = (plot_width, height_per_row * num_plot_rows)
-
-        fig, axes = plt.subplots(
-            num_plot_rows, num_plot_columns, sharex=False, sharey=False, figsize=figsize
+        return plot_grid(
+            plot_items,
+            figsize=figsize,
+            num_cols=num_cols,
+            height_per_row=height_per_row,
+            plot_width=plot_width,
         )
-        row = 0
-        col = 0
-        with warnings.catch_warnings():
-            warnings.filterwarnings(
-                action="ignore", message="Attempting to set identical bottom == top"
-            )
-            for i, (item_key, series) in enumerate(plot_items.items()):
-                selected_ax = get_selected_ax(
-                    axes, row, col, num_plot_rows, num_plot_columns
-                )
-                series.plot(ax=selected_ax)
-
-                # For before final row, don't display x-axis
-                if not is_last_plot_in_col(
-                    row, col, num_plot_rows, num_plot_columns, len(plot_items)
-                ):
-                    selected_ax.get_xaxis().set_visible(False)
-
-                if i == len(plot_items) - 1 or plot_finished(
-                    row, col, num_plot_rows, num_plot_columns
-                ):
-                    break
-                col += 1
-                if col == num_plot_columns:
-                    row += 1
-                    col = 0
-        while not plot_finished(row, col, num_plot_rows, num_plot_columns):
-            col += 1
-            if col == num_plot_columns:
-                row += 1
-                col = 0
-            fig.delaxes(axes[row][col])
-        plt.close()
-        return fig

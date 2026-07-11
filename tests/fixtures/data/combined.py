@@ -35,13 +35,6 @@ def data_source(request):
     return request.param
 
 
-def _build(income_df: pd.DataFrame, balance_df: pd.DataFrame) -> FinancialStatements:
-    income_stmt = StatementSeries.from_df(income_df)
-    bs_stmt = StatementSeries.from_df(balance_df)
-    stmts = FinancialStatements(income_stmt, bs_stmt)
-    return stmts
-
-
 @pytest.fixture(scope="session")
 def statement(data_frequency: DataFrequency, data_source: DataSource):
     if data_frequency == DataFrequency.ANNUAL:

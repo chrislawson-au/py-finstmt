@@ -1,51 +1,97 @@
-import datetime
-import re
-from typing import Optional, Union
+"""Excel export for financial statements."""
 
-import numpy as np
+from typing import TYPE_CHECKING, Dict
+
 import pandas as pd
 
-COLUMN_NAME_PATTERN = re.compile(
-    r"((Restated)|(Reclassified)|(12 months)|(3 months)|(Q\d)|(\n))*(?P<date>\w\w\w-\d\d-\d\d\d\d)"
-)
+if TYPE_CHECKING:
+    from finstmt.core.statement_series import StatementSeries
 
 
-def load_capiq_df(file_path: str, sheet_name: str) -> pd.DataFrame:
+def statements_to_excel(
+    statements: Dict[str, "StatementSeries"],
+    filepath: str,
+    separate_sheets: bool = True,
+) -> None:
     """
-    Loads financial statements downloaded from Capital IQ into a DataFrame which can be passed into
-    IncomeStatements or BalanceSheets
+    Save financial statements to an Excel file with statement headers.
+
+    :param statements: Dict mapping statement names to StatementSeries objects
+    :param filepath: Path where the Excel file should be saved
+    :param separate_sheets: If True, creates separate sheet for each statement.
+                          If False, combines all statements into one sheet
     """
-    df = pd.read_excel(file_path, index_col=0, sheet_name=sheet_name, skiprows=14)
+    with pd.ExcelWriter(filepath, engine='xlsxwriter') as writer:
+        workbook = writer.book
+        money_fmt = workbook.add_format({
+            'num_format': '$#,##0',
+            'align': 'right'
+        })
+        header_fmt = workbook.add_format({
+            'bold': True,
+            'align': 'center'
+        })
+        title_fmt = workbook.add_format({
+            'bold': True,
+            'font_size': 14,
+            'align': 'left'
+        })
 
-    # Rename columns, extracting date
-    col_names = [_extract_date(col) for col in df.columns]
-    df.columns = col_names
+        if separate_sheets:
+            for statement_series in statements.values():
+                df = statement_series.df.copy()
+                df.fillna(0, inplace=True)
+                df.columns = [pd.to_datetime(col).strftime("%m/%d/%Y") for col in df.columns]
 
-    # Drop non period ends such as LTM
-    valid_col_names = [col for col in col_names if col is not None]
-    df = df[valid_col_names]
+                sheet_name = statement_series.statement_name
+                # Write statement name first, then data starting one row down
+                df.to_excel(writer, sheet_name=sheet_name, startrow=1)
 
-    # Fill in - with mising
-    df = df.replace("-", np.nan)
+                worksheet = writer.sheets[sheet_name]
+                worksheet.write(0, 0, sheet_name, title_fmt)
 
-    return df
+                for idx, col in enumerate(df.columns, start=1):
+                    worksheet.set_column(idx, idx, 15, money_fmt)
 
+                worksheet.set_row(1, None, header_fmt)  # Headers now on row 1 instead of 0
+                worksheet.set_column(0, 0, 30)
+        else:
+            all_dfs = []
+            current_row = 0
 
-def _extract_date(
-    column_name: Union[pd.Timestamp, datetime.datetime, str]
-) -> Optional[Union[pd.Timestamp, datetime.datetime]]:
-    """
-    Extracts column date from Capital IQ columns.
+            for (statement_name, statement_series) in statements.items():
+                df = statement_series.df.copy()
+                df.fillna(0, inplace=True)
+                df.index = [f"{idx}" for idx in df.index]
+                all_dfs.append((statement_name, df))
 
-    Returns None for LTM columns
-    """
-    if isinstance(column_name, (datetime.datetime, pd.Timestamp)):
-        return column_name
+            # Create single worksheet
+            worksheet = workbook.add_worksheet('Financial Statements')
 
-    match = COLUMN_NAME_PATTERN.match(column_name)
+            # Write each statement with its header
+            for stmt_name, df in all_dfs:
+                # Write statement header
+                worksheet.write(current_row, 0, stmt_name, title_fmt)
+                current_row += 1
 
-    if not match:
-        return None
+                # Convert df to formatted dates
+                df.columns = [pd.to_datetime(col).strftime("%m/%d/%Y") for col in df.columns]
 
-    date_str = match.group("date")
-    return pd.to_datetime(date_str)
+                # Write column headers
+                for idx, col in enumerate(df.columns):
+                    worksheet.write(current_row, idx + 1, col, header_fmt)
+
+                # Write index
+                for idx, row in enumerate(df.index):
+                    worksheet.write(current_row + 1 + idx, 0, row)
+
+                # Write data
+                for row_idx, row in enumerate(df.values):
+                    for col_idx, value in enumerate(row):
+                        worksheet.write(current_row + 1 + row_idx, col_idx + 1, value, money_fmt)
+
+                current_row += len(df.index) + 2  # Move past data plus add a blank row
+
+            # Set column widths
+            worksheet.set_column(0, 0, 30)  # First column wider for labels
+            worksheet.set_column(1, len(df.columns), 15)  # Data columns
