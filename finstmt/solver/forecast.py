@@ -22,6 +22,7 @@ from finstmt.forecast.forecasted_statements import ForecastedStatements
 from finstmt.config.item import ItemConfig
 from finstmt._logging import logger
 from finstmt.solver.base import SolverBase
+from finstmt.solver.periods import FORECAST_INDEXING
 
 # TODO [#46]: clean up ForecastSolver
 #
@@ -86,7 +87,10 @@ class ForecastSolver(SolverBase):
             solutions_dict = self._solved_values()
 
         new_results = sympy_dict_to_results_dict(
-            solutions_dict, self.forecast_dates, self.stmts.all_config_items, t_offset=1
+            solutions_dict,
+            self.forecast_dates,
+            self.stmts.all_config_items,
+            FORECAST_INDEXING,
         )
 
         if self.balance:
@@ -211,8 +215,10 @@ class ForecastSolver(SolverBase):
 
     @property
     def num_periods(self) -> int:
-        # adding 1 because final existing period will be included as period 0
-        return list(self.forecast_dict.values())[0].config.periods + 1
+        # One sympy index per forecast period, plus index 0 for the last
+        # historical period (see FORECAST_INDEXING)
+        periods = list(self.forecast_dict.values())[0].config.periods
+        return FORECAST_INDEXING.sympy_index(periods)
 
     @property
     def forecast_dates(self) -> pd.DatetimeIndex:
@@ -302,7 +308,7 @@ class ForecastSolver(SolverBase):
                     except KeyError:
                         # Must not be a forecasted item, probably calculated item
                         continue
-                    value = series.iloc[period - 1]
+                    value = series.iloc[FORECAST_INDEXING.position(period)]
                 subs_dict[lhs] = value
         return subs_dict
 
@@ -586,7 +592,7 @@ def _balance_group_to_balance_arrs(
         key = str(var.base)  # type: ignore[attr-defined]
         if key in balance_list:
             arr_idx = balance_list.index(key)  # type: ignore[attr-defined]
-            t = int(var.indices[0]) - 1  # type: ignore[attr-defined]
+            t = FORECAST_INDEXING.position(int(var.indices[0]))  # type: ignore[attr-defined]
             if t >= 0:
                 balance_arrs[arr_idx][t] = value
     return balance_arrs

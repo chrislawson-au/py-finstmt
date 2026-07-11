@@ -7,6 +7,11 @@ from sympy.logic.boolalg import BooleanFalse, BooleanTrue
 
 from finstmt.config.item import ItemConfig
 from finstmt.exceptions import NoSuchItemException, NotACalculatedItemException
+from finstmt.solver.periods import (
+    FORECAST_INDEXING,
+    HISTORICAL_INDEXING,
+    PeriodIndexing,
+)
 
 PLUG_SCALE = 1e11
 
@@ -86,7 +91,7 @@ def sympy_dict_to_results_dict(
     s_dict: Dict[IndexedBase, float],
     forecast_dates: pd.DatetimeIndex,
     item_configs: List[ItemConfig],
-    t_offset: int = 0,
+    indexing: PeriodIndexing = HISTORICAL_INDEXING,
 ) -> Dict[str, pd.Series]:
     item_config_dict: Dict[str, ItemConfig] = {
         config.key: config for config in item_configs
@@ -104,7 +109,7 @@ def sympy_dict_to_results_dict(
         )
     for expr, val in s_dict.items():
         key = str(expr.base)  # type: ignore[attr-defined]
-        t = int(expr.indices[0]) - t_offset  # type: ignore[attr-defined]
+        t = indexing.position(int(expr.indices[0]))  # type: ignore[attr-defined]
         if t < 0:
             # Don't need to store historical results
             continue
@@ -160,7 +165,9 @@ def results_dict_to_sympy_dict(
     for key, series in results_dict.items():
         arr = series.values
         for i, val in enumerate(arr):
-            t_str = f"{key}[{i + 1}]"
+            # Result arrays hold forecast periods, which are 1-based in the
+            # sympy system (index 0 is the last historical period)
+            t_str = f"{key}[{FORECAST_INDEXING.sympy_index(i)}]"
             lhs = sympify(t_str, locals=sympy_namespace)
             out_dict[lhs] = val
     return out_dict
