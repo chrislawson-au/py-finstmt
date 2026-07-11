@@ -1,12 +1,25 @@
 import dataclasses
 import operator
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Sequence, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    TypeVar,
+    Union,
+    get_args,
+)
 
 import pandas as pd
-from typing_extensions import Self
+from typing_extensions import Literal, Self
 
 T = TypeVar("T")
+
+ForecastMethod = Literal["auto", "cagr", "trend", "mean", "recent", "manual"]
+VALID_FORECAST_METHODS = frozenset(get_args(ForecastMethod))
 
 
 @dataclass
@@ -17,8 +30,8 @@ class ForecastItemConfig:
     expressed as a percentage of another item, manual overrides, and balance-sheet
     plug/balancing behavior.
 
-    :param method: Forecast model name (``"cagr"``, ``"average"``, ``"trend"``,
-        ``"recent"``, ``"manual"``, ``"prophet"``).
+    :param method: Forecast model name (``"auto"`` for Prophet, ``"cagr"``,
+        ``"trend"``, ``"mean"``, ``"recent"``, ``"manual"``).
     :param pct_of: Key of another item to forecast this as a percentage of
         (e.g. ``"revenue"``). ``None`` to forecast the raw value.
     :param make_forecast: Whether to include this item in the forecast.
@@ -39,7 +52,7 @@ class ForecastItemConfig:
         >>> fc.manual_forecasts = {"levels": [100, 110], "growth": []}
     """
 
-    method: str = "cagr"
+    method: ForecastMethod = "cagr"
     pct_of: Optional[str] = None
     make_forecast: bool = True
     prophet_kwargs: dict = field(default_factory=lambda: {})
@@ -51,6 +64,13 @@ class ForecastItemConfig:
     plug: bool = False
     balance_with: Optional[str] = None
     use_average: bool = False
+
+    def __post_init__(self) -> None:
+        if self.method not in VALID_FORECAST_METHODS:
+            raise ValueError(
+                f"invalid forecast method {self.method!r}; "
+                f"must be one of {sorted(VALID_FORECAST_METHODS)}"
+            )
 
     def to_series(self) -> pd.Series:
         out_dict = {
@@ -193,13 +213,10 @@ class ItemConfig:
         return _apply_operation_to_item_config(self, other, operator.truediv)
 
 
-ItemConfigOperationData = ForecastItemConfig
-
-
 def _apply_operation_to_item_config(
     item_config: ItemConfig,
     other: T,
-    func: Callable[[ItemConfigOperationData, T], ItemConfigOperationData],
+    func: Callable[[ForecastItemConfig, T], ForecastItemConfig],
 ) -> ItemConfig:
     updates: Dict[str, Any] = {}
     updates["forecast"] = func(
