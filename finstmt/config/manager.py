@@ -196,10 +196,18 @@ class ConfigManager:
                         determinant_keys.extend(
                             self._calculated_item_determinant_keys(pct_conf.key)
                         )
-        return list(set(determinant_keys))
+        # Order-preserving dedupe: set() iteration order is not deterministic
+        # across processes
+        return list(dict.fromkeys(determinant_keys))
 
     @property
-    def balance_groups(self) -> List[Set[str]]:
+    def balance_groups(self) -> List[List[str]]:
+        """Groups of item keys that must balance against each other.
+
+        Each group is sorted so ordering is deterministic across processes
+        (set iteration order depends on PYTHONHASHSEED, and the plug solver's
+        equation ordering must be stable for reproducible results).
+        """
         balance_sets: List[Set[str]] = []
         for item in self.items:
             if item.forecast.balance_with is not None:
@@ -232,4 +240,4 @@ class ConfigManager:
                         balance_with_conf = self.get(balance_with_key)
 
                 balance_sets.append(balance_group)
-        return balance_sets
+        return [sorted(balance_set) for balance_set in balance_sets]

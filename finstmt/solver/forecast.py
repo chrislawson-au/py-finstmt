@@ -1,7 +1,7 @@
 import itertools
 import timeit
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Sequence, Set, Tuple
+from typing import Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
@@ -412,7 +412,7 @@ def resolve_balance_sheet(
     config: ConfigManager,
     sympy_namespace: Dict[str, IndexedBase],
     bs_diff_max: float,
-    balance_groups: List[Set[str]],
+    balance_groups: List[List[str]],
     timeout: float,
 ) -> Dict[IndexedBase, float]:
     """
@@ -431,7 +431,7 @@ def resolve_balance_sheet(
         config: Configuration manager containing financial statement structure
         sympy_namespace: Dictionary mapping variable names to SymPy objects
         bs_diff_max: Maximum allowed difference between balance groups
-        balance_groups: Groups of items that should be equal (e.g. [{'assets', 'liabilities_and_equity'}])
+        balance_groups: Groups of items that should be equal (e.g. [['assets', 'liabilities_and_equity']])
         timeout: Maximum time in seconds to attempt balancing
 
     Returns:
@@ -454,7 +454,7 @@ def resolve_balance_sheet(
         ...     fixed_assets[1]: 1000,
         ...     equity[1]: 800
         ... }
-        >>> balance_groups = [{'assets', 'liab_and_equity'}]
+        >>> balance_groups = [['assets', 'liab_and_equity']]
         >>>
         >>> # Resolve balance sheet
         >>> solutions = resolve_balance_sheet(
@@ -581,7 +581,7 @@ def _resolve_balance_sheet_check_diff(
     forecast_dates: pd.DatetimeIndex,
     solve_for: Sequence[IndexedBase],
     bs_diff_max: float,
-    balance_groups: List[Set[str]],
+    balance_groups: List[List[str]],
     res: PlugResult,
 ):
     if res.is_timed_out:
@@ -613,7 +613,7 @@ def _resolve_balance_sheet_check_diff(
 
 
 def _balance_group_to_balance_arrs(
-    balance_group: Set[str],
+    balance_group: List[str],
     sol_arr: np.ndarray,
     solve_for: Sequence[IndexedBase],
     num_periods: int,
@@ -648,7 +648,7 @@ def _adjust_x0_to_initial_balance_guess(
     forecast_dates: pd.DatetimeIndex,
     solve_for: Sequence[IndexedBase],
     config: ConfigManager,
-    balance_groups: List[Set[str]],
+    balance_groups: List[List[str]],
 ):
     sol_arr = _eq_arrs_and_x_to_sol_arr(x0, eq_arrs)
     n_periods = len(forecast_dates)

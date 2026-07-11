@@ -14,7 +14,7 @@ finstmt.forecast.forecasted_statements.ForecastedStatements(
   "rd_exp": 1.0,
   "op_exp": 2.0,
   "ebit": 3.0,
-  "ebt": 3.0,
+  "ebt": 2.0,
   "net_income": 2.0
 },
                 datetime.datetime(
@@ -28,7 +28,7 @@ finstmt.forecast.forecasted_statements.ForecastedStatements(
   "rd_exp": 1.0,
   "op_exp": 2.0,
   "ebit": 3.0,
-  "ebt": 3.0,
+  "ebt": 2.0,
   "net_income": 2.0
 }
             },
@@ -41,12 +41,12 @@ finstmt.forecast.forecasted_statements.ForecastedStatements(
                     12,
                     31
                 ): {
-  "cash": 29.0,
-  "cash_and_st_invest": 29.0,
+  "cash": 28.0,
+  "cash_and_st_invest": 28.0,
   "receivables": 8.0,
   "inventory": 11.0,
   "def_tax_st": 1.0,
-  "total_current_assets": 48.0,
+  "total_current_assets": 47.0,
   "gross_ppe": 7.0,
   "dep": 4.0,
   "net_ppe": 4.0,
@@ -54,31 +54,31 @@ finstmt.forecast.forecasted_statements.ForecastedStatements(
   "lt_invest": 1.0,
   "other_lt_assets": 1.0,
   "total_non_current_assets": 12.0,
-  "total_assets": 61.0,
+  "total_assets": 59.0,
   "payables": 7.0,
   "other_current_liab": 4.0,
-  "total_current_liab": 10.0,
-  "lt_debt": 7.0,
-  "total_debt": 7.0,
+  "total_current_liab": 11.0,
+  "lt_debt": 9.0,
+  "total_debt": 9.0,
   "other_lt_liab": 3.0,
-  "total_non_current_liab": 11.0,
-  "total_liab": 21.0,
+  "total_non_current_liab": 12.0,
+  "total_liab": 23.0,
   "common_stock": 6.0,
   "retained_earnings": 30.0,
   "total_equity": 36.0,
-  "total_liab_and_equity": 57.0
+  "total_liab_and_equity": 59.0
 },
                 datetime.datetime(
                     2020,
                     3,
                     31
                 ): {
-  "cash": 29.0,
-  "cash_and_st_invest": 29.0,
+  "cash": 28.0,
+  "cash_and_st_invest": 28.0,
   "receivables": 8.0,
   "inventory": 10.0,
   "def_tax_st": 1.0,
-  "total_current_assets": 48.0,
+  "total_current_assets": 47.0,
   "gross_ppe": 7.0,
   "dep": 4.0,
   "net_ppe": 4.0,
@@ -86,19 +86,19 @@ finstmt.forecast.forecasted_statements.ForecastedStatements(
   "lt_invest": 1.0,
   "other_lt_assets": 1.0,
   "total_non_current_assets": 12.0,
-  "total_assets": 61.0,
+  "total_assets": 59.0,
   "payables": 6.0,
   "other_current_liab": 4.0,
   "total_current_liab": 10.0,
-  "lt_debt": 7.0,
-  "total_debt": 7.0,
+  "lt_debt": 9.0,
+  "total_debt": 9.0,
   "other_lt_liab": 3.0,
-  "total_non_current_liab": 11.0,
-  "total_liab": 21.0,
+  "total_non_current_liab": 12.0,
+  "total_liab": 23.0,
   "common_stock": 6.0,
   "retained_earnings": 30.0,
   "total_equity": 37.0,
-  "total_liab_and_equity": 58.0
+  "total_liab_and_equity": 59.0
 }
             },
             statement_name='Balance Sheet'
@@ -972,12 +972,12 @@ Name: Cash and Cash Equivalents, dtype: float64,
                 ],
                 forecast=finstmt.config.item.ForecastItemConfig(
                     method='manual',
-                    manual_forecasts={'levels': [29, 29], 'growth': []},
+                    manual_forecasts={'levels': [28, 28], 'growth': []},
                     plug=True
                 )
             ),
-            _result=2019-12-31    29007.609360
-2020-03-31    29491.148602
+            _result=2019-12-31    27679.997188
+2020-03-31    28136.392534
 Name: mean, dtype: float64
         ),
         'receivables': finstmt.forecast.forecast_item_series.ForecastItemSeries(
@@ -2246,12 +2246,12 @@ Name: Long-Term Debt, dtype: float64,
                 ],
                 forecast=finstmt.config.item.ForecastItemConfig(
                     method='manual',
-                    manual_forecasts={'levels': [7, 7], 'growth': []},
+                    manual_forecasts={'levels': [9, 9], 'growth': []},
                     plug=True
                 )
             ),
-            _result=2019-12-31    7285.299803
-2020-03-31    7286.712990
+            _result=2019-12-31    9158.329770
+2020-03-31    9182.724346
 Freq: QE-DEC, Name: mean, dtype: float64
         ),
         'tax_liab_lt': finstmt.forecast.forecast_item_series.ForecastItemSeries(
