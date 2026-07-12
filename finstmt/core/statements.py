@@ -53,6 +53,15 @@ class FinancialStatements:
     statements: Dict[str, StatementSeries]  # Changed from List to Dict
     calculate: bool = True
     auto_adjust_config: bool = True
+    #: When True, calculated items are always recomputed from their equations
+    #: across the historical periods (extracted values only seed equations that
+    #: reach outside the historical window, e.g. ``revenue[t-1]`` at t=0).
+    #: The default (False) preserves the data-priority contract: extracted
+    #: values win and equations only fill gaps. Enable for models built from
+    #: scratch where accounting identities must hold exactly; leave off for
+    #: real reported filings, whose aggregates legitimately differ from the
+    #: config's simplified identities.
+    recompute_calculated: bool = False
 
     def __post_init__(self):
         # Convert list to dict if needed for backwards compatibility
@@ -112,11 +121,16 @@ class FinancialStatements:
         if self.calculate:
             self._validate_dates()
             solver = HistoricalSolver(
-                self._effective_statement_configs(), self._item_values()
+                self._effective_statement_configs(),
+                self._item_values(),
+                recompute_calculated=self.recompute_calculated,
             )
             stmts = self._statement_series_from_results(solver.solve())
             new_stmts = FinancialStatements(
-                stmts, calculate=False, auto_adjust_config=self.auto_adjust_config
+                stmts,
+                calculate=False,
+                auto_adjust_config=self.auto_adjust_config,
+                recompute_calculated=self.recompute_calculated,
             )
             self.statements = dict(new_stmts.statements)
             self._create_config_from_statements()
@@ -355,7 +369,10 @@ class FinancialStatements:
         stmt_dfs = self._statement_series_from_results(results)
         # the forecasts passed are just used for plotting
         return ForecastedStatements(
-            stmt_dfs, forecasts=all_forecast_dict, calculate=False
+            stmt_dfs,
+            forecasts=all_forecast_dict,
+            calculate=False,
+            recompute_calculated=self.recompute_calculated,
         )
 
     @property
@@ -455,9 +472,15 @@ class FinancialStatements:
         df: pd.DataFrame,
         statement_config_list: List[StatementConfig],
         disp_unextracted: bool = True,
+        recompute_calculated: bool = False,
     ):
         """
         DataFrame must have columns as dates and index as names of financial statement items
+
+        :param recompute_calculated: Always recompute calculated items from
+            their equations across historical periods instead of preferring
+            extracted values. Use for models built from scratch where
+            accounting identities must hold; leave off for real reported data.
         """
         dates = list(df.columns)
         dates.sort(key=lambda t: pd.to_datetime(t))
@@ -472,20 +495,35 @@ class FinancialStatements:
             )
             stmts[statment_config.display_name] = stmt
 
-        return cls(stmts)
+        return cls(stmts, recompute_calculated=recompute_calculated)
 
     @classmethod
-    def from_yaml_config(cls, df: pd.DataFrame, config_path: str, disp_unextracted: bool = True):
+    def from_yaml_config(
+        cls,
+        df: pd.DataFrame,
+        config_path: str,
+        disp_unextracted: bool = True,
+        recompute_calculated: bool = False,
+    ):
         """
         Create FinancialStatements from DataFrame using YAML config file
 
         :param df: DataFrame with financial data
         :param config_path: Path to YAML config file
         :param disp_unextracted: Whether to display unextracted items
+        :param recompute_calculated: Always recompute calculated items from
+            their equations across historical periods instead of preferring
+            extracted values. Use for models built from scratch where
+            accounting identities must hold; leave off for real reported data.
         :return: FinancialStatements object
         """
         statement_configs = load_statement_configs(config_path)
-        return cls.from_df(df, statement_configs, disp_unextracted)
+        return cls.from_df(
+            df,
+            statement_configs,
+            disp_unextracted,
+            recompute_calculated=recompute_calculated,
+        )
 
     def to_excel(self, filepath: str, separate_sheets: bool = True) -> None:
         """
