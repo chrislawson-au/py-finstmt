@@ -239,6 +239,30 @@ Remaining open items: the non-dead-code parts of §5 (frozen configs, `__getattr
 mixin, model-interface template method, god-method split in `resolve_balance_sheet`,
 `to_series` presentation split, `pd.Series` cap/floor equality hazard).
 
+**2026-07-12 (deals layer)** — Reviewed and accepted a new additive
+`finstmt/deals/` module from the parallel session (transactions, debt
+waterfalls, IRR/MOIC/NPV metrics, deal composition). Verdict: it belongs — it
+consumes the statements engine as a layer (order and conditionality on top of
+the simultaneous solve) and the seeds-based `recompute_calculated` contract is
+exactly its interface. Five defects found and fixed during review:
+1. `Transaction.apply` silently sign-flipped adjustments that took a
+   `force_positive` item negative (cash −30 became +30) — now raises.
+2. Rebuild rows were keyed by display name, which is not always extractable
+   (shipped config: `cash`, `nwc`, `dep_exp`) — now keyed by `primary_name`,
+   matching the core rebuild convention.
+3. `irr`/`npv` dropped NaN flows, silently shifting later flows earlier in
+   time — missing flows now count as zero.
+4. Waterfall results violated their own same-period identities (total_debt
+   left at the pre-payment value) — a post-step stabilization pass fixes it.
+5. Core: equations referencing outside the historical window (debt[t-1] at
+   period 0) entered the linear system, where unknown terms are silently
+   dropped and values fabricated (interest[0] = 0.1×nothing = 0). Such
+   equations are now excluded (honest NaN), `CAGRModel` tolerates None
+   endpoints, and `item_series_is_empty` treats all-None/NaN as empty (it
+   previously said a series with no data was not empty).
+`_item_seed_values` promoted to public `item_seed_values()` as the deals
+layer's interface.
+
 **2026-07-12 (recompute refinement)** — The parallel session refined
 `recompute_calculated` to a single unified rule verified here: explicitly
 provided (seed) values win in BOTH modes; the flag differs from the default
