@@ -7,6 +7,7 @@ from pandas import DatetimeIndex
 from packaging import version
 
 from finstmt.exceptions import ForecastNotFitException, ForecastNotPredictedException
+from finstmt.freq import infer_freq_or_default
 from finstmt.config.forecast import ForecastConfig
 from finstmt.forecast.plot import plot_forecast
 from finstmt.config.item import ItemConfig
@@ -89,7 +90,7 @@ class ForecastModel:
     def historical_freq(self) -> str:
         if self.orig_series is None:
             raise ForecastNotFitException("call .fit before .historical_freq")
-        return pd.infer_freq(self.orig_series.index)
+        return infer_freq_or_default(self.orig_series.index)
 
     @property
     def desired_freq_t_multiplier(self) -> float:

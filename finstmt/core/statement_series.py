@@ -6,6 +6,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from finstmt.check import item_series_is_empty
+from finstmt.freq import infer_freq_or_default
 from finstmt.exceptions import (
     CouldNotParseException,
     MixedFrequencyException,
@@ -224,7 +225,7 @@ class StatementSeries:
 
     @property
     def freq(self) -> str:
-        return pd.infer_freq(self.dates)
+        return infer_freq_or_default(self.dates)
 
     @property
     def dates(self) -> List[pd.Timestamp]:
