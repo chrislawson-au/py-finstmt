@@ -121,7 +121,7 @@ class FinancialStatements:
             self._validate_dates()
             solver = HistoricalSolver(
                 self._effective_statement_configs(),
-                self._item_seed_values()
+                self.item_seed_values()
                 if self.recompute_calculated
                 else self._item_values(),
                 recompute_calculated=self.recompute_calculated,
@@ -148,13 +148,15 @@ class FinancialStatements:
         """One series of values by date per item key, as solver input."""
         return {config.key: getattr(self, config.key) for config in self.all_config_items}
 
-    def _item_seed_values(self) -> Dict[str, pd.Series]:
-        """Solver input where calculated items contribute only their
-        explicitly-provided (seed) values, never per-statement precomputed
-        results. Raw items keep their normal values (missing raw data is
-        zero-filled, matching :meth:`StatementItem.value`). Used with
-        ``recompute_calculated`` so genuine actuals win while stale
-        precomputed values are recomputed from their equations."""
+    def item_seed_values(self) -> Dict[str, pd.Series]:
+        """One series per item key where calculated items contribute only
+        their explicitly-provided (seed) values, never per-statement
+        precomputed results. Raw items keep their normal values (missing raw
+        data is zero-filled, matching :meth:`StatementItem.value`).
+
+        This is the ``recompute_calculated`` solver input, and the public
+        interface for layers that rebuild statements from clean inputs
+        (e.g. :class:`finstmt.deals.Transaction`)."""
         out: Dict[str, pd.Series] = {}
         calculated_keys = {
             config.key for config in self.all_config_items if config.expr_str is not None

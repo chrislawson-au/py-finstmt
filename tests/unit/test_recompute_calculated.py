@@ -148,3 +148,28 @@ def test_recompute_keeps_actual_history_for_recurrences():
     assert list(stmts.revenue.values) == [1000.0, 1100.0, 1210.0]
     # the same-period identity is still computed
     assert list(stmts.profit.values) == [600.0, 660.0, 726.0]
+
+
+def test_unsolvable_boundary_periods_stay_nan():
+    """An equation reaching outside the window (debt[t-1] at period 0) with
+    no seed must yield NaN — not a value fabricated by silently dropping the
+    unknown term from the linear system."""
+    df = pd.DataFrame(
+        {"Debt": [400.0]}, index=pd.to_datetime(["2023-12-31"])
+    ).T
+    items = [
+        ItemConfig(key="debt", display_name="Debt", extract_names=["debt"]),
+        ItemConfig(
+            key="interest",
+            display_name="Interest",
+            extract_names=["interest"],
+            expr_str="0.10 * debt[t-1]",
+        ),
+    ]
+    configs = [StatementConfig(key="s", display_name="S", items_config_list=items)]
+
+    stmts = FinancialStatements.from_df(
+        df, configs, disp_unextracted=False, recompute_calculated=True
+    )
+
+    assert pd.isna(stmts.interest.iloc[0])

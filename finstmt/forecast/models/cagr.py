@@ -13,10 +13,12 @@ class CAGRModel(ForecastModel):
     last_value: Optional[float] = None
 
     def fit(self, series: pd.Series):
-        y_T = series.iloc[-1]
+        # None appears for calculated items with no solvable history; treat
+        # it like NaN so it propagates instead of crashing comparisons
+        y_T = float("nan") if series.iloc[-1] is None else series.iloc[-1]
         self.last_value = y_T
 
-        y_0 = series.iloc[0]
+        y_0 = float("nan") if series.iloc[0] is None else series.iloc[0]
 
         if y_0 <= 0 or y_T <= 0:
             # Invalid data for CAGR method

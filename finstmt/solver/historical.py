@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional
 
 import pandas as pd
-from sympy import Eq, Expr, IndexedBase
+from sympy import Eq, Expr, Indexed, IndexedBase
 
 from finstmt.config.item import ItemConfig
 from finstmt.solver.base import SolverBase
@@ -52,8 +52,26 @@ class HistoricalSolver(SolverBase):
                 if period_eq.lhs in subs_dict:
                     # Already have data for this, no need to calculate
                     continue
+                if self._references_out_of_window(period_eq.rhs):
+                    # The equation needs data from outside the historical
+                    # window (e.g. debt[t-1] at period 0). It cannot be
+                    # solved as stated — including it would let the linear
+                    # solver silently drop the unknown term and fabricate a
+                    # value. Leave the item unsolved (NaN) instead.
+                    continue
                 out_eqs.append(period_eq)
         return out_eqs
+
+    def _references_out_of_window(self, rhs: Expr) -> bool:
+        """Whether an already-period-substituted expression references data
+        from outside the historical window."""
+        for indexed in rhs.atoms(Indexed):
+            for index in indexed.indices:
+                if not index.is_number:
+                    continue
+                if index < 0 or index >= self.num_periods:
+                    return True
+        return False
 
     @property
     def num_periods(self) -> int:
@@ -71,7 +89,7 @@ class HistoricalSolver(SolverBase):
                 if config.expr_str is not None:
                     if self.recompute_calculated:
                         # item_values holds only explicitly-provided seeds for
-                        # calculated items (see _item_seed_values): genuine
+                        # calculated items (see item_seed_values): genuine
                         # actuals win, everything else — including stale
                         # per-statement precomputed values — is recomputed
                         # from the equations.
