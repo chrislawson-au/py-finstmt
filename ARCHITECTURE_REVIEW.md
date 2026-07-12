@@ -239,6 +239,27 @@ Remaining open items: the non-dead-code parts of §5 (frozen configs, `__getattr
 mixin, model-interface template method, god-method split in `resolve_balance_sheet`,
 `to_series` presentation split, `pd.Series` cap/floor equality hazard).
 
+**2026-07-12 (cross-session verification)** — Reviewed two uncommitted changes from
+a parallel session:
+
+1. *Kept (with fixes):* `finstmt/freq.py` — frequency inference tolerating 1–2
+   period histories (`pd.infer_freq` needs ≥3 dates and raised ValueError).
+   Fixed the alias preference to try modern pandas aliases first (`12ME` before
+   `12M`) and to treat a deprecation FutureWarning as a rejection; added tests.
+2. *Rejected:* a `HistoricalSolver.sympy_subs_dict` change that always recomputed
+   calculated items from their equations, discarding extracted values (except
+   where the equation referenced out-of-window periods). Verified intent works on
+   clean data, but it failed 24/80 tests and fabricated values wherever an
+   equation component is missing from the data: stockrow MAR cannot extract
+   `int_exp`, so `ebt := ebit - 0` replaced Marriott's reported EBT of −418M with
+   −101M (and net income −353M → −36M); every dataset was affected because
+   reported aggregates never exactly match the config's simplified identities.
+   It also reversed the documented data-priority contract in
+   `StatementItem.value` (extracted values win over calculation). If the
+   underlying staleness problem recurs, the safer shape is recomputing only when
+   every equation component actually has extracted data — but note even that
+   overrides legitimately-reported aggregates and needs a deliberate decision.
+
 **2026-07-11 (externally reported)** — CAGR off-by-one, inherited from upstream:
 `CAGRModel.fit` used `n = len(series)` as the exponent denominator instead of the
 number of growth periods `len(series) - 1`, systematically understating growth
