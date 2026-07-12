@@ -578,7 +578,7 @@ Name: Cash and Cash Equivalents, dtype: float64,
             ),
             _result=2019-12-31    11768.497740
 2020-12-31    12004.285888
-Name: mean, dtype: float64
+Freq: YE-DEC, Name: mean, dtype: float64
         ),
         'receivables': finstmt.forecast.forecast_item_series.ForecastItemSeries(
             orig_series=2014-12-31    8.0

@@ -69,10 +69,12 @@ class ForecastItemSeries:
             )
 
         if use_levels:
-            values = self._result.values
+            # .values can be a read-only view under pandas copy-on-write;
+            # copy so the adjustment/replacement writes below are legal
+            values = self._result.to_numpy(copy=True)
         else:
             # Growth
-            values = self._result.pct_change().values
+            values = self._result.pct_change().to_numpy(copy=True)
             # Fill in first growth
             values[0] = (self._result.iloc[0] - self.series.iloc[-1]) / self.series.iloc[
                 -1
@@ -110,7 +112,10 @@ class ForecastItemSeries:
             self.config, self.item_config
         )
         self.model.fit(self.series)
-        self.model.predict()
+        # Store the manual prediction so .result reflects the new values.
+        # Previously this happened by accident: .values returned a writable
+        # view and the replacement writes above mutated _result in place.
+        self._result = self.model.predict()
 
     @property
     def series(self) -> pd.Series:

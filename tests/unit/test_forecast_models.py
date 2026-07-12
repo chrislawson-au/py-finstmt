@@ -54,6 +54,32 @@ def test_cagr_single_period_falls_back_to_zero_growth():
     assert model.stderr == 0
 
 
+def test_to_manual_replacements_are_reflected_in_result():
+    # The balance-plug write-back calls to_manual(use_levels=True,
+    # replacements=...) and downstream consumers (including snapshot reprs)
+    # read .result afterwards; it must reflect the replaced values, not the
+    # stale pre-manual forecast. Historically this only worked because
+    # .values returned a writable view - the write-back must be explicit.
+    from finstmt.forecast.forecast_item_series import ForecastItemSeries
+
+    series = pd.Series(
+        [100.0, 110.0, 121.0],
+        index=pd.DatetimeIndex(["2021-12-31", "2022-12-31", "2023-12-31"]),
+    )
+    fis = ForecastItemSeries(
+        orig_series=series,
+        config=ForecastConfig(periods=2, freq="Y"),
+        item_config=ItemConfig(key="revenue", display_name="Revenue", extract_names=["revenue"]),
+    )
+    fis.fit()
+    fis.predict()
+
+    fis.to_manual(use_levels=True, replacements=[500.0, 600.0])
+
+    assert list(fis.result.values) == [500.0, 600.0]
+    assert fis.result.name == "mean"
+
+
 def test_item_level_prophet_kwargs_override_global():
     config = ForecastConfig(prophet_kwargs={"n_changepoints": 10})
     item_config = ItemConfig(

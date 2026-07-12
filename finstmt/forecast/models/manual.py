@@ -59,7 +59,8 @@ class ManualForecastModel(ForecastModel):
         else:
             values = self.forecast_values
 
-        self.result = pd.Series(values, index=self._future_date_range)
+        # name matches the "mean" column the other models' results carry
+        self.result = pd.Series(values, index=self._future_date_range, name="mean")
         self.result_df = pd.DataFrame(
             pd.concat([self.orig_series, self.result]), columns=["mean"]
         )
