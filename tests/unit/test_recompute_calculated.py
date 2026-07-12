@@ -1,13 +1,16 @@
 """Tests for the ``recompute_calculated`` historical-solver option.
 
-Default (False): extracted values win — the library's data-priority contract
-for real reported filings, whose aggregates legitimately differ from the
-config's simplified identities.
+In both modes, explicitly provided values win — the library's data-priority
+contract. The modes differ only in how *unreported* calculated items are
+treated:
 
-Opt-in (True): calculated items are always recomputed from their equations,
-for models built from scratch where accounting identities must hold. Extracted
-values still seed equations that reach outside the historical window
-(recurrences like ``revenue[t-1]`` at t=0).
+Default (False): any nonzero value wins, including per-statement precomputed
+values; equations only fill zero-valued gaps.
+
+Opt-in (True): calculated items are solved from clean inputs — only genuine
+seed values (explicitly present in the source data, including explicit zeros)
+are substituted, and everything else is recomputed from the equations. Stale
+precomputed values never leak into the solve.
 """
 
 import pandas as pd
@@ -53,8 +56,11 @@ def test_recompute_solves_cross_statement_chain(cross_statement_configs, cross_s
     assert list(stmts.c.values) == [50.0]
 
 
-def test_default_keeps_extracted_values_for_calculated_items():
-    """An extracted aggregate that disagrees with the identity is kept by default."""
+def test_explicit_values_win_in_both_modes():
+    """An explicitly reported aggregate that disagrees with the identity is
+    kept in both modes — the flag only changes how *unreported* calculated
+    items are treated (recomputed from clean inputs instead of trusting
+    per-statement precomputed values)."""
     df = pd.DataFrame(
         # Reported C (70) intentionally differs from A - B (60): real filings
         # contain items the simplified identity does not carry.
@@ -74,7 +80,7 @@ def test_default_keeps_extracted_values_for_calculated_items():
     recomputed = FinancialStatements.from_df(
         df, configs, disp_unextracted=False, recompute_calculated=True
     )
-    assert list(recomputed.c.values) == [60.0]
+    assert list(recomputed.c.values) == [70.0]
 
 
 def test_recompute_preserves_recurrence_seed():
@@ -100,3 +106,45 @@ def test_recompute_preserves_recurrence_seed():
         df, configs, disp_unextracted=False, recompute_calculated=True
     )
     assert list(stmts.revenue.values) == [1000.0]
+
+
+def test_recompute_keeps_actual_history_for_recurrences():
+    """Recurrences describe evolution, not identity: actual historical values
+    win over the equation; only same-period identities are recomputed."""
+    df = pd.DataFrame(
+        {
+            "Growth": [0.12, 0.12, 0.12],
+            "Revenue": [1000.0, 1100.0, 1210.0],  # actual growth is 10%, not 12%
+            "Costs": [400.0, 440.0, 484.0],
+        },
+        index=pd.to_datetime(["2021-12-31", "2022-12-31", "2023-12-31"]),
+    ).T
+    items_p = [ItemConfig(key="growth", display_name="Growth", extract_names=["growth"])]
+    items_s = [
+        ItemConfig(
+            key="revenue",
+            display_name="Revenue",
+            extract_names=["revenue"],
+            expr_str="revenue[t-1] * (1 + growth[t])",
+        ),
+        ItemConfig(key="costs", display_name="Costs", extract_names=["costs"]),
+        ItemConfig(
+            key="profit",
+            display_name="Profit",
+            extract_names=["profit"],
+            expr_str="revenue[t] - costs[t]",
+        ),
+    ]
+    stmts = FinancialStatements.from_df(
+        df,
+        [
+            StatementConfig(key="p", display_name="P", items_config_list=items_p),
+            StatementConfig(key="s", display_name="S", items_config_list=items_s),
+        ],
+        disp_unextracted=False,
+        recompute_calculated=True,
+    )
+    # actual history preserved, not restated to 12% growth
+    assert list(stmts.revenue.values) == [1000.0, 1100.0, 1210.0]
+    # the same-period identity is still computed
+    assert list(stmts.profit.values) == [600.0, 660.0, 726.0]

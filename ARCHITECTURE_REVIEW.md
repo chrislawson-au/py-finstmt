@@ -239,6 +239,19 @@ Remaining open items: the non-dead-code parts of §5 (frozen configs, `__getattr
 mixin, model-interface template method, god-method split in `resolve_balance_sheet`,
 `to_series` presentation split, `pd.Series` cap/floor equality hazard).
 
+**2026-07-12 (recompute refinement)** — The parallel session refined
+`recompute_calculated` to a single unified rule verified here: explicitly
+provided (seed) values win in BOTH modes; the flag differs from the default
+only in ignoring per-statement precomputed values and the zero-gap heuristic
+for unreported calculated items. This removes the earlier flag behavior of
+restating same-period actuals (reported aggregates that disagree with the
+config's identities are now kept even when opted in), aligns the flag with
+`StatementItem.value`'s documented contract, and lets an explicit zero win
+over recomputation (the default's `value == 0` heuristic cannot distinguish
+explicit zeros from missing data). Verified: default path character-identical,
+full suite green, and edge probes for explicit-zero seeds, NaN cells, and
+`force_positive` abs'ed seeds all behave per the contract.
+
 **2026-07-12 (second cross-session batch)** — The parallel session resolved the
 previously-rejected solver change as an opt-in `recompute_calculated` flag
 (default False preserves the extracted-values-win contract; verified

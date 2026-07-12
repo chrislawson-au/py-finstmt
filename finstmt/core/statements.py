@@ -53,14 +53,13 @@ class FinancialStatements:
     statements: Dict[str, StatementSeries]  # Changed from List to Dict
     calculate: bool = True
     auto_adjust_config: bool = True
-    #: When True, calculated items are always recomputed from their equations
-    #: across the historical periods (extracted values only seed equations that
-    #: reach outside the historical window, e.g. ``revenue[t-1]`` at t=0).
-    #: The default (False) preserves the data-priority contract: extracted
-    #: values win and equations only fill gaps. Enable for models built from
-    #: scratch where accounting identities must hold exactly; leave off for
-    #: real reported filings, whose aggregates legitimately differ from the
-    #: config's simplified identities.
+    #: When True, calculated items are solved from clean inputs: explicitly
+    #: provided (seed) values win wherever they exist, and everything else is
+    #: recomputed from the equations — per-statement precomputed values never
+    #: leak into the solve. The default (False) preserves the long-standing
+    #: contract where any nonzero value wins. Enable for models built from
+    #: scratch (accounting identities hold; actuals are honored); leave off
+    #: for real reported filings if you rely on zero-filled aggregates.
     recompute_calculated: bool = False
 
     def __post_init__(self):
@@ -122,7 +121,9 @@ class FinancialStatements:
             self._validate_dates()
             solver = HistoricalSolver(
                 self._effective_statement_configs(),
-                self._item_values(),
+                self._item_seed_values()
+                if self.recompute_calculated
+                else self._item_values(),
                 recompute_calculated=self.recompute_calculated,
             )
             stmts = self._statement_series_from_results(solver.solve())
@@ -146,6 +147,34 @@ class FinancialStatements:
     def _item_values(self) -> Dict[str, pd.Series]:
         """One series of values by date per item key, as solver input."""
         return {config.key: getattr(self, config.key) for config in self.all_config_items}
+
+    def _item_seed_values(self) -> Dict[str, pd.Series]:
+        """Solver input where calculated items contribute only their
+        explicitly-provided (seed) values, never per-statement precomputed
+        results. Raw items keep their normal values (missing raw data is
+        zero-filled, matching :meth:`StatementItem.value`). Used with
+        ``recompute_calculated`` so genuine actuals win while stale
+        precomputed values are recomputed from their equations."""
+        out: Dict[str, pd.Series] = {}
+        calculated_keys = {
+            config.key for config in self.all_config_items if config.expr_str is not None
+        }
+        for config in self.all_config_items:
+            if config.key not in calculated_keys:
+                out[config.key] = getattr(self, config.key)
+                continue
+            for statement_series in self.statements.values():
+                first_period = next(iter(statement_series.statements.values()))
+                if config.key not in first_period.statement_items:
+                    continue
+                dates = list(statement_series.statements.keys())
+                seeds = [
+                    statement_series.statements[date].statement_items[config.key].seed_value
+                    for date in dates
+                ]
+                out[config.key] = pd.Series(seeds, index=dates, dtype=float)
+                break
+        return out
 
     def _statement_series_from_results(
         self, results: Dict[str, pd.Series]
