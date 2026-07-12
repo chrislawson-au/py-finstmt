@@ -37,10 +37,20 @@ class CAGRModel(ForecastModel):
                 f"as {specific_message}. Setting to 0 growth (recent value forecast)"
             )
             warnings.warn(message)
+        elif len(series) < 2:
+            # A single observation has no growth periods to measure
+            self.cagr = 0
+            self.stderr = 0
+            warnings.warn(
+                f"CAGR not an appropriate method for {self.item_config.display_name} "
+                f"as there is only one period of history. "
+                f"Setting to 0 growth (recent value forecast)"
+            )
         else:
-            n = len(series)
-            self.cagr = (y_T / y_0) ** (1 / n) - 1
-            self.stderr = series.pct_change().std() / (n**0.5)
+            # T observations span T - 1 growth periods
+            n_periods = len(series) - 1
+            self.cagr = (y_T / y_0) ** (1 / n_periods) - 1
+            self.stderr = series.pct_change().std() / (n_periods**0.5)
         super().fit(series)
 
     def predict(self) -> pd.Series:

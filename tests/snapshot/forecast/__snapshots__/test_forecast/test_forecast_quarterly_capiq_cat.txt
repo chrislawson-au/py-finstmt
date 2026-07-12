@@ -178,8 +178,8 @@ Name: Revenue, dtype: float64,
                     'sale'
                 ]
             ),
-            _result=2019-12-31    12665.637974
-2020-03-31    12573.944606
+            _result=2019-12-31    12662.570782
+2020-03-31    12567.855370
 Freq: QE-DEC, Name: mean, dtype: float64
         ),
         'cogs': finstmt.forecast.forecast_item_series.ForecastItemSeries(
@@ -346,8 +346,8 @@ Name: SG&A Expense, dtype: float64,
                     'selling general admin exp'
                 ]
             ),
-            _result=2019-12-31    1059.511136
-2020-03-31    1055.041209
+            _result=2019-12-31    1059.361833
+2020-03-31    1054.743886
 Freq: QE-DEC, Name: mean, dtype: float64
         ),
         'int_exp': finstmt.forecast.forecast_item_series.ForecastItemSeries(
@@ -917,8 +917,8 @@ Name: Operating Expense, dtype: float64,
                 ],
                 expr_str='rd_exp[t] + dep_exp[t] + sga[t] + other_op_exp[t]'
             ),
-            _result=2019-12-31    1517.972131
-2020-03-31    1508.010073
+            _result=2019-12-31    1517.639005
+2020-03-31    1507.348265
 Freq: QE-DEC, Name: mean, dtype: float64
         ),
         'cash': finstmt.forecast.forecast_item_series.ForecastItemSeries(
@@ -976,8 +976,8 @@ Name: Cash and Cash Equivalents, dtype: float64,
                     plug=True
                 )
             ),
-            _result=2019-12-31    27679.997188
-2020-03-31    28136.392534
+            _result=2019-12-31    27683.683324
+2020-03-31    28143.681609
 Name: mean, dtype: float64
         ),
         'receivables': finstmt.forecast.forecast_item_series.ForecastItemSeries(
@@ -2250,8 +2250,8 @@ Name: Long-Term Debt, dtype: float64,
                     plug=True
                 )
             ),
-            _result=2019-12-31    9158.329770
-2020-03-31    9182.724346
+            _result=2019-12-31    9159.141878
+2020-03-31    9184.352960
 Freq: QE-DEC, Name: mean, dtype: float64
         ),
         'tax_liab_lt': finstmt.forecast.forecast_item_series.ForecastItemSeries(

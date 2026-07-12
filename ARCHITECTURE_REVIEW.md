@@ -238,3 +238,11 @@ against an unchanged snapshot suite:
 Remaining open items: the non-dead-code parts of §5 (frozen configs, `__getattr__`
 mixin, model-interface template method, god-method split in `resolve_balance_sheet`,
 `to_series` presentation split, `pd.Series` cap/floor equality hazard).
+
+**2026-07-11 (externally reported)** — CAGR off-by-one, inherited from upstream:
+`CAGRModel.fit` used `n = len(series)` as the exponent denominator instead of the
+number of growth periods `len(series) - 1`, systematically understating growth
+(e.g. `[100, 110, 121]` → 6.56% instead of 10%; the model's own back-fit did not
+reproduce its input data). Since `"cagr"` is the default forecast method this
+affected most items in every forecast. Fixed with a single-period guard (one
+observation → 0 growth, warning) and all forecast snapshots regenerated.

@@ -8,34 +8,34 @@ finstmt.forecast.forecasted_statements.ForecastedStatements(
                     12,
                     31
                 ): {
-  "revenue": 12911873.0,
-  "cogs": 9037500.0,
-  "sga": 1259904.0,
-  "int_exp": 117699.0,
+  "revenue": 12915842.0,
+  "cogs": 9040278.0,
+  "sga": 1260133.0,
+  "int_exp": 117712.0,
   "tax_exp": 368775.0,
   "rd_exp": 556710.0,
-  "other_op_exp": 171535.0,
-  "op_exp": 1988150.0,
-  "ebit": 1886223.0,
-  "ebt": 1768525.0,
-  "net_income": 1399750.0
+  "other_op_exp": 171516.0,
+  "op_exp": 1988359.0,
+  "ebit": 1887205.0,
+  "ebt": 1769493.0,
+  "net_income": 1400718.0
 },
                 datetime.datetime(
                     2020,
                     3,
                     31
                 ): {
-  "revenue": 13067601.0,
-  "cogs": 9129684.0,
-  "sga": 1268871.0,
-  "int_exp": 118235.0,
+  "revenue": 13075638.0,
+  "cogs": 9135299.0,
+  "sga": 1269333.0,
+  "int_exp": 118263.0,
   "tax_exp": 368775.0,
   "rd_exp": 476761.0,
-  "other_op_exp": 250700.0,
-  "op_exp": 1996333.0,
-  "ebit": 1941584.0,
-  "ebt": 1823349.0,
-  "net_income": 1454574.0
+  "other_op_exp": 250659.0,
+  "op_exp": 1996754.0,
+  "ebit": 1943585.0,
+  "ebt": 1825322.0,
+  "net_income": 1456547.0
 }
             },
             statement_name='Income Statement'
@@ -47,54 +47,54 @@ finstmt.forecast.forecasted_statements.ForecastedStatements(
                     12,
                     31
                 ): {
-  "st_invest": 13052698.0,
-  "cash_and_st_invest": 13052698.0,
-  "receivables": 32121906.0,
-  "inventory": 11817498.0,
-  "total_current_assets": 56992102.0,
-  "net_ppe": 12853613.0,
+  "st_invest": 13045409.0,
+  "cash_and_st_invest": 13045409.0,
+  "receivables": 32131782.0,
+  "inventory": 11821131.0,
+  "total_current_assets": 56998322.0,
+  "net_ppe": 12853910.0,
   "goodwill": 8462500.0,
-  "total_non_current_assets": 21316113.0,
-  "total_assets": 78308214.0,
-  "payables": 6762939.0,
-  "st_debt": 12389397.0,
-  "total_current_liab": 19152336.0,
-  "lt_debt": 25689311.0,
-  "total_debt": 38078708.0,
+  "total_non_current_assets": 21316410.0,
+  "total_assets": 78314733.0,
+  "payables": 6765018.0,
+  "st_debt": 12391233.0,
+  "total_current_liab": 19156252.0,
+  "lt_debt": 25691914.0,
+  "total_debt": 38083147.0,
   "deposit_liab": 1839275.0,
-  "total_non_current_liab": 27528586.0,
-  "total_liab": 46680922.0,
+  "total_non_current_liab": 27531189.0,
+  "total_liab": 46687440.0,
   "other_income": -1783000.0,
   "retained_earnings": 33410292.0,
   "total_equity": 31627292.0,
-  "total_liab_and_equity": 78308214.0
+  "total_liab_and_equity": 78314733.0
 },
                 datetime.datetime(
                     2020,
                     3,
                     31
                 ): {
-  "st_invest": 13019544.0,
-  "cash_and_st_invest": 13019544.0,
-  "receivables": 32509324.0,
-  "inventory": 11966312.0,
-  "total_current_assets": 57495181.0,
-  "net_ppe": 12865236.0,
+  "st_invest": 13004744.0,
+  "cash_and_st_invest": 13004744.0,
+  "receivables": 32529318.0,
+  "inventory": 11973671.0,
+  "total_current_assets": 57507733.0,
+  "net_ppe": 12865832.0,
   "goodwill": 8462500.0,
-  "total_non_current_assets": 21327736.0,
-  "total_assets": 78822916.0,
-  "payables": 6872128.0,
-  "st_debt": 12461221.0,
-  "total_current_liab": 19333348.0,
-  "lt_debt": 25791023.0,
-  "total_debt": 38252244.0,
+  "total_non_current_assets": 21328332.0,
+  "total_assets": 78836064.0,
+  "payables": 6876354.0,
+  "st_debt": 12464916.0,
+  "total_current_liab": 19341270.0,
+  "lt_debt": 25796250.0,
+  "total_debt": 38261166.0,
   "deposit_liab": 1839275.0,
-  "total_non_current_liab": 27630298.0,
-  "total_liab": 46963646.0,
+  "total_non_current_liab": 27635525.0,
+  "total_liab": 46976795.0,
   "other_income": -1783000.0,
   "retained_earnings": 33642270.0,
   "total_equity": 31859270.0,
-  "total_liab_and_equity": 78822916.0
+  "total_liab_and_equity": 78836064.0
 }
             },
             statement_name='Balance Sheet'
@@ -162,8 +162,8 @@ Name: Revenue, dtype: float64,
                     'sale'
                 ]
             ),
-            _result=2019-12-31    1.291187e+10
-2020-03-31    1.306760e+10
+            _result=2019-12-31    1.291584e+10
+2020-03-31    1.307564e+10
 Freq: QE-DEC, Name: mean, dtype: float64
         ),
         'cogs': finstmt.forecast.forecast_item_series.ForecastItemSeries(
@@ -357,8 +357,8 @@ Name: SG&A Expense, dtype: float64,
                     'selling general admin exp'
                 ]
             ),
-            _result=2019-12-31    1.259904e+09
-2020-03-31    1.268871e+09
+            _result=2019-12-31    1.260133e+09
+2020-03-31    1.269333e+09
 Freq: QE-DEC, Name: mean, dtype: float64
         ),
         'int_exp': finstmt.forecast.forecast_item_series.ForecastItemSeries(
@@ -673,8 +673,8 @@ Name: Operating Expense, dtype: float64,
                 ],
                 expr_str='rd_exp[t] + dep_exp[t] + sga[t] + other_op_exp[t]'
             ),
-            _result=2019-12-31    1.988150e+09
-2020-03-31    1.996333e+09
+            _result=2019-12-31    1.988359e+09
+2020-03-31    1.996754e+09
 Freq: QE-DEC, Name: mean, dtype: float64
         ),
         'cash': finstmt.forecast.forecast_item_series.ForecastItemSeries(
@@ -819,15 +819,15 @@ Name: Cash and Short-Term Investments, dtype: float64,
                 forecast=finstmt.config.item.ForecastItemConfig(
                     method='manual',
                     manual_forecasts={
-                        'levels': [13052698, 13019544],
+                        'levels': [13045409, 13004744],
                         'growth': []
                     },
                     plug=True
                 ),
                 expr_str='cash[t] + st_invest[t]'
             ),
-            _result=2019-12-31    1.305270e+10
-2020-03-31    1.301954e+10
+            _result=2019-12-31    1.304541e+10
+2020-03-31    1.300474e+10
 Freq: QE-DEC, Name: mean, dtype: float64
         ),
         'receivables': finstmt.forecast.forecast_item_series.ForecastItemSeries(
@@ -1125,8 +1125,8 @@ Name: Net Property, Plant & Equipment, dtype: float64,
                 ],
                 expr_str='gross_ppe[t] - dep[t]'
             ),
-            _result=2019-12-31    1.285361e+10
-2020-03-31    1.286524e+10
+            _result=2019-12-31    1.285391e+10
+2020-03-31    1.286583e+10
 Freq: QE-DEC, Name: mean, dtype: float64
         ),
         'goodwill': finstmt.forecast.forecast_item_series.ForecastItemSeries(
@@ -1509,8 +1509,8 @@ Name: Total Debt, dtype: float64,
                 ),
                 expr_str='st_debt[t] + lt_debt[t]'
             ),
-            _result_pct=2019-12-31    0.325363
-2020-03-31    0.325764
+            _result_pct=2019-12-31    0.325373
+2020-03-31    0.325785
 Freq: QE-DEC, Name: mean, dtype: float64
         ),
         'lt_debt': finstmt.forecast.forecast_item_series.ForecastItemSeries(
@@ -1585,14 +1585,14 @@ Name: Long-Term Debt, dtype: float64,
                 forecast=finstmt.config.item.ForecastItemConfig(
                     method='manual',
                     manual_forecasts={
-                        'levels': [25689311, 25791023],
+                        'levels': [25691914, 25796250],
                         'growth': []
                     },
                     plug=True
                 )
             ),
-            _result=2019-12-31    2.568931e+10
-2020-03-31    2.579102e+10
+            _result=2019-12-31    2.569191e+10
+2020-03-31    2.579625e+10
 Freq: QE-DEC, Name: mean, dtype: float64
         ),
         'deposit_liab': finstmt.forecast.forecast_item_series.ForecastItemSeries(

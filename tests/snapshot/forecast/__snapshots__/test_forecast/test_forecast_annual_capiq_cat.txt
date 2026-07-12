@@ -16,14 +16,14 @@ finstmt.forecast.forecasted_statements.ForecastedStatements(
   "op_exp": 6.0,
   "ebit": 12.0,
   "ebt": 12.0,
-  "net_income": 10.0
+  "net_income": 11.0
 },
                 datetime.datetime(
                     2020,
                     12,
                     31
                 ): {
-  "revenue": 55.0,
+  "revenue": 54.0,
   "cogs": 35.0,
   "sga": 4.0,
   "tax_exp": 1.0,
@@ -31,7 +31,7 @@ finstmt.forecast.forecasted_statements.ForecastedStatements(
   "op_exp": 6.0,
   "ebit": 13.0,
   "ebt": 13.0,
-  "net_income": 11.0
+  "net_income": 12.0
 }
             },
             statement_name='Income Statement'
@@ -61,7 +61,7 @@ finstmt.forecast.forecasted_statements.ForecastedStatements(
   "lt_debt": 7.0,
   "total_debt": 7.0,
   "other_lt_liab": 3.0,
-  "total_non_current_liab": 11.0,
+  "total_non_current_liab": 10.0,
   "total_liab": 22.0,
   "common_stock": 6.0,
   "retained_earnings": 26.0,
@@ -118,7 +118,7 @@ finstmt.forecast.forecasted_statements.ForecastedStatements(
                 ): {
   "capex": 16.0,
   "non_cash_expenses": 16.0,
-  "fcf": 11.0
+  "fcf": 12.0
 }
             },
             statement_name='Metrics'
@@ -151,8 +151,8 @@ Name: Revenue, dtype: float64,
                     'sale'
                 ]
             ),
-            _result=2019-12-31    54630.065183
-2020-12-31    54538.284820
+            _result=2019-12-31    54607.105623
+2020-12-31    54492.452478
 Freq: YE-DEC, Name: mean, dtype: float64
         ),
         'cogs': finstmt.forecast.forecast_item_series.ForecastItemSeries(
@@ -241,8 +241,8 @@ Name: SG&A Expense, dtype: float64,
                     'selling general admin exp'
                 ]
             ),
-            _result=2019-12-31    4613.797118
-2020-12-31    4429.280868
+            _result=2019-12-31    4566.959657
+2020-12-31    4339.808678
 Freq: YE-DEC, Name: mean, dtype: float64
         ),
         'int_exp': finstmt.forecast.forecast_item_series.ForecastItemSeries(
@@ -543,8 +543,8 @@ Name: Operating Expense, dtype: float64,
                 ],
                 expr_str='rd_exp[t] + dep_exp[t] + sga[t] + other_op_exp[t]'
             ),
-            _result=2019-12-31    6468.067770
-2020-12-31    6202.505659
+            _result=2019-12-31    6400.629864
+2020-12-31    6073.841757
 Freq: YE-DEC, Name: mean, dtype: float64
         ),
         'cash': finstmt.forecast.forecast_item_series.ForecastItemSeries(
@@ -576,8 +576,8 @@ Name: Cash and Cash Equivalents, dtype: float64,
                     plug=True
                 )
             ),
-            _result=2019-12-31    11843.051478
-2020-12-31    12146.004763
+            _result=2019-12-31    11768.497740
+2020-12-31    12004.285888
 Name: mean, dtype: float64
         ),
         'receivables': finstmt.forecast.forecast_item_series.ForecastItemSeries(
@@ -1330,8 +1330,8 @@ Name: Long-Term Debt, dtype: float64,
                     plug=True
                 )
             ),
-            _result=2019-12-31    7223.835516
-2020-12-31    6912.677118
+            _result=2019-12-31    7144.756867
+2020-12-31    6762.160642
 Freq: YE-DEC, Name: mean, dtype: float64
         ),
         'tax_liab_lt': finstmt.forecast.forecast_item_series.ForecastItemSeries(
