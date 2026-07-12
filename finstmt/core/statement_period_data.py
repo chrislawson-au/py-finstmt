@@ -110,6 +110,10 @@ class StatementPeriodData:
 
         for i, name in enumerate(for_lookup.index):
             orig_name = series.index[i]
+            # Positional access: the index can contain duplicate names (two
+            # items sharing a display name), where label access returns a
+            # Series instead of a scalar
+            cell_value = for_lookup.iloc[i]
             for item_config in configs:
                 if item_config.extract_names is None:
                     # Not an extractable item, must be a calculated item
@@ -119,7 +123,7 @@ class StatementPeriodData:
                     if item_config.key in data_dict:
                         # Multiple matches for data item.
                         # First see if data is the same, then just skip
-                        if for_lookup[name] == data_dict[item_config.key]:
+                        if cell_value == data_dict[item_config.key]:
                             continue
                         # Data is not the same, so take the one which is
                         # earliest in extract_names
@@ -144,7 +148,7 @@ class StatementPeriodData:
                                 f'keeping value from "{original_name_dict[item_config.key]}"'
                             )
                             continue
-                    data_dict[item_config.key] = for_lookup[name]
+                    data_dict[item_config.key] = cell_value
                     extracted_name_dict[item_config.key] = name
                     original_name_dict[item_config.key] = orig_name
             if name not in extracted_name_dict.values():
