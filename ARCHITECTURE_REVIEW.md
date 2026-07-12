@@ -239,6 +239,23 @@ Remaining open items: the non-dead-code parts of §5 (frozen configs, `__getattr
 mixin, model-interface template method, god-method split in `resolve_balance_sheet`,
 `to_series` presentation split, `pd.Series` cap/floor equality hazard).
 
+**2026-07-12 (second cross-session batch)** — The parallel session resolved the
+previously-rejected solver change as an opt-in `recompute_calculated` flag
+(default False preserves the extracted-values-win contract; verified
+zero-regression in isolation) — this supersedes the rejection below. It also
+brought two genuine bug fixes, both independently reproduced here: `to_manual`
+crashes under pandas copy-on-write ("assignment destination is read-only"),
+and `from_series` crashes on duplicate display names ("truth value of a Series
+is ambiguous"). The copy-on-write fix as delivered was incomplete — the old
+writable-view write-through was accidentally load-bearing (it mutated
+`_result` in place with the balanced plug values), and copying alone broke all
+8 balance-plug snapshots. Completed by explicitly assigning the manual model's
+prediction to `_result` in `to_manual` and naming the manual result series
+"mean" like the other models; 5 snapshots regenerated for a one-line index
+`Freq:` repr difference (values verified unchanged). Flag plumbing completed
+through `from_yaml_config` and `forecast()`; regression tests added for the
+duplicate-name fix and the `to_manual` post-condition.
+
 **2026-07-12 (cross-session verification)** — Reviewed two uncommitted changes from
 a parallel session:
 
