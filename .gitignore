@@ -68,6 +68,8 @@ _examples
 **/.ipynb_checkpoints
 venvs/
 node_modules
+# poetry in-project virtualenvs (root and .venvs/*)
+.venv/
 scripts/bin/
 !.venvs/docs/
 Scratch/
