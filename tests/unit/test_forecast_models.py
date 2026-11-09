@@ -5,6 +5,7 @@ from finstmt.config.forecast import ForecastConfig
 from finstmt.config.item import ItemConfig
 from finstmt.forecast.models.cagr import CAGRModel
 from finstmt.forecast.models.prophet import ProphetModel
+from tests.markers import requires_prophet
 
 
 def _cagr_model() -> CAGRModel:
@@ -82,6 +83,7 @@ def test_to_manual_replacements_are_reflected_in_result():
     assert fis.result.name == "mean"
 
 
+@requires_prophet
 def test_item_level_prophet_kwargs_override_global():
     config = ForecastConfig(prophet_kwargs={"n_changepoints": 10})
     item_config = ItemConfig(

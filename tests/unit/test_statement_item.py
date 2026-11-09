@@ -66,7 +66,7 @@ def test_default_value_for_non_calculated_field():
 
     stmt_timeseries = StatementSeries.from_dict(dict, "Test Statment", config)
     finstmts = FinancialStatements([stmt_timeseries])
-    assert finstmts.investments[0] == 0
+    assert finstmts.investments.iloc[0] == 0
 
 
 def test_calculated_field():
@@ -90,7 +90,7 @@ def test_calculated_field():
 
     stmt_timeseries = StatementSeries.from_dict(dict, "Test Statment", config)
     finstmts = FinancialStatements([stmt_timeseries])
-    assert finstmts.equity[0] == 1000
+    assert finstmts.equity.iloc[0] == 1000
 
 
 def test_nested_calculated_fields():
@@ -119,7 +119,7 @@ def test_nested_calculated_fields():
 
     stmt_timeseries = StatementSeries.from_dict(dict, "Test Statment", config)
     finstmts = FinancialStatements([stmt_timeseries])
-    assert finstmts.equity[0] == 1000
+    assert finstmts.equity.iloc[0] == 1000
 
 
 # Equity is defined BEFORE Assets in config file where assets and equity are a calculated field
@@ -149,7 +149,7 @@ def test_nested_calculated_fields_out_of_order():
 
     stmt_timeseries = StatementSeries.from_dict(dict, "Test Statment", config)
     finstmts = FinancialStatements([stmt_timeseries])
-    assert finstmts.equity[0] == 1000
+    assert finstmts.equity.iloc[0] == 1000
 
 
 def test_time_shift_calculated_field():
@@ -176,6 +176,6 @@ def test_time_shift_calculated_field():
 
     stmt_timeseries = StatementSeries.from_dict(dict, "Test Statment", config)
     finstmts = FinancialStatements([stmt_timeseries])
-    print(type(finstmts.cashDelta[0]))
-    assert np.isnan(finstmts.cashDelta[0])
-    assert finstmts.cashDelta[1] == 100
+    print(type(finstmts.cashDelta.iloc[0]))
+    assert np.isnan(finstmts.cashDelta.iloc[0])
+    assert finstmts.cashDelta.iloc[1] == 100

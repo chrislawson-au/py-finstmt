@@ -23,6 +23,7 @@ from tests.fixtures.forecast.adjust_config import (
     AdjustDict,
     adjust_forecast_methods,
 )
+from tests.markers import requires_prophet
 from tests.snapshot.forecast.snapshot_format import format_statement_for_snapshot
 
 matplotlib.use("Agg")
@@ -33,6 +34,7 @@ pdf_path = GENERATED_PATH / "test_forecast_pdfs"
 pdf_path.mkdir(parents=True, exist_ok=True)
 
 
+@requires_prophet
 def test_forecast_annual_stockrow_cat(
     annual_stockrow_stmts_cat: FinancialStatements, snapshot, request
 ):
@@ -47,6 +49,7 @@ def test_forecast_annual_stockrow_cat(
     )
 
 
+@requires_prophet
 def test_forecast_annual_stockrow_cat_no_balance(
     annual_stockrow_stmts_cat: FinancialStatements, snapshot, request
 ):
@@ -62,6 +65,7 @@ def test_forecast_annual_stockrow_cat_no_balance(
     )
 
 
+@requires_prophet
 def test_forecast_annual_stockrow_cat_change_bs_diff(
     annual_stockrow_stmts_cat: FinancialStatements, snapshot, request
 ):
@@ -77,6 +81,7 @@ def test_forecast_annual_stockrow_cat_change_bs_diff(
     )
 
 
+@requires_prophet
 def test_forecast_annual_stockrow_cat_make_forecast_and_plug(
     annual_stockrow_stmts_cat: FinancialStatements, snapshot, request
 ):
@@ -111,6 +116,7 @@ def test_forecast_annual_stockrow_cat_make_forecast_and_plug(
     )
 
 
+@requires_prophet
 def test_forecast_quarterly_stockrow_cat(
     quarterly_stockrow_stmts_cat: FinancialStatements, snapshot, request
 ):

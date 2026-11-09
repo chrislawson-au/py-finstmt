@@ -18,4 +18,4 @@ def test_load_from_dict():
 
     stmt = StatementSeries.from_dict(dict, "Test Statment", config)
 
-    assert stmt.cash[0] == 1000
+    assert stmt.cash.iloc[0] == 1000

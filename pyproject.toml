@@ -55,6 +55,8 @@ pytest = "*"
 pytest-cov = "*"
 syrupy = ">=4.9"
 prettyprinter = "*"
+# Reads back the .xlsx files that finstmt writes with xlsxwriter
+openpyxl = "*"
 
 [tool.poetry.group.dev.dependencies]
 jupyterlab = "*"
