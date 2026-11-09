@@ -430,7 +430,7 @@ Name: mean, dtype: float64
 2015-12-31    0.0
 2016-12-31    0.0
 2017-12-31    0.0
-2018-12-31   -0.0
+2018-12-31    0.0
 Name: Gain on Sale of Investments, dtype: float64,
             config=finstmt.config.forecast.ForecastConfig(
                 periods=2,

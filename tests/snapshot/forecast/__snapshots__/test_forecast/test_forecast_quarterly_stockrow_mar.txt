@@ -157,8 +157,8 @@ Name: Long-Term Debt, dtype: float64,
                     plug=True
                 )
             ),
-            _result=2019-12-31   -0.0
-2020-03-31   -0.0
+            _result=2019-12-31    0.0
+2020-03-31    0.0
 Freq: QE-DEC, Name: mean, dtype: float64
         )
     }

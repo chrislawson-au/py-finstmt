@@ -446,8 +446,8 @@ Name: Cash and Cash Equivalents, dtype: float64,
                     plug=True
                 )
             ),
-            _result=2019-12-31   -0.0
-2020-12-31   -0.0
+            _result=2019-12-31    0.0
+2020-12-31    0.0
 Freq: YE-DEC, Name: mean, dtype: float64
         ),
         'cash_and_st_invest': finstmt.forecast.forecast_item_series.ForecastItemSeries(
