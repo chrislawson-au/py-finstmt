@@ -2,33 +2,40 @@
 
 ## Install
 
-Install via:
+finstmt 2.0 is in alpha and installs from GitHub (Python 3.12 or newer):
 
 ```
-pip install finstmt
+pip install "finstmt @ git+https://github.com/chrislawson-au/py-finstmt@v2.0.0-alpha.1"
 ```
+
+Use `finstmt[forecast] @ git+...` to add Prophet for the `auto` forecast method.
 
 ## Usage
 
-This is a simple example to construct financial statements:
+Load an income statement and a balance sheet with the bundled configs. The
+DataFrame needs item names as its index and one column per period:
 
 ```
-bs_path = r'WMT Balance Sheet.xlsx'
-inc_path = r'WMT Income Statement.xlsx'
-bs_df = pd.read_excel(bs_path)
-inc_df = pd.read_excel(inc_path)
-bs_data = BalanceSheets.from_df(bs_df)
-inc_data = IncomeStatements.from_df(inc_df)
-stmts = FinancialStatements(inc_data, bs_data)
+import pandas as pd
+
+from finstmt import FinancialStatements
+from finstmt.config.statement import STATEMENT_CONFIGS
+
+inc_df = pd.read_excel("WMT Income Statement.xlsx", index_col=0)
+bs_df = pd.read_excel("WMT Balance Sheet.xlsx", index_col=0)
+stmts = FinancialStatements.from_df(pd.concat([inc_df, bs_df]), STATEMENT_CONFIGS)
 ```
 
 ## Forecasting
 
-See the example notebook for an example of forecasting. The available forecast
-methods are:
+`stmts.forecast(periods=5)` returns `ForecastedStatements`. Choose a method per
+item with `stmts.config.update(key, ["forecast", "method"], method)`:
 
-- `auto`: Uses `prophet`
-- `trend`: Fits a linear trend regression
-- `cagr`: Calculates the compounded annual growth rate (CAGR) and grows each future period at that rate
-- `mean`: Uses an average of the historical to predict the future
-- `recent`: Uses the most recent value to predict the future
+- `auto`: Prophet (needs the `forecast` extra)
+- `trend`: a linear trend regression
+- `cagr`: the compound annual growth rate (the default)
+- `mean`: the historical average
+- `recent`: the most recent value
+- `manual`: levels or growth rates you supply
+
+See the example notebooks, and MIGRATION.md in the repository for 1.x users.

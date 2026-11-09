@@ -22,14 +22,18 @@ auto_examples/index
 
 ### Quick Links
 
-Find the source code [on Github](https://github.com/nickderobertis/py-finstmt).
+Find the source code [on Github](https://github.com/chrislawson-au/py-finstmt).
 
 ```{eval-rst}
 .. autosummarynameonly::
 
-      finstmt.findata.statements.FinancialStatements
-      finstmt.inc.main.IncomeStatements
-      finstmt.bs.main.BalanceSheets
+      finstmt.core.statements.FinancialStatements
+      finstmt.core.statement_series.StatementSeries
+      finstmt.config.statement.StatementConfig
+      finstmt.config.item.ItemConfig
+      finstmt.config.item.ForecastItemConfig
+      finstmt.forecast.forecasted_statements.ForecastedStatements
+      finstmt.deals.deal.Deal
 
 ```
 
