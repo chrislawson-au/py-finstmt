@@ -13,11 +13,13 @@ on:
 
 jobs:
   deploy:
+    # Upstream-only: publishes the upstream gh-pages site; the fork has no hosted docs
+    if: github.repository == 'nickderobertis/py-finstmt'
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 1
       matrix:
-        python-version: [3.8]
+        python-version: ["3.12"]
 
     steps:
       - uses: actions/checkout@v3

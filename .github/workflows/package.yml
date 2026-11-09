@@ -25,6 +25,8 @@ jobs:
       - uses: ./.github/actions/lint-and-test
 
   collectTODO:
+    # Upstream-only: opens issues from TODO comments; issues are off on forks
+    if: github.repository == 'nickderobertis/py-finstmt'
     runs-on: ubuntu-latest
     steps:
       - uses: "actions/checkout@master"
@@ -33,6 +35,8 @@ jobs:
         id: "todo"
 
   deploy:
+    # Upstream-only: semantic-release publishes the upstream PyPI project
+    if: github.repository == 'nickderobertis/py-finstmt'
     needs: test
     runs-on: ubuntu-latest
     strategy:
@@ -52,12 +56,14 @@ jobs:
           github_token: ${{ secrets.GH_TOKEN }}
 
   coverage:
+    # Upstream-only: uploads to the upstream Codecov project
+    if: github.repository == 'nickderobertis/py-finstmt'
     needs: deploy
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 1
       matrix:
-        python-version: [3.8]
+        python-version: ["3.12"]
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/install-dependencies
