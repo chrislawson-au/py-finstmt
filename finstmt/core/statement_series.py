@@ -1,6 +1,6 @@
 import operator
 from dataclasses import dataclass, field
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Optional
 
 import pandas as pd
 from tqdm import tqdm
@@ -224,7 +224,7 @@ class StatementSeries:
         return forecast_dict
 
     @property
-    def freq(self) -> str:
+    def freq(self) -> Optional[str]:
         return infer_freq_or_default(self.dates)
 
     @property

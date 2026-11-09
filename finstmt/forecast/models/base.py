@@ -8,7 +8,11 @@ from pandas import DatetimeIndex
 
 from finstmt.config.forecast import ForecastConfig
 from finstmt.config.item import ItemConfig
-from finstmt.exceptions import ForecastNotFitException, ForecastNotPredictedException
+from finstmt.exceptions import (
+    ForecastNotFitException,
+    ForecastNotPredictedException,
+    MixedFrequencyException,
+)
 from finstmt.forecast.plot import plot_forecast
 from finstmt.freq import infer_freq_or_default
 
@@ -87,7 +91,7 @@ class ForecastModel:
         return pd.date_range(**kwargs)
 
     @property
-    def historical_freq(self) -> str:
+    def historical_freq(self) -> Optional[str]:
         if self.orig_series is None:
             raise ForecastNotFitException("call .fit before .historical_freq")
         return infer_freq_or_default(self.orig_series.index)
@@ -102,8 +106,17 @@ class ForecastModel:
         """
         if self.orig_series is None:
             raise ForecastNotFitException("call .fit before .desired_freq_t_multiplier")
+        historical_freq = self.historical_freq
+        if historical_freq is None:
+            # pd.date_range treats freq=None as daily, which would silently
+            # produce a meaningless multiplier
+            raise MixedFrequencyException(
+                f"Could not determine the frequency of the history of "
+                f"{self.item_config.display_name}. Likely there are mixed frequencies "
+                "in the data; remove the periods that do not match before forecasting."
+            )
         return compare_freq_strs(
-            self.config.freq, self.historical_freq, ref_date=self.orig_series.index[-1]
+            self.config.freq, historical_freq, ref_date=self.orig_series.index[-1]
         )
 
 

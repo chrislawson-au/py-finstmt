@@ -262,9 +262,10 @@ class ForecastSolver(SolverBase):
         nper = self.num_periods
         subs_dict = {}
         for config in self.all_config_items:
-            is_pct_item = config.forecast.pct_of is not None
-            if is_pct_item:
-                key = _key_pct_of_key(config.key, config.forecast.pct_of)
+            pct_of = config.forecast.pct_of
+            is_pct_item = pct_of is not None
+            if pct_of is not None:
+                key = _key_pct_of_key(config.key, pct_of)
             else:
                 key = config.key
 

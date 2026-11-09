@@ -2,10 +2,10 @@
 
 import math
 import warnings
-from typing import Mapping, Optional, Tuple
+from typing import Any, Mapping, Optional, Tuple
 
 import matplotlib.pyplot as plt
-from matplotlib.axes import Subplot
+from matplotlib.axes import Axes
 
 NUM_PLOT_COLUMNS = 3
 DEFAULT_WIDTH = 15
@@ -70,8 +70,10 @@ def plot_finished(row: int, col: int, max_rows: int, max_cols: int) -> bool:
 
 
 def get_selected_ax(
-    axes: plt.GridSpec, row: int, col: int, num_plot_rows: int, num_plot_columns: int
-) -> Subplot:
+    axes: Any, row: int, col: int, num_plot_rows: int, num_plot_columns: int
+) -> Axes:
+    """Pick one Axes from what ``plt.subplots`` returned: a single Axes, or a
+    1-D or 2-D array of them depending on the grid shape."""
     if num_plot_rows == num_plot_columns == 1:
         return axes
     elif num_plot_rows == 1:

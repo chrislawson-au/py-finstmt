@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -21,7 +21,7 @@ def plot_forecast(
         fig = plt.figure(facecolor="w", figsize=figsize)
         ax = fig.add_subplot(111)
     else:
-        fig = ax.get_figure()
+        fig = cast(plt.Figure, ax.get_figure())
     fcst_t = fcst_df.index.to_pydatetime()
     ax.plot(orig_dates, orig_data, "k.")
     ax.plot(fcst_t, fcst_df["mean"], ls="-", c="#0072B2")
@@ -35,7 +35,7 @@ def plot_forecast(
     min_point = min(fcst_df["mean"].min(), orig_data.min())
     y_lim_upper = max_point * (1 + PAD_PCT)
     y_lim_lower = min_point * (1 - PAD_PCT)
-    ax.set_ylim([y_lim_lower, y_lim_upper])
+    ax.set_ylim(y_lim_lower, y_lim_upper)
     ax.grid(True, which="major", c="gray", ls="-", lw=1, alpha=0.2)
     if xlabel is not None:
         ax.set_xlabel(xlabel)

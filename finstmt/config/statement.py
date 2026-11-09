@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from finstmt.config.item import ForecastItemConfig, ItemConfig
 from finstmt.config.loader import load_yaml_config
@@ -18,7 +18,7 @@ def get_default_config_path() -> str:
     return str(Path(__file__).parent / "statement_config.yaml")
 
 
-def load_statement_configs(config_path: str = None) -> List[StatementConfig]:
+def load_statement_configs(config_path: Optional[str] = None) -> List[StatementConfig]:
     """
     Load statement configurations, using default if no path specified
 

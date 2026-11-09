@@ -94,3 +94,42 @@ def test_item_level_prophet_kwargs_override_global():
     model = ProphetModel(config, item_config)
 
     assert model.model.n_changepoints == 5
+
+
+def test_mixed_historical_frequency_raises_a_clear_error():
+    from finstmt.exceptions import MixedFrequencyException
+
+    series = pd.Series(
+        [100.0, 110.0, 121.0, 130.0],
+        index=pd.DatetimeIndex(
+            ["2020-12-31", "2021-12-31", "2022-03-31", "2023-12-31"]
+        ),
+    )
+    model = _cagr_model()
+    model.fit(series)
+
+    with pytest.raises(MixedFrequencyException):
+        model.desired_freq_t_multiplier
+
+
+def test_to_manual_on_a_pct_of_item_says_it_is_unsupported():
+    from finstmt.config.item import ForecastItemConfig
+    from finstmt.forecast.forecast_item_series import ForecastItemSeries
+
+    index = pd.DatetimeIndex(["2021-12-31", "2022-12-31", "2023-12-31"])
+    fis = ForecastItemSeries(
+        orig_series=pd.Series([60.0, 66.0, 72.6], index=index),
+        config=ForecastConfig(periods=2, freq="Y"),
+        item_config=ItemConfig(
+            key="cogs",
+            display_name="COGS",
+            extract_names=["cogs"],
+            forecast=ForecastItemConfig(method="mean", pct_of="revenue"),
+        ),
+        pct_of_series=pd.Series([100.0, 110.0, 121.0], index=index),
+    )
+    fis.fit()
+    fis.predict()
+
+    with pytest.raises(NotImplementedError, match="pct-of"):
+        fis.to_manual(use_levels=True, replacements=[0.85, 0.85])

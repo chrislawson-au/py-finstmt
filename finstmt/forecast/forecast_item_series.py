@@ -68,17 +68,28 @@ class ForecastItemSeries:
                 "call .fit then .predict before .to_manual"
             )
 
+        if self.item_config.forecast.pct_of is not None:
+            raise NotImplementedError(
+                f"to_manual does not support pct-of items yet: {self.item_config.key} "
+                f"is forecast as a percent of {self.item_config.forecast.pct_of}. Set "
+                "its forecast method to 'manual' and its manual_forecasts levels to "
+                "the ratios instead."
+            )
+        result = self._result
+        if result is None:
+            raise ForecastNotPredictedException(
+                "call .fit then .predict before .to_manual"
+            )
+
         if use_levels:
             # .values can be a read-only view under pandas copy-on-write;
             # copy so the adjustment/replacement writes below are legal
-            values = self._result.to_numpy(copy=True)
+            values = result.to_numpy(copy=True)
         else:
             # Growth
-            values = self._result.pct_change().to_numpy(copy=True)
+            values = result.pct_change().to_numpy(copy=True)
             # Fill in first growth
-            values[0] = (
-                self._result.iloc[0] - self.series.iloc[-1]
-            ) / self.series.iloc[-1]
+            values[0] = (result.iloc[0] - self.series.iloc[-1]) / self.series.iloc[-1]
 
         self.item_config.forecast.method = "manual"
 

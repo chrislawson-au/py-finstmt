@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Optional, Tuple, cast
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -26,7 +26,7 @@ class StatementItemSeries:
             fig = plt.figure(facecolor="w", figsize=figsize)
             ax = fig.add_subplot(111)
         else:
-            fig = ax.get_figure()
+            fig = cast(plt.Figure, ax.get_figure())
 
         xlabel = "Time"
         ylabel = None
