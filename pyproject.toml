@@ -66,6 +66,8 @@ include = 'finstmt.*\.pyi?$|tests.*\.pyi?$'
 
 [tool.isort]
 profile = "black"
+# Skip generated, gitignored files such as the docs build output
+skip_gitignore = true
 skip = ['.bzr', '.direnv', '.eggs', '.git', '.hg', '.mypy_cache', '.pants.d', '.svn', '.tox', '.venv', '__pypackages__', '_build', 'buck-out', 'build', 'dist', 'node_modules', '.venvs']
 
 [build-system]
