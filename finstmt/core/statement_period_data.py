@@ -61,9 +61,7 @@ class StatementPeriodData:
         series = self.to_series()
         df = pd.DataFrame(series)
         # TODO: introduce verbosity check here
-        return df.applymap(
-            lambda x: f"${x:,.0f}" if not x == 0 else " - "
-        )._repr_html_()
+        return df.map(lambda x: f"${x:,.0f}" if not x == 0 else " - ")._repr_html_()
 
     def __repr__(self) -> str:
         statement_items: dict = cast(dict, self.statement_items)

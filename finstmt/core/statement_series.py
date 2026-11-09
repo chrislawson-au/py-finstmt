@@ -177,7 +177,7 @@ class StatementSeries:
         out_df = self.df.copy()
         out_df.fillna(0, inplace=True)
         out_df.columns = [col.strftime("%m/%d/%Y") for col in out_df.columns]
-        return out_df.applymap(lambda x: f"${x:,.0f}" if not x == 0 else " - ")
+        return out_df.map(lambda x: f"${x:,.0f}" if not x == 0 else " - ")
 
     def _forecast(self, statements, **kwargs) -> Dict[str, ForecastItemSeries]:
         if "freq" not in kwargs:

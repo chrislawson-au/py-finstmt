@@ -75,3 +75,19 @@ def test_two_period_statement_has_usable_freq():
 
     assert freq is not None
     pd.date_range("2023-12-31", periods=3, freq=freq)
+
+
+def test_forecast_config_maps_year_and_quarter_to_month_end_aliases():
+    from finstmt.config.forecast import ForecastConfig
+
+    assert ForecastConfig(freq="Y").freq == "12ME"
+    assert ForecastConfig(freq="q").freq == "3ME"
+    assert ForecastConfig(freq="YE-DEC").freq == "YE-DEC"
+
+
+def test_infer_freq_returns_a_string_without_warnings():
+    dates = list(pd.date_range("2020-12-31", periods=4, freq="12ME"))
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        freq = infer_freq_or_default(dates)
+    assert freq == "YE-DEC"

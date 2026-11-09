@@ -14,10 +14,12 @@ class ForecastConfig:
     bs_diff_max: float = 10000
 
     def __post_init__(self):
+        # pandas >= 2.2 spells month-end offsets "ME"; pandas 3 rejects the old
+        # lower-case "m" (month end) alias
         if self.freq.casefold() == "y":
-            self.freq = "12m"
+            self.freq = "12ME"
         elif self.freq.casefold() == "q":
-            self.freq = "3m"
+            self.freq = "3ME"
 
     @property
     def make_future_df_kwargs(self) -> Dict[str, Union[int, str]]:

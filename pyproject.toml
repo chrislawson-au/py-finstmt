@@ -71,3 +71,12 @@ skip = ['.bzr', '.direnv', '.eggs', '.git', '.hg', '.mypy_cache', '.pants.d', '.
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+# pandas attributes deprecations to the calling module, so this catches only
+# finstmt's own use of deprecated pandas behavior (Pandas4Warning subclasses
+# DeprecationWarning on pandas 3); warnings raised inside dependencies pass
+filterwarnings = [
+    "error::FutureWarning:finstmt",
+    "error::DeprecationWarning:finstmt",
+]

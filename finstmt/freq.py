@@ -7,6 +7,36 @@ import pandas as pd
 from pandas.tseries.frequencies import to_offset
 
 
+def _option_exists(name: str) -> bool:
+    try:
+        pd.get_option(name)
+    except pd.errors.OptionError:
+        return False
+    return True
+
+
+# pandas 3 warns that infer_freq will return an offset instead of a string
+_INFER_FREQ_OFFSET_OPTION = "future.infer_freq_returns_offset"
+_HAS_INFER_FREQ_OFFSET_OPTION = _option_exists(_INFER_FREQ_OFFSET_OPTION)
+
+
+def _infer_freq_str(dates: Sequence[pd.Timestamp]) -> Optional[str]:
+    """``pd.infer_freq`` as a string on pandas 2 and 3.
+
+    Opt in to pandas 3's offset return value where the option exists (which
+    silences its deprecation warning) and convert back to the string spelling
+    the rest of finstmt uses, e.g. ``"YE-DEC"``.
+    """
+    if _HAS_INFER_FREQ_OFFSET_OPTION:
+        with pd.option_context(_INFER_FREQ_OFFSET_OPTION, True):
+            freq = pd.infer_freq(dates)
+    else:
+        freq = pd.infer_freq(dates)
+    if freq is None or isinstance(freq, str):
+        return freq
+    return freq.freqstr
+
+
 def _first_valid_freq(*candidates: str) -> str:
     """Return the first alias this pandas version accepts without complaint.
 
@@ -46,7 +76,7 @@ def infer_freq_or_default(
 
     date_list: List[pd.Timestamp] = list(dates)
     if len(date_list) >= 3:
-        return pd.infer_freq(date_list)
+        return _infer_freq_str(date_list)
     if len(date_list) == 2:
         days = abs((date_list[1] - date_list[0]).days)
         if days >= 300:

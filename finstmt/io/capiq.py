@@ -1,5 +1,6 @@
 import datetime
 import re
+import warnings
 from typing import Optional, Union
 
 import numpy as np
@@ -15,7 +16,18 @@ def load_capiq_df(file_path: str, sheet_name: str) -> pd.DataFrame:
     Loads financial statements downloaded from Capital IQ into a DataFrame which can be passed into
     IncomeStatements or BalanceSheets
     """
-    df = pd.read_excel(file_path, index_col=0, sheet_name=sheet_name, skiprows=14)
+    with warnings.catch_warnings():
+        # pandas 3 deprecates its xlrd engine in favour of calamine, but calamine
+        # reads the numbers in Capital IQ .xls exports as dates (52142 becomes
+        # 2042-10-03). Keep xlrd, which reads them correctly, until pandas drops it.
+        warnings.filterwarnings(
+            "ignore",
+            message="The xlrd engine is deprecated",
+            category=DeprecationWarning,
+        )
+        df = pd.read_excel(
+            file_path, index_col=0, sheet_name=sheet_name, skiprows=14, engine="xlrd"
+        )
 
     # Rename columns, extracting date
     col_names = [_extract_date(col) for col in df.columns]
