@@ -5,7 +5,7 @@ version = "1.0.0"
 authors = ["Nick DeRobertis <whoopnip@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = ">=3.8.1,<4.0"
+python = ">=3.12,<4.0"
 finstmt = {path = "../..", develop = true}
 sphinx = "*"
 sphinx-autobuild = "*"
@@ -14,7 +14,8 @@ sphinxcontrib-fulltoc = "*"
 sphinx-paramlinks = "*"
 sphinx-gallery = "*"
 sphinx-copybutton = "*"
-pypandoc = "*"
+# Bundles the pandoc binary, so docs build without a system pandoc (no sudo)
+pypandoc-binary = "*"
 myst-parser = "*"
 sphinx-material = "*"
 matplotlib = "*"

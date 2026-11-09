@@ -2,11 +2,20 @@ import dataclasses
 import operator
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Sequence, Tuple
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Self,
+    Sequence,
+    Tuple,
+)
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from typing_extensions import Self
 
 from finstmt._logging import logger
 from finstmt._plot_helpers import (

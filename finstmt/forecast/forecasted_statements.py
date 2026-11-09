@@ -1,8 +1,7 @@
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, Optional, Self, Sequence, Tuple
 
 import matplotlib.pyplot as plt
-from typing_extensions import Self
 
 from finstmt._plot_helpers import (
     DEFAULT_HEIGHT_PER_ROW,

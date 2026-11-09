@@ -6,7 +6,9 @@ from typing import (
     Callable,
     Dict,
     List,
+    Literal,
     Optional,
+    Self,
     Sequence,
     TypeVar,
     Union,
@@ -14,7 +16,6 @@ from typing import (
 )
 
 import pandas as pd
-from typing_extensions import Literal, Self
 
 T = TypeVar("T")
 

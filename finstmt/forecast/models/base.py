@@ -3,7 +3,6 @@ from typing import Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from packaging import version
 from pandas import DatetimeIndex
 
 from finstmt.config.forecast import ForecastConfig
@@ -74,21 +73,12 @@ class ForecastModel:
         if not self.has_been_fit:
             raise ForecastNotFitException("call .fit before ._future_date_range")
 
-        kwargs = dict(
+        return pd.date_range(
             start=self.last_historical_period,
             periods=self.config.periods + 1,
             freq=self.config.freq,
+            inclusive="right",
         )
-
-        # Only inclusive parameter works in pandas >= 2.0.0
-        # Only closed parameter works in pandas < 1.4.0
-        # Both parameters work in 1.4.0 <= pandas < 2.0.0
-        if version.parse(pd.__version__) >= version.parse("2.0.0"):
-            kwargs["inclusive"] = "right"
-        else:
-            kwargs["closed"] = "right"
-
-        return pd.date_range(**kwargs)
 
     @property
     def historical_freq(self) -> Optional[str]:

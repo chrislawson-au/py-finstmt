@@ -1,11 +1,10 @@
 import dataclasses
 import operator
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Optional, Sequence, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, Optional, Self, Sequence, Tuple, TypeVar, Union
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from typing_extensions import Self
 
 from finstmt.config.forecast import ForecastConfig
 from finstmt.config.item import ItemConfig
