@@ -2,17 +2,32 @@
 name: Run PR lint/format checks and tests
 on: [pull_request]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # One BLAS thread: faster for finstmt's many small solves, and deterministic
+  OPENBLAS_NUM_THREADS: "1"
+
 jobs:
   test:
+    name: test (${{ matrix.os }}, py${{ matrix.python-version }}, pandas ${{ matrix.pandas-major }})
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest, ]
-        python-version: ["3.8", "3.9", "3.10", ]
+        os: [ubuntu-latest, ubuntu-24.04-arm]
+        python-version: ["3.12", "3.13", "3.14", "3.15"]
+        pandas-major: ["2", "3"]
+        exclude:
+          # pandas 2.x publishes no wheels for Python 3.15
+          - python-version: "3.15"
+            pandas-major: "2"
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
     - uses: ./.github/actions/install-dependencies
       with:
         python-version: ${{ matrix.python-version }}
-    # TODO: Check test coverage
+        pandas-major: ${{ matrix.pandas-major }}
     - uses: ./.github/actions/lint-and-test

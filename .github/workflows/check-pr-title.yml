@@ -7,14 +7,16 @@ jobs:
   check-pr-title:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v6
         with:
-          version: 7.26.1
+          # 7.26.1 fails on Node 20+ (ERR_INVALID_THIS); keep in step with .tool-versions
+          version: 7.33.7
           run_install: true
       - name: Check PR Title against Commitlint
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          echo "${{ github.event.pull_request.title }}" > pr-title.txt
+          printf '%s\n' "$PR_TITLE" > pr-title.txt
           MY_FILE=pr-title.txt npx commitlint --env MY_FILE
-
