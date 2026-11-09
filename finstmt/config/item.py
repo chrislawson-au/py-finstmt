@@ -118,9 +118,13 @@ def _apply_operation_to_forecast_item_config(
 ) -> ForecastItemConfig:
     updates: Dict[str, Any] = {}
     if item_config.cap is not None:
-        updates["cap"] = func(item_config.cap, _get_forecast_attr_if_needed(other, "cap"))
+        updates["cap"] = func(
+            item_config.cap, _get_forecast_attr_if_needed(other, "cap")
+        )
     if item_config.floor is not None:
-        updates["floor"] = func(item_config.floor, _get_forecast_attr_if_needed(other, "floor"))
+        updates["floor"] = func(
+            item_config.floor, _get_forecast_attr_if_needed(other, "floor")
+        )
     manual_forecast_keys = ["levels", "growth"]
     updates["manual_forecasts"] = {}
     for key in manual_forecast_keys:
@@ -174,9 +178,7 @@ class ItemConfig:
 
     extract_names: Optional[Sequence[str]] = None
     force_positive: bool = True
-    forecast: ForecastItemConfig = field(
-        default_factory=lambda: ForecastItemConfig()
-    )
+    forecast: ForecastItemConfig = field(default_factory=lambda: ForecastItemConfig())
     expr_str: Optional[str] = None
 
     display_verbosity: int = 1

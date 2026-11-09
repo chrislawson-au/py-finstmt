@@ -9,17 +9,16 @@ from scipy.optimize import OptimizeResult, minimize
 from sympy import Eq, Expr, IndexedBase, solve
 from sympy.core.numbers import NaN
 
+from finstmt._logging import logger
+from finstmt.config.item import ItemConfig
 from finstmt.exceptions import (
     BalanceSheetNotBalancedException,
     InvalidBalancePlugsException,
     InvalidForecastEquationException,
     MissingDataException,
 )
-from finstmt.config.item import ItemConfig
-from finstmt._logging import logger
 from finstmt.solver.base import SolverBase
 from finstmt.solver.dependencies import ItemDependencies
-from finstmt.solver.periods import FORECAST_INDEXING
 
 # TODO [#46]: clean up ForecastSolver
 #
@@ -34,9 +33,10 @@ from finstmt.solver.engine import (
     _solve_eqs_with_plug_solutions,
     _symbolic_to_matrix,
     _x_arr_to_plug_solutions,
-    expr_for as engine_expr_for,
-    sympy_dict_to_results_dict,
 )
+from finstmt.solver.engine import expr_for as engine_expr_for
+from finstmt.solver.engine import sympy_dict_to_results_dict
+from finstmt.solver.periods import FORECAST_INDEXING
 
 
 class ForecastSolver(SolverBase):
@@ -309,9 +309,7 @@ class ForecastSolver(SolverBase):
 
     @property
     def plug_configs(self) -> List[ItemConfig]:
-        return [
-            conf for conf in self.all_config_items if conf.forecast.plug
-        ]
+        return [conf for conf in self.all_config_items if conf.forecast.plug]
 
     @property
     def plug_keys(self) -> List[str]:
@@ -461,7 +459,13 @@ def resolve_balance_sheet(
 
     # Get better initial x0 by adding to appropriate plug
     _adjust_x0_to_initial_balance_guess(
-        x0, plug_keys, eq_arrs, forecast_dates, to_solve_for, item_configs, balance_groups
+        x0,
+        plug_keys,
+        eq_arrs,
+        forecast_dates,
+        to_solve_for,
+        item_configs,
+        balance_groups,
     )
 
     result = PlugResult(timeout=timeout)
@@ -638,10 +642,7 @@ def _adjust_x0_to_initial_balance_guess(
                 if plug_key is None:
                     normally_calculated_but_not_keys: List[str] = []
                     for item in item_configs:
-                        if (
-                            item.expr_str is not None
-                            and item.forecast.make_forecast
-                        ):
+                        if item.expr_str is not None and item.forecast.make_forecast:
                             normally_calculated_but_not_keys.append(item.key)
                     message = (
                         f"Trying to balance {adjust_side} but no plug affects it. One of the following "

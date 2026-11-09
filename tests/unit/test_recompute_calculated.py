@@ -26,11 +26,17 @@ def cross_statement_configs():
     The per-statement extraction pass precomputes c with b unresolved (b needs
     the cross-statement margin), so c arrives at the global solver stale.
     """
-    p_items = [ItemConfig(key="margin", display_name="Margin", extract_names=["margin"])]
+    p_items = [
+        ItemConfig(key="margin", display_name="Margin", extract_names=["margin"])
+    ]
     s_items = [
         ItemConfig(key="a", display_name="A", extract_names=["a"]),
-        ItemConfig(key="b", display_name="B", extract_names=["b"], expr_str="margin[t] * a[t]"),
-        ItemConfig(key="c", display_name="C", extract_names=["c"], expr_str="a[t] - b[t]"),
+        ItemConfig(
+            key="b", display_name="B", extract_names=["b"], expr_str="margin[t] * a[t]"
+        ),
+        ItemConfig(
+            key="c", display_name="C", extract_names=["c"], expr_str="a[t] - b[t]"
+        ),
     ]
     return [
         StatementConfig(key="p", display_name="P", items_config_list=p_items),
@@ -45,7 +51,9 @@ def cross_statement_df():
     ).T
 
 
-def test_recompute_solves_cross_statement_chain(cross_statement_configs, cross_statement_df):
+def test_recompute_solves_cross_statement_chain(
+    cross_statement_configs, cross_statement_df
+):
     stmts = FinancialStatements.from_df(
         cross_statement_df,
         cross_statement_configs,
@@ -70,7 +78,9 @@ def test_explicit_values_win_in_both_modes():
     items = [
         ItemConfig(key="a", display_name="A", extract_names=["a"]),
         ItemConfig(key="b", display_name="B", extract_names=["b"]),
-        ItemConfig(key="c", display_name="C", extract_names=["c"], expr_str="a[t] - b[t]"),
+        ItemConfig(
+            key="c", display_name="C", extract_names=["c"], expr_str="a[t] - b[t]"
+        ),
     ]
     configs = [StatementConfig(key="s", display_name="S", items_config_list=items)]
 
@@ -88,7 +98,9 @@ def test_recompute_preserves_recurrence_seed():
     df = pd.DataFrame(
         {"Growth": [0.1], "Revenue": [1000.0]}, index=pd.to_datetime(["2023-12-31"])
     ).T
-    p_items = [ItemConfig(key="growth", display_name="Growth", extract_names=["growth"])]
+    p_items = [
+        ItemConfig(key="growth", display_name="Growth", extract_names=["growth"])
+    ]
     s_items = [
         ItemConfig(
             key="revenue",
@@ -119,7 +131,9 @@ def test_recompute_keeps_actual_history_for_recurrences():
         },
         index=pd.to_datetime(["2021-12-31", "2022-12-31", "2023-12-31"]),
     ).T
-    items_p = [ItemConfig(key="growth", display_name="Growth", extract_names=["growth"])]
+    items_p = [
+        ItemConfig(key="growth", display_name="Growth", extract_names=["growth"])
+    ]
     items_s = [
         ItemConfig(
             key="revenue",
@@ -154,9 +168,7 @@ def test_unsolvable_boundary_periods_stay_nan():
     """An equation reaching outside the window (debt[t-1] at period 0) with
     no seed must yield NaN — not a value fabricated by silently dropping the
     unknown term from the linear system."""
-    df = pd.DataFrame(
-        {"Debt": [400.0]}, index=pd.to_datetime(["2023-12-31"])
-    ).T
+    df = pd.DataFrame({"Debt": [400.0]}, index=pd.to_datetime(["2023-12-31"])).T
     items = [
         ItemConfig(key="debt", display_name="Debt", extract_names=["debt"]),
         ItemConfig(

@@ -3,6 +3,7 @@
 A copy of prettyprinter.extras.dataclasses with a modifications to support
 optional Series and DataFrames.
 """
+
 from collections import OrderedDict
 from dataclasses import MISSING, fields
 

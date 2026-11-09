@@ -10,5 +10,5 @@ def load_yaml_config(filepath: str) -> Dict[str, Any]:
     :param filepath: Path to YAML config file
     :return: Raw config data, a mapping with a ``statements`` list
     """
-    with open(filepath, 'r') as f:
+    with open(filepath, "r") as f:
         return yaml.safe_load(f)

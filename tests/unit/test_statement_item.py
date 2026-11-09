@@ -1,9 +1,11 @@
 import numpy as np
 from sympy import nan
-from finstmt.core.statements import FinancialStatements
+
+from finstmt.config.item import ItemConfig
 from finstmt.core.statement_item import StatementItem
 from finstmt.core.statement_series import StatementSeries
-from finstmt.config.item import ItemConfig
+from finstmt.core.statements import FinancialStatements
+
 
 def test_seed_value_is_none():
     item_config = ItemConfig(
@@ -60,11 +62,7 @@ def test_default_value_for_non_calculated_field():
             extract_names=["Investments"],
         ),
     ]
-    dict = {
-        "12/31/2022": {
-            "cash": 1000
-        }
-    }
+    dict = {"12/31/2022": {"cash": 1000}}
 
     stmt_timeseries = StatementSeries.from_dict(dict, "Test Statment", config)
     finstmts = FinancialStatements([stmt_timeseries])
@@ -181,5 +179,3 @@ def test_time_shift_calculated_field():
     print(type(finstmts.cashDelta[0]))
     assert np.isnan(finstmts.cashDelta[0])
     assert finstmts.cashDelta[1] == 100
-
-

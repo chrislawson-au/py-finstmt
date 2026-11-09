@@ -69,7 +69,9 @@ def test_to_manual_replacements_are_reflected_in_result():
     fis = ForecastItemSeries(
         orig_series=series,
         config=ForecastConfig(periods=2, freq="Y"),
-        item_config=ItemConfig(key="revenue", display_name="Revenue", extract_names=["revenue"]),
+        item_config=ItemConfig(
+            key="revenue", display_name="Revenue", extract_names=["revenue"]
+        ),
     )
     fis.fit()
     fis.predict()

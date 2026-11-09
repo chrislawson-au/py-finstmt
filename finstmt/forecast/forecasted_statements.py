@@ -30,6 +30,7 @@ class ForecastedStatements(FinancialStatements):
         >>> forecasted.revenue  # pd.Series of forecasted revenue
         >>> forecasted.plot()   # plot all forecasted items
     """
+
     forecasts: Dict[str, ForecastItemSeries] = field(default_factory=lambda: {})
 
     def __round__(self, n: Optional[int] = None) -> Self:
@@ -42,8 +43,10 @@ class ForecastedStatements(FinancialStatements):
         result = super()._apply_op(other, op)
         if isinstance(other, (float, int)):
             new_forecasts = {k: op(v, other) for k, v in self.forecasts.items()}
-        elif hasattr(other, 'forecasts'):
-            new_forecasts = {k: op(v, other.forecasts[k]) for k, v in self.forecasts.items()}
+        elif hasattr(other, "forecasts"):
+            new_forecasts = {
+                k: op(v, other.forecasts[k]) for k, v in self.forecasts.items()
+            }
         else:
             new_forecasts = self.forecasts
         return result.copy(forecasts=new_forecasts)

@@ -23,10 +23,10 @@ Design rule: this layer never adds solver semantics. Order and conditional
 logic live here; identities and recurrences live in the core.
 """
 
+from finstmt.deals.deal import Deal, DealResult, ExitTerms
 from finstmt.deals.metrics import Metric, compute_metrics, irr, moic, npv
 from finstmt.deals.transaction import Entry, Transaction
 from finstmt.deals.waterfall import Pay, Residual, Sweep, Waterfall, WaterfallResult
-from finstmt.deals.deal import Deal, DealResult, ExitTerms
 
 __all__ = [
     "Entry",

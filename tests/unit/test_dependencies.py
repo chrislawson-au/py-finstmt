@@ -95,5 +95,8 @@ def test_pct_of_targets_of_determinants_are_included():
 
 
 def test_walk_is_deterministic():
-    runs = {tuple(ItemDependencies(CONFIGS).item_determinant_keys("net_income")) for _ in range(5)}
+    runs = {
+        tuple(ItemDependencies(CONFIGS).item_determinant_keys("net_income"))
+        for _ in range(5)
+    }
     assert len(runs) == 1

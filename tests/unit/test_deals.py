@@ -3,7 +3,7 @@
 import pandas as pd
 import pytest
 
-from finstmt import FinancialStatements, ItemConfig, ForecastItemConfig, StatementConfig
+from finstmt import FinancialStatements, ForecastItemConfig, ItemConfig, StatementConfig
 from finstmt.deals import (
     Deal,
     Entry,
@@ -20,8 +20,8 @@ from finstmt.deals import (
     npv,
 )
 
-
 # ------------------------------------------------------------------ helpers
+
 
 def lbo_statements() -> FinancialStatements:
     """EBITDA 100 flat; debt 400 at 10% on prior balance; 25% tax.
@@ -35,20 +35,41 @@ def lbo_statements() -> FinancialStatements:
     ).T
     items = [
         ItemConfig(
-            key="ebitda", display_name="EBITDA", extract_names=["ebitda"],
+            key="ebitda",
+            display_name="EBITDA",
+            extract_names=["ebitda"],
             forecast=ForecastItemConfig(method="recent"),
         ),
-        ItemConfig(key="debt", display_name="Debt", extract_names=["debt"],
-                   forecast=ForecastItemConfig(method="recent")),
-        ItemConfig(key="cash", display_name="Cash", extract_names=["cash"],
-                   forecast=ForecastItemConfig(method="recent")),
-        ItemConfig(key="interest", display_name="Interest", extract_names=["interest"],
-                   expr_str="0.10 * debt[t-1]"),
-        ItemConfig(key="taxes", display_name="Taxes", extract_names=["taxes"],
-                   expr_str="0.25 * (ebitda[t] - interest[t])"),
-        ItemConfig(key="cash_available", display_name="Cash Available",
-                   extract_names=["cash available"],
-                   expr_str="ebitda[t] - interest[t] - taxes[t]"),
+        ItemConfig(
+            key="debt",
+            display_name="Debt",
+            extract_names=["debt"],
+            forecast=ForecastItemConfig(method="recent"),
+        ),
+        ItemConfig(
+            key="cash",
+            display_name="Cash",
+            extract_names=["cash"],
+            forecast=ForecastItemConfig(method="recent"),
+        ),
+        ItemConfig(
+            key="interest",
+            display_name="Interest",
+            extract_names=["interest"],
+            expr_str="0.10 * debt[t-1]",
+        ),
+        ItemConfig(
+            key="taxes",
+            display_name="Taxes",
+            extract_names=["taxes"],
+            expr_str="0.25 * (ebitda[t] - interest[t])",
+        ),
+        ItemConfig(
+            key="cash_available",
+            display_name="Cash Available",
+            extract_names=["cash available"],
+            expr_str="ebitda[t] - interest[t] - taxes[t]",
+        ),
     ]
     return FinancialStatements.from_df(
         df,
@@ -59,6 +80,7 @@ def lbo_statements() -> FinancialStatements:
 
 
 # ------------------------------------------------------------------ metrics
+
 
 def test_irr_moic_npv():
     assert irr([-1000, 500, 500, 500]) == pytest.approx(0.2338, abs=1e-3)
@@ -87,6 +109,7 @@ def test_metric_validation():
 
 
 # -------------------------------------------------------------- transaction
+
 
 def test_sources_and_uses_must_balance():
     with pytest.raises(ValueError):
@@ -146,13 +169,16 @@ def test_transaction_survives_display_names_that_do_not_reextract():
         recompute_calculated=True,
     )
 
-    adjusted = Transaction(date="2023-12-31", entries=[Entry("cash", 25.0)]).apply(stmts)
+    adjusted = Transaction(date="2023-12-31", entries=[Entry("cash", 25.0)]).apply(
+        stmts
+    )
 
     assert float(adjusted.cash.iloc[0]) == 75.0
     assert float(adjusted.debt.iloc[0]) == 400.0
 
 
 # ---------------------------------------------------------------- waterfall
+
 
 def test_waterfall_sweep_hand_checked():
     stmts = lbo_statements()
@@ -200,23 +226,46 @@ def test_waterfall_result_identities_hold_post_step():
 
     def calc(key, name, extract, expr):
         return ItemConfig(
-            key=key, display_name=name, extract_names=[extract], expr_str=expr,
+            key=key,
+            display_name=name,
+            extract_names=[extract],
+            expr_str=expr,
             forecast=ForecastItemConfig(make_forecast=False),
         )
 
     items = [
-        ItemConfig(key="ebitda", display_name="EBITDA", extract_names=["ebitda"],
-                   forecast=ForecastItemConfig(method="recent")),
-        ItemConfig(key="debt_a", display_name="Debt A", extract_names=["debt a"],
-                   forecast=ForecastItemConfig(method="recent")),
-        ItemConfig(key="debt_b", display_name="Debt B", extract_names=["debt b"],
-                   forecast=ForecastItemConfig(method="recent")),
-        ItemConfig(key="cash", display_name="Cash", extract_names=["cash"],
-                   forecast=ForecastItemConfig(method="recent")),
+        ItemConfig(
+            key="ebitda",
+            display_name="EBITDA",
+            extract_names=["ebitda"],
+            forecast=ForecastItemConfig(method="recent"),
+        ),
+        ItemConfig(
+            key="debt_a",
+            display_name="Debt A",
+            extract_names=["debt a"],
+            forecast=ForecastItemConfig(method="recent"),
+        ),
+        ItemConfig(
+            key="debt_b",
+            display_name="Debt B",
+            extract_names=["debt b"],
+            forecast=ForecastItemConfig(method="recent"),
+        ),
+        ItemConfig(
+            key="cash",
+            display_name="Cash",
+            extract_names=["cash"],
+            forecast=ForecastItemConfig(method="recent"),
+        ),
         calc("interest", "Interest", "interest", "0.10 * (debt_a[t-1] + debt_b[t-1])"),
         calc("total_debt", "Total Debt", "total debt", "debt_a[t] + debt_b[t]"),
-        calc("cash_available", "Cash Available", "cash available",
-             "ebitda[t] - interest[t]"),
+        calc(
+            "cash_available",
+            "Cash Available",
+            "cash available",
+            "ebitda[t] - interest[t]",
+        ),
     ]
     stmts = FinancialStatements.from_df(
         df,
@@ -239,12 +288,11 @@ def test_irr_npv_treat_missing_flows_as_zero():
     assert irr([-100.0, float("nan"), 0.0, 121.0]) == pytest.approx(
         1.21 ** (1 / 3) - 1, abs=1e-6
     )
-    assert npv([-100.0, float("nan"), 110.0], 0.10) == pytest.approx(
-        -100 + 110 / 1.21
-    )
+    assert npv([-100.0, float("nan"), 110.0], 0.10) == pytest.approx(-100 + 110 / 1.21)
 
 
 # --------------------------------------------------------------------- deal
+
 
 def test_deal_end_to_end():
     stmts = lbo_statements()

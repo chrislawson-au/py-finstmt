@@ -2,10 +2,11 @@ from typing import Optional
 
 import pandas as pd
 
-from finstmt.exceptions import ImproperManualForecastException
 from finstmt.config.forecast import ForecastConfig
-from finstmt.forecast.models.base import ForecastModel
 from finstmt.config.item import ItemConfig
+from finstmt.exceptions import ImproperManualForecastException
+from finstmt.forecast.models.base import ForecastModel
+
 
 # TODO: updated this to be more generic, but could break backwards compatibility
 # could consider having "levels" and "growth" for backwards compatibility for some time
@@ -23,7 +24,9 @@ class ManualForecastModel(ForecastModel):
 
     def _validate(self):
         if not self.forecast_values:
-            raise ImproperManualForecastException("must provide values for manual forecast")
+            raise ImproperManualForecastException(
+                "must provide values for manual forecast"
+            )
         # If only one value is provided, then repeat it for all periods
         if len(self.forecast_values) == 1:
             self.forecast_values = [self.forecast_values[0]] * self.config.periods

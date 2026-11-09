@@ -2,14 +2,15 @@
 Work with financial statement data in Python. Can calculate free cash flows and help project
 financial statements, automatically balancing the balance sheet.
 """
+
 __version__ = "1.4.0"
 
-from finstmt.core.statements import FinancialStatements
-from finstmt.core.statement_series import StatementSeries
-from finstmt.config.item import ItemConfig, ForecastItemConfig
-from finstmt.config.statement import StatementConfig
 from finstmt.config.forecast import ForecastConfig
+from finstmt.config.item import ForecastItemConfig, ItemConfig
 from finstmt.config.manager import ConfigManager
+from finstmt.config.statement import StatementConfig
+from finstmt.core.statement_series import StatementSeries
+from finstmt.core.statements import FinancialStatements
 from finstmt.forecast.forecasted_statements import ForecastedStatements
 
 

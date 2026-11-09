@@ -3,14 +3,14 @@ from typing import Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from pandas import DatetimeIndex
 from packaging import version
+from pandas import DatetimeIndex
 
-from finstmt.exceptions import ForecastNotFitException, ForecastNotPredictedException
-from finstmt.freq import infer_freq_or_default
 from finstmt.config.forecast import ForecastConfig
-from finstmt.forecast.plot import plot_forecast
 from finstmt.config.item import ItemConfig
+from finstmt.exceptions import ForecastNotFitException, ForecastNotPredictedException
+from finstmt.forecast.plot import plot_forecast
+from finstmt.freq import infer_freq_or_default
 
 
 class ForecastModel:
@@ -75,15 +75,15 @@ class ForecastModel:
             periods=self.config.periods + 1,
             freq=self.config.freq,
         )
-        
+
         # Only inclusive parameter works in pandas >= 2.0.0
         # Only closed parameter works in pandas < 1.4.0
         # Both parameters work in 1.4.0 <= pandas < 2.0.0
-        if version.parse(pd.__version__) >= version.parse('2.0.0'):
-            kwargs['inclusive'] = 'right'
+        if version.parse(pd.__version__) >= version.parse("2.0.0"):
+            kwargs["inclusive"] = "right"
         else:
-            kwargs['closed'] = 'right'
-            
+            kwargs["closed"] = "right"
+
         return pd.date_range(**kwargs)
 
     @property

@@ -24,9 +24,13 @@ def test_round_forecasted_statements(
     assert (
         rounded_whole.forecasts["cash"].series == round(fcst.forecasts["cash"].series)
     ).all()
-    assert rounded_whole.forecasts["cash"].item_config.forecast.manual_forecasts["levels"] == [
+    assert rounded_whole.forecasts["cash"].item_config.forecast.manual_forecasts[
+        "levels"
+    ] == [
         round(val)
-        for val in fcst.forecasts["cash"].item_config.forecast.manual_forecasts["levels"]
+        for val in fcst.forecasts["cash"].item_config.forecast.manual_forecasts[
+            "levels"
+        ]
     ]
 
     rounded_decimal = round(fcst, 2)
@@ -35,9 +39,13 @@ def test_round_forecasted_statements(
         rounded_decimal.forecasts["cash"].series
         == round(fcst.forecasts["cash"].series, 2)
     ).all()
-    assert rounded_decimal.forecasts["cash"].item_config.forecast.manual_forecasts["levels"] == [
+    assert rounded_decimal.forecasts["cash"].item_config.forecast.manual_forecasts[
+        "levels"
+    ] == [
         round(val, 2)
-        for val in fcst.forecasts["cash"].item_config.forecast.manual_forecasts["levels"]
+        for val in fcst.forecasts["cash"].item_config.forecast.manual_forecasts[
+            "levels"
+        ]
     ]
 
 
@@ -61,7 +69,9 @@ def test_add_forecasted_statements(
     ).all()
     assert added.forecasts["cash"].item_config.forecast.manual_forecasts["levels"] == [
         val + val
-        for val in fcst.forecasts["cash"].item_config.forecast.manual_forecasts["levels"]
+        for val in fcst.forecasts["cash"].item_config.forecast.manual_forecasts[
+            "levels"
+        ]
     ]
 
 
@@ -81,7 +91,10 @@ def test_add_forecasted_statements_number(
     assert (added.cash == fcst.cash + 1).all()
     assert (added.forecasts["cash"].series == fcst.forecasts["cash"].series + 1).all()
     assert added.forecasts["cash"].item_config.forecast.manual_forecasts["levels"] == [
-        val + 1 for val in fcst.forecasts["cash"].item_config.forecast.manual_forecasts["levels"]
+        val + 1
+        for val in fcst.forecasts["cash"].item_config.forecast.manual_forecasts[
+            "levels"
+        ]
     ]
 
 
@@ -103,9 +116,13 @@ def test_subtract_forecasted_statements(
         subtracted.forecasts["cash"].series
         == fcst.forecasts["cash"].series - fcst.forecasts["cash"].series
     ).all()
-    assert subtracted.forecasts["cash"].item_config.forecast.manual_forecasts["levels"] == [
+    assert subtracted.forecasts["cash"].item_config.forecast.manual_forecasts[
+        "levels"
+    ] == [
         val - val
-        for val in fcst.forecasts["cash"].item_config.forecast.manual_forecasts["levels"]
+        for val in fcst.forecasts["cash"].item_config.forecast.manual_forecasts[
+            "levels"
+        ]
     ]
 
 
@@ -126,8 +143,13 @@ def test_subtract_forecasted_statements_number(
     assert (
         subtracted.forecasts["revenue"].series == fcst.forecasts["revenue"].series - 1
     ).all()
-    assert subtracted.forecasts["lt_debt"].item_config.forecast.manual_forecasts["levels"] == [
-        val - 1 for val in fcst.forecasts["lt_debt"].item_config.forecast.manual_forecasts["levels"]
+    assert subtracted.forecasts["lt_debt"].item_config.forecast.manual_forecasts[
+        "levels"
+    ] == [
+        val - 1
+        for val in fcst.forecasts["lt_debt"].item_config.forecast.manual_forecasts[
+            "levels"
+        ]
     ]
 
 
@@ -149,9 +171,13 @@ def test_multiply_forecasted_statements(
         multiplied.forecasts["cash"].series
         == fcst.forecasts["cash"].series * fcst.forecasts["cash"].series
     ).all()
-    assert multiplied.forecasts["cash"].item_config.forecast.manual_forecasts["levels"] == [
+    assert multiplied.forecasts["cash"].item_config.forecast.manual_forecasts[
+        "levels"
+    ] == [
         val * val
-        for val in fcst.forecasts["cash"].item_config.forecast.manual_forecasts["levels"]
+        for val in fcst.forecasts["cash"].item_config.forecast.manual_forecasts[
+            "levels"
+        ]
     ]
 
 
@@ -172,8 +198,13 @@ def test_multiply_forecasted_statements_number(
     assert (
         multiplied.forecasts["cash"].series == fcst.forecasts["cash"].series * 2
     ).all()
-    assert multiplied.forecasts["cash"].item_config.forecast.manual_forecasts["levels"] == [
-        val * 2 for val in fcst.forecasts["cash"].item_config.forecast.manual_forecasts["levels"]
+    assert multiplied.forecasts["cash"].item_config.forecast.manual_forecasts[
+        "levels"
+    ] == [
+        val * 2
+        for val in fcst.forecasts["cash"].item_config.forecast.manual_forecasts[
+            "levels"
+        ]
     ]
 
 
@@ -193,8 +224,12 @@ def test_divide_forecasted_statements(
     assert (divided.revenue == 1).all()
     assert (divided.forecasts["revenue"].series == 1).all()
     # Check manual_forecasts levels: non-zero values become 1, zero/zero becomes NaN
-    orig_levels = fcst.forecasts["lt_debt"].item_config.forecast.manual_forecasts["levels"]
-    div_levels = divided.forecasts["lt_debt"].item_config.forecast.manual_forecasts["levels"]
+    orig_levels = fcst.forecasts["lt_debt"].item_config.forecast.manual_forecasts[
+        "levels"
+    ]
+    div_levels = divided.forecasts["lt_debt"].item_config.forecast.manual_forecasts[
+        "levels"
+    ]
     for orig, div in zip(orig_levels, div_levels):
         if orig != 0:
             assert div == 1
@@ -217,6 +252,11 @@ def test_divide_forecasted_statements_number(
     divided = fcst / 2
     assert (divided.cash == fcst.cash / 2).all()
     assert (divided.forecasts["cash"].series == fcst.forecasts["cash"].series / 2).all()
-    assert divided.forecasts["cash"].item_config.forecast.manual_forecasts["levels"] == [
-        val / 2 for val in fcst.forecasts["cash"].item_config.forecast.manual_forecasts["levels"]
+    assert divided.forecasts["cash"].item_config.forecast.manual_forecasts[
+        "levels"
+    ] == [
+        val / 2
+        for val in fcst.forecasts["cash"].item_config.forecast.manual_forecasts[
+            "levels"
+        ]
     ]

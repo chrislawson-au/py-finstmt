@@ -12,8 +12,8 @@ from typing import Dict, List, Union
 
 import pandas as pd
 
-from finstmt.core.statements import FinancialStatements
 from finstmt.config.statement import StatementConfig
+from finstmt.core.statements import FinancialStatements
 
 
 @dataclass

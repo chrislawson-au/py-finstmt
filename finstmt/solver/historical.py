@@ -20,7 +20,9 @@ class HistoricalSolver(SolverBase):
         contract for real reported data.
     """
 
-    def __init__(self, statement_configs, item_values, recompute_calculated: bool = False):
+    def __init__(
+        self, statement_configs, item_values, recompute_calculated: bool = False
+    ):
         self.recompute_calculated = recompute_calculated
         super().__init__(statement_configs, item_values)
 

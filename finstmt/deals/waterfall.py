@@ -18,7 +18,7 @@ import pandas as pd
 from sympy import Expr, Indexed
 
 from finstmt.core.statements import FinancialStatements
-from finstmt.solver.engine import expr_for, build_sympy_namespace
+from finstmt.solver.engine import build_sympy_namespace, expr_for
 
 
 @dataclass
@@ -126,7 +126,9 @@ class Waterfall:
             fcst_series = getattr(forecasted, key)
             values[key] = [
                 float(v) if not pd.isna(v) else float("nan") for v in hist_series.values
-            ] + [float(v) if not pd.isna(v) else float("nan") for v in fcst_series.values]
+            ] + [
+                float(v) if not pd.isna(v) else float("nan") for v in fcst_series.values
+            ]
 
         n_hist = len(hist_dates)
 

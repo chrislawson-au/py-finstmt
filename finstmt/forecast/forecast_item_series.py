@@ -7,9 +7,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from typing_extensions import Self
 
-from finstmt.exceptions import ForecastNotFitException, ForecastNotPredictedException
 from finstmt.config.forecast import ForecastConfig
 from finstmt.config.item import ItemConfig
+from finstmt.exceptions import ForecastNotFitException, ForecastNotPredictedException
 from finstmt.forecast.models.chooser import get_model
 from finstmt.forecast.models.manual import ManualForecastModel
 
@@ -76,9 +76,9 @@ class ForecastItemSeries:
             # Growth
             values = self._result.pct_change().to_numpy(copy=True)
             # Fill in first growth
-            values[0] = (self._result.iloc[0] - self.series.iloc[-1]) / self.series.iloc[
-                -1
-            ]
+            values[0] = (
+                self._result.iloc[0] - self.series.iloc[-1]
+            ) / self.series.iloc[-1]
 
         self.item_config.forecast.method = "manual"
 
@@ -108,9 +108,7 @@ class ForecastItemSeries:
         else:
             self.item_config.forecast.manual_forecasts["levels"] = []
             self.item_config.forecast.manual_forecasts["growth"] = list(values)
-        self.model = ManualForecastModel(
-            self.config, self.item_config
-        )
+        self.model = ManualForecastModel(self.config, self.item_config)
         self.model.fit(self.series)
         # Store the manual prediction so .result reflects the new values.
         # Previously this happened by accident: .values returned a writable
@@ -195,7 +193,7 @@ def _get_attr_if_needed(other: Any, attr: str) -> Any:
 
 
 def _adjust_to_dict(
-    seq_or_dict: Union[Sequence[float], Dict[int, float]]
+    seq_or_dict: Union[Sequence[float], Dict[int, float]],
 ) -> Dict[int, float]:
     if isinstance(seq_or_dict, dict):
         return seq_or_dict
@@ -206,7 +204,7 @@ def _adjust_to_dict(
 
 
 def _replace_to_dict(
-    seq_or_dict: Union[Sequence[float], Dict[int, float]]
+    seq_or_dict: Union[Sequence[float], Dict[int, float]],
 ) -> Dict[int, float]:
     if isinstance(seq_or_dict, dict):
         return seq_or_dict

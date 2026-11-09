@@ -6,6 +6,7 @@ to make the snapshot consistent across different machines.
 
 When updating snapshots, check the generated folder for PDFs of the plots.
 """
+
 import sys
 from typing import Final, Sequence
 

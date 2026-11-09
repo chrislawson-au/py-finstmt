@@ -32,7 +32,7 @@ def load_capiq_df(file_path: str, sheet_name: str) -> pd.DataFrame:
 
 
 def _extract_date(
-    column_name: Union[pd.Timestamp, datetime.datetime, str]
+    column_name: Union[pd.Timestamp, datetime.datetime, str],
 ) -> Optional[Union[pd.Timestamp, datetime.datetime]]:
     """
     Extracts column date from Capital IQ columns.

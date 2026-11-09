@@ -8,7 +8,9 @@ from finstmt.core.statement_period_data import StatementPeriodData
 
 CONFIGS = [
     ItemConfig(key="revenue", display_name="Revenue", extract_names=["revenue"]),
-    ItemConfig(key="net_income", display_name="Net Income", extract_names=["net income"]),
+    ItemConfig(
+        key="net_income", display_name="Net Income", extract_names=["net income"]
+    ),
 ]
 
 

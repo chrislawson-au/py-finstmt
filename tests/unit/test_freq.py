@@ -65,7 +65,9 @@ def test_two_period_statement_has_usable_freq():
     from finstmt.config.item import ItemConfig
     from finstmt.core.statement_series import StatementSeries
 
-    config = [ItemConfig(key="revenue", display_name="Revenue", extract_names=["revenue"])]
+    config = [
+        ItemConfig(key="revenue", display_name="Revenue", extract_names=["revenue"])
+    ]
     data = {"12/31/2022": {"revenue": 1000}, "12/31/2023": {"revenue": 1100}}
     stmt = StatementSeries.from_dict(data, "Income Statement", config)
 

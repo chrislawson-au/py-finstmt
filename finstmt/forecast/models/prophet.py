@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from finstmt.config.forecast import ForecastConfig
+from finstmt.config.item import ItemConfig
 from finstmt.forecast.dataframe import add_cap_and_floor_to_df
 from finstmt.forecast.models.base import ForecastModel
-from finstmt.config.item import ItemConfig
 
 
 class ProphetModel(ForecastModel):
@@ -33,7 +33,9 @@ class ProphetModel(ForecastModel):
 
     def predict(self) -> pd.Series:
         future = self.model.make_future_dataframe(**self.config.make_future_df_kwargs)
-        add_cap_and_floor_to_df(future, self.item_config.forecast.cap, self.item_config.forecast.floor)
+        add_cap_and_floor_to_df(
+            future, self.item_config.forecast.cap, self.item_config.forecast.floor
+        )
         forecast = self.model.predict(future)
         self.result_df = forecast
         result = forecast[["ds", "yhat"]].set_index("ds")["yhat"]
@@ -69,7 +71,9 @@ class ProphetModel(ForecastModel):
     def _df_for_fit(self, series: pd.Series) -> pd.DataFrame:
         df = pd.DataFrame(series).reset_index()
         df.columns = ["ds", "y"]
-        add_cap_and_floor_to_df(df, self.item_config.forecast.cap, self.item_config.forecast.floor)
+        add_cap_and_floor_to_df(
+            df, self.item_config.forecast.cap, self.item_config.forecast.floor
+        )
 
         return df
 

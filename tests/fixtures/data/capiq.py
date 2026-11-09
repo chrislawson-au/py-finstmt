@@ -9,8 +9,8 @@ from finstmt.config.statement import (
     INCOME_STATEMENT_CONFIG,
     METRICS_STATEMENT_CONFIG,
 )
-from finstmt.exceptions import MismatchingDatesException
 from finstmt.core.statement_series import StatementSeries
+from finstmt.exceptions import MismatchingDatesException
 from finstmt.io.capiq import load_capiq_df
 from tests.fixtures.data.common import DATA_PATH
 

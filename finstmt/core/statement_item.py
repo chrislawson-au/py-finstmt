@@ -10,9 +10,9 @@ from finstmt.config.item import ItemConfig
 @dataclass
 class StatementItem:
     item_config: ItemConfig
-    seed_value: Optional[
-        float
-    ] = None  # explicitly provided value for this statement item
+    seed_value: Optional[float] = (
+        None  # explicitly provided value for this statement item
+    )
     calculated_value: Optional[np.float64] = field(init=False, default=None)
 
     def __post_init__(self) -> None:

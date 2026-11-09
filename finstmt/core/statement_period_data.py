@@ -168,9 +168,11 @@ class StatementPeriodData:
                 data_dict[item_config.display_name] = getattr(self, item_config.key)
             else:
                 data_dict[
-                    item_config.extract_names[0]
-                    if item_config.extract_names is not None
-                    else item_config.key
+                    (
+                        item_config.extract_names[0]
+                        if item_config.extract_names is not None
+                        else item_config.key
+                    )
                 ] = getattr(self, item_config.key)
 
         return pd.Series(data_dict)

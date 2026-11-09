@@ -121,9 +121,11 @@ class FinancialStatements:
             self._validate_dates()
             solver = HistoricalSolver(
                 self._effective_statement_configs(),
-                self.item_seed_values()
-                if self.recompute_calculated
-                else self._item_values(),
+                (
+                    self.item_seed_values()
+                    if self.recompute_calculated
+                    else self._item_values()
+                ),
                 recompute_calculated=self.recompute_calculated,
             )
             stmts = self._statement_series_from_results(solver.solve())
@@ -146,7 +148,9 @@ class FinancialStatements:
 
     def _item_values(self) -> Dict[str, pd.Series]:
         """One series of values by date per item key, as solver input."""
-        return {config.key: getattr(self, config.key) for config in self.all_config_items}
+        return {
+            config.key: getattr(self, config.key) for config in self.all_config_items
+        }
 
     def item_seed_values(self) -> Dict[str, pd.Series]:
         """One series per item key where calculated items contribute only
@@ -159,7 +163,9 @@ class FinancialStatements:
         (e.g. :class:`finstmt.deals.Transaction`)."""
         out: Dict[str, pd.Series] = {}
         calculated_keys = {
-            config.key for config in self.all_config_items if config.expr_str is not None
+            config.key
+            for config in self.all_config_items
+            if config.expr_str is not None
         }
         for config in self.all_config_items:
             if config.key not in calculated_keys:
@@ -171,7 +177,9 @@ class FinancialStatements:
                     continue
                 dates = list(statement_series.statements.keys())
                 seeds = [
-                    statement_series.statements[date].statement_items[config.key].seed_value
+                    statement_series.statements[date]
+                    .statement_items[config.key]
+                    .seed_value
                     for date in dates
                 ]
                 out[config.key] = pd.Series(seeds, index=dates, dtype=float)
@@ -311,7 +319,6 @@ class FinancialStatements:
                 return statement_series.get_statement_item_series(item)
 
         raise AttributeError(item)
-
 
     def __getitem__(self, item):
         stmts_hetrogeneous = []
@@ -579,7 +586,10 @@ class FinancialStatements:
         if subset is not None:
             plot_items = {k: self.get_statement_item_series(k) for k in subset}
         else:
-            plot_items = {item.key: self.get_statement_item_series(item.key) for item in self.all_config_items}
+            plot_items = {
+                item.key: self.get_statement_item_series(item.key)
+                for item in self.all_config_items
+            }
 
         return plot_grid(
             plot_items,

@@ -32,7 +32,9 @@ def build_sympy_namespace(item_configs: List[ItemConfig]) -> Dict[str, IndexedBa
     return ns
 
 
-def expr_for(item_key: str, item_configs: List[ItemConfig], ns: Dict[str, IndexedBase]) -> Expr:
+def expr_for(
+    item_key: str, item_configs: List[ItemConfig], ns: Dict[str, IndexedBase]
+) -> Expr:
     """Parse expr_str for item_key into a sympy expression."""
     for config in item_configs:
         if config.key == item_key:

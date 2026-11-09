@@ -1,5 +1,5 @@
-from finstmt.core.statement_series import StatementSeries
 from finstmt.config.item import ItemConfig
+from finstmt.core.statement_series import StatementSeries
 
 
 def test_load_from_dict():

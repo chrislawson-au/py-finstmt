@@ -15,9 +15,7 @@ MetricValue = Union[float, pd.Series, None]
 def _clean_flows(cashflows: Sequence[float]) -> list:
     """Missing flows are no flow (0.0) — dropping them would silently shift
     later flows earlier in time."""
-    return [
-        0.0 if v is None or pd.isna(v) else float(v) for v in cashflows
-    ]
+    return [0.0 if v is None or pd.isna(v) else float(v) for v in cashflows]
 
 
 def irr(cashflows: Sequence[float]) -> Optional[float]:
@@ -89,7 +87,9 @@ class Metric:
             if self.kind not in ("irr", "moic", "npv"):
                 raise ValueError(f"Metric {self.key}: unknown kind {self.kind!r}")
             if self.cashflows is None:
-                raise ValueError(f"Metric {self.key}: kind metrics need a cashflows item key")
+                raise ValueError(
+                    f"Metric {self.key}: kind metrics need a cashflows item key"
+                )
             if self.kind == "npv" and self.rate is None:
                 raise ValueError(f"Metric {self.key}: npv needs a rate")
 

@@ -12,6 +12,7 @@ class StatementItemSeries:
     """
     Series data for a single financial statement item.
     """
+
     series: pd.Series
     item_config: ItemConfig
 

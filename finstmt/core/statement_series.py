@@ -5,19 +5,20 @@ from typing import Callable, Dict, List
 import pandas as pd
 from tqdm import tqdm
 
+from finstmt._logging import logger
 from finstmt.check import item_series_is_empty
-from finstmt.freq import infer_freq_or_default
+from finstmt.config.forecast import ForecastConfig
+from finstmt.config.item import ItemConfig
+from finstmt.core.statement_item_series import StatementItemSeries
+from finstmt.core.statement_period_data import StatementPeriodData
 from finstmt.exceptions import (
     CouldNotParseException,
     MixedFrequencyException,
     NoSuchItemException,
 )
-from finstmt.core.statement_period_data import StatementPeriodData
-from finstmt.core.statement_item_series import StatementItemSeries
-from finstmt.config.forecast import ForecastConfig
 from finstmt.forecast.forecast_item_series import ForecastItemSeries
-from finstmt.config.item import ItemConfig
-from finstmt._logging import logger
+from finstmt.freq import infer_freq_or_default
+
 
 @dataclass
 class StatementSeries:
@@ -30,6 +31,7 @@ class StatementSeries:
         >>> series = StatementSeries.from_df(df, "Income Statement", configs)
         >>> series.revenue  # pd.Series of revenue over time
     """
+
     statements: Dict[pd.Timestamp, StatementPeriodData]
     items_config_list: List[ItemConfig] = field(repr=False)
     statement_name: str
@@ -177,9 +179,7 @@ class StatementSeries:
         out_df.columns = [col.strftime("%m/%d/%Y") for col in out_df.columns]
         return out_df.applymap(lambda x: f"${x:,.0f}" if not x == 0 else " - ")
 
-    def _forecast(
-        self, statements, **kwargs
-    ) -> Dict[str, ForecastItemSeries]:
+    def _forecast(self, statements, **kwargs) -> Dict[str, ForecastItemSeries]:
         if "freq" not in kwargs:
             freq = self.freq
             if freq is None:

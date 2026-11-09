@@ -112,10 +112,7 @@ class ItemDependencies:
         if include_pct_of:
             for item in self._configs.values():
                 # TODO [$5fed05c64df698000808428a]: multiple passes through determinants may be necessary for complicated pct_of structures
-                if (
-                    item.key in determinant_keys
-                    and item.forecast.pct_of is not None
-                ):
+                if item.key in determinant_keys and item.forecast.pct_of is not None:
                     pct_conf = self._get(item.forecast.pct_of)
                     if pct_conf.expr_str is None:
                         determinant_keys.append(item.forecast.pct_of)

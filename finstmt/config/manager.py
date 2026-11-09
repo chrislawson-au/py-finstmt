@@ -1,13 +1,12 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Sequence, Set, Tuple, Union
 
-
+from finstmt._logging import logger
+from finstmt.config.item import ItemConfig
 from finstmt.exceptions import (
     InvalidBalanceConfigException,
     NoSuchItemException,
 )
-from finstmt.config.item import ItemConfig
-from finstmt._logging import logger
 
 
 @dataclass
@@ -131,9 +130,7 @@ class ConfigManager:
                     changed = True
                     while changed:
                         num_balanced = len(balance_group)
-                        balance_with_key = (
-                            balance_with_conf.forecast.balance_with
-                        )
+                        balance_with_key = balance_with_conf.forecast.balance_with
                         if balance_with_key is None:
                             raise InvalidBalanceConfigException(
                                 f"{balance_with_conf.key} is part of balance group {balance_group} but in its "
