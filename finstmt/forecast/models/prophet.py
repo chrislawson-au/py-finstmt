@@ -4,27 +4,26 @@ from typing import Optional, Tuple
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from finstmt.forecast.config import ForecastConfig, ForecastItemConfig
+from finstmt.config.forecast import ForecastConfig
+from finstmt.config.item import ItemConfig
 from finstmt.forecast.dataframe import add_cap_and_floor_to_df
 from finstmt.forecast.models.base import ForecastModel
-from finstmt.items.config import ItemConfig
 
 
-class FBProphetModel(ForecastModel):
+class ProphetModel(ForecastModel):
     def __init__(
         self,
         config: ForecastConfig,
-        item_config: ForecastItemConfig,
-        base_config: ItemConfig,
+        item_config: ItemConfig,
     ):
-        super().__init__(config, item_config, base_config)
+        super().__init__(config, item_config)
         Prophet = _try_import_prophet()
 
         all_kwargs = {}
         if config.freq.lower() == "y":
             all_kwargs["yearly_seasonality"] = False
-        all_kwargs.update(item_config.prophet_kwargs)
         all_kwargs.update(config.prophet_kwargs)
+        all_kwargs.update(item_config.forecast.prophet_kwargs)
         model = Prophet(**all_kwargs)
         self.model = model
 
@@ -34,7 +33,9 @@ class FBProphetModel(ForecastModel):
 
     def predict(self) -> pd.Series:
         future = self.model.make_future_dataframe(**self.config.make_future_df_kwargs)
-        add_cap_and_floor_to_df(future, self.item_config.cap, self.item_config.floor)
+        add_cap_and_floor_to_df(
+            future, self.item_config.forecast.cap, self.item_config.forecast.floor
+        )
         forecast = self.model.predict(future)
         self.result_df = forecast
         result = forecast[["ds", "yhat"]].set_index("ds")["yhat"]
@@ -54,7 +55,7 @@ class FBProphetModel(ForecastModel):
         if xlabel is None:
             xlabel = "Time"
         if title is None:
-            title = self.base_config.display_name
+            title = self.item_config.display_name
 
         fig = self.model.plot(
             self.result_df, ax=ax, figsize=figsize, xlabel=xlabel, ylabel=ylabel
@@ -70,7 +71,9 @@ class FBProphetModel(ForecastModel):
     def _df_for_fit(self, series: pd.Series) -> pd.DataFrame:
         df = pd.DataFrame(series).reset_index()
         df.columns = ["ds", "y"]
-        add_cap_and_floor_to_df(df, self.item_config.cap, self.item_config.floor)
+        add_cap_and_floor_to_df(
+            df, self.item_config.forecast.cap, self.item_config.forecast.floor
+        )
 
         return df
 

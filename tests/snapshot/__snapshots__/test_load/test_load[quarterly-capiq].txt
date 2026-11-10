@@ -1,12 +1,13 @@
 '''
-finstmt.combined.statements.FinancialStatements(
-    income_statements=finstmt.inc.main.IncomeStatements(
-        statements={
-            datetime.datetime(
-                2012,
-                3,
-                31
-            ): {
+finstmt.core.statements.FinancialStatements(
+    statements={
+        'Income Statement': finstmt.core.statement_series.StatementSeries(
+            statements={
+                datetime.datetime(
+                    2012,
+                    3,
+                    31
+                ): {
   "revenue": 15981.0,
   "cogs": 11237.0,
   "sga": 1213.0,
@@ -19,11 +20,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 2300.0,
   "net_income": 1586.0
 },
-            datetime.datetime(
-                2012,
-                6,
-                30
-            ): {
+                datetime.datetime(
+                    2012,
+                    6,
+                    30
+                ): {
   "revenue": 17374.0,
   "cogs": 12280.0,
   "sga": 1367.0,
@@ -37,11 +38,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 2581.0,
   "net_income": 1699.0
 },
-            datetime.datetime(
-                2012,
-                9,
-                30
-            ): {
+                datetime.datetime(
+                    2012,
+                    9,
+                    30
+                ): {
   "revenue": 16445.0,
   "cogs": 11639.0,
   "sga": 1318.0,
@@ -55,11 +56,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 2455.0,
   "net_income": 1699.0
 },
-            datetime.datetime(
-                2012,
-                12,
-                31
-            ): {
+                datetime.datetime(
+                    2012,
+                    12,
+                    31
+                ): {
   "revenue": 16075.0,
   "cogs": 11899.0,
   "sga": 1403.0,
@@ -75,11 +76,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 914.0,
   "net_income": 697.0
 },
-            datetime.datetime(
-                2013,
-                3,
-                31
-            ): {
+                datetime.datetime(
+                    2013,
+                    3,
+                    31
+                ): {
   "revenue": 13210.0,
   "cogs": 9639.0,
   "sga": 1261.0,
@@ -93,11 +94,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 1128.0,
   "net_income": 880.0
 },
-            datetime.datetime(
-                2013,
-                6,
-                30
-            ): {
+                datetime.datetime(
+                    2013,
+                    6,
+                    30
+                ): {
   "revenue": 14621.0,
   "cogs": 10773.0,
   "sga": 1271.0,
@@ -111,11 +112,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 1352.0,
   "net_income": 960.0
 },
-            datetime.datetime(
-                2013,
-                9,
-                30
-            ): {
+                datetime.datetime(
+                    2013,
+                    9,
+                    30
+                ): {
   "revenue": 13423.0,
   "cogs": 9774.0,
   "sga": 1163.0,
@@ -128,11 +129,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 1260.0,
   "net_income": 946.0
 },
-            datetime.datetime(
-                2013,
-                12,
-                31
-            ): {
+                datetime.datetime(
+                    2013,
+                    12,
+                    31
+                ): {
   "revenue": 14402.0,
   "cogs": 10541.0,
   "sga": 1286.0,
@@ -146,11 +147,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 1382.0,
   "net_income": 1003.0
 },
-            datetime.datetime(
-                2014,
-                3,
-                31
-            ): {
+                datetime.datetime(
+                    2014,
+                    3,
+                    31
+                ): {
   "revenue": 13241.0,
   "cogs": 9437.0,
   "sga": 1146.0,
@@ -164,11 +165,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 1343.0,
   "net_income": 922.0
 },
-            datetime.datetime(
-                2014,
-                6,
-                30
-            ): {
+                datetime.datetime(
+                    2014,
+                    6,
+                    30
+                ): {
   "revenue": 14150.0,
   "cogs": 10197.0,
   "sga": 1278.0,
@@ -181,11 +182,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 1421.0,
   "net_income": 999.0
 },
-            datetime.datetime(
-                2014,
-                9,
-                30
-            ): {
+                datetime.datetime(
+                    2014,
+                    9,
+                    30
+                ): {
   "revenue": 13549.0,
   "cogs": 9634.0,
   "sga": 1274.0,
@@ -199,11 +200,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 1385.0,
   "net_income": 1017.0
 },
-            datetime.datetime(
-                2014,
-                12,
-                31
-            ): {
+                datetime.datetime(
+                    2014,
+                    12,
+                    31
+                ): {
   "revenue": 14244.0,
   "cogs": 10499.0,
   "sga": 1364.0,
@@ -217,11 +218,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 942.0,
   "net_income": 757.0
 },
-            datetime.datetime(
-                2015,
-                3,
-                31
-            ): {
+                datetime.datetime(
+                    2015,
+                    3,
+                    31
+                ): {
   "revenue": 12702.0,
   "cogs": 8760.0,
   "sga": 1116.0,
@@ -235,11 +236,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 1769.0,
   "net_income": 1245.0
 },
-            datetime.datetime(
-                2015,
-                6,
-                30
-            ): {
+                datetime.datetime(
+                    2015,
+                    6,
+                    30
+                ): {
   "revenue": 12317.0,
   "cogs": 8674.0,
   "sga": 1146.0,
@@ -253,11 +254,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 1138.0,
   "net_income": 802.0
 },
-            datetime.datetime(
-                2015,
-                9,
-                30
-            ): {
+                datetime.datetime(
+                    2015,
+                    9,
+                    30
+                ): {
   "revenue": 10962.0,
   "cogs": 7872.0,
   "sga": 990.0,
@@ -271,11 +272,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 780.0,
   "net_income": 559.0
 },
-            datetime.datetime(
-                2015,
-                12,
-                31
-            ): {
+                datetime.datetime(
+                    2015,
+                    12,
+                    31
+                ): {
   "revenue": 11030.0,
   "cogs": 8240.0,
   "sga": 1111.0,
@@ -289,11 +290,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": -248.0,
   "net_income": -94.0
 },
-            datetime.datetime(
-                2016,
-                3,
-                31
-            ): {
+                datetime.datetime(
+                    2016,
+                    3,
+                    31
+                ): {
   "revenue": 9461.0,
   "cogs": 6822.0,
   "sga": 949.0,
@@ -306,11 +307,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 364.0,
   "net_income": 271.0
 },
-            datetime.datetime(
-                2016,
-                6,
-                30
-            ): {
+                datetime.datetime(
+                    2016,
+                    6,
+                    30
+                ): {
   "revenue": 10342.0,
   "cogs": 7419.0,
   "sga": 976.0,
@@ -324,11 +325,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 737.0,
   "net_income": 550.0
 },
-            datetime.datetime(
-                2016,
-                9,
-                30
-            ): {
+                datetime.datetime(
+                    2016,
+                    9,
+                    30
+                ): {
   "revenue": 9160.0,
   "cogs": 6527.0,
   "sga": 854.0,
@@ -342,11 +343,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 379.0,
   "net_income": 283.0
 },
-            datetime.datetime(
-                2016,
-                12,
-                31
-            ): {
+                datetime.datetime(
+                    2016,
+                    12,
+                    31
+                ): {
   "revenue": 9574.0,
   "cogs": 7541.0,
   "sga": 1334.0,
@@ -361,11 +362,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": -1347.0,
   "net_income": -1171.0
 },
-            datetime.datetime(
-                2017,
-                3,
-                31
-            ): {
+                datetime.datetime(
+                    2017,
+                    3,
+                    31
+                ): {
   "revenue": 9822.0,
   "cogs": 6801.0,
   "sga": 935.0,
@@ -378,11 +379,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 284.0,
   "net_income": 192.0
 },
-            datetime.datetime(
-                2017,
-                6,
-                30
-            ): {
+                datetime.datetime(
+                    2017,
+                    6,
+                    30
+                ): {
   "revenue": 11331.0,
   "cogs": 7816.0,
   "sga": 1165.0,
@@ -396,11 +397,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 1164.0,
   "net_income": 802.0
 },
-            datetime.datetime(
-                2017,
-                9,
-                30
-            ): {
+                datetime.datetime(
+                    2017,
+                    9,
+                    30
+                ): {
   "revenue": 11413.0,
   "cogs": 7678.0,
   "sga": 1081.0,
@@ -413,11 +414,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 1531.0,
   "net_income": 1059.0
 },
-            datetime.datetime(
-                2017,
-                12,
-                31
-            ): {
+                datetime.datetime(
+                    2017,
+                    12,
+                    31
+                ): {
   "revenue": 12896.0,
   "cogs": 8965.0,
   "sga": 1244.0,
@@ -431,11 +432,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 1119.0,
   "net_income": -1299.0
 },
-            datetime.datetime(
-                2018,
-                3,
-                31
-            ): {
+                datetime.datetime(
+                    2018,
+                    3,
+                    31
+                ): {
   "revenue": 12859.0,
   "cogs": 8566.0,
   "sga": 1001.0,
@@ -449,11 +450,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 2139.0,
   "net_income": 1665.0
 },
-            datetime.datetime(
-                2018,
-                6,
-                30
-            ): {
+                datetime.datetime(
+                    2018,
+                    6,
+                    30
+                ): {
   "revenue": 14011.0,
   "cogs": 9422.0,
   "sga": 1131.0,
@@ -467,11 +468,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 2195.0,
   "net_income": 1707.0
 },
-            datetime.datetime(
-                2018,
-                9,
-                30
-            ): {
+                datetime.datetime(
+                    2018,
+                    9,
+                    30
+                ): {
   "revenue": 13510.0,
   "cogs": 9022.0,
   "sga": 1045.0,
@@ -485,11 +486,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 2142.0,
   "net_income": 1727.0
 },
-            datetime.datetime(
-                2018,
-                12,
-                31
-            ): {
+                datetime.datetime(
+                    2018,
+                    12,
+                    31
+                ): {
   "revenue": 14342.0,
   "cogs": 9987.0,
   "sga": 1372.0,
@@ -503,11 +504,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 1370.0,
   "net_income": 1048.0
 },
-            datetime.datetime(
-                2019,
-                3,
-                31
-            ): {
+                datetime.datetime(
+                    2019,
+                    3,
+                    31
+                ): {
   "revenue": 13466.0,
   "cogs": 9003.0,
   "sga": 1101.0,
@@ -521,11 +522,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 2271.0,
   "net_income": 1881.0
 },
-            datetime.datetime(
-                2019,
-                6,
-                30
-            ): {
+                datetime.datetime(
+                    2019,
+                    6,
+                    30
+                ): {
   "revenue": 14432.0,
   "cogs": 9941.0,
   "sga": 1076.0,
@@ -539,11 +540,11 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 2184.0,
   "net_income": 1620.0
 },
-            datetime.datetime(
-                2019,
-                9,
-                30
-            ): {
+                datetime.datetime(
+                    2019,
+                    9,
+                    30
+                ): {
   "revenue": 12758.0,
   "cogs": 8569.0,
   "sga": 1064.0,
@@ -557,15 +558,16 @@ finstmt.combined.statements.FinancialStatements(
   "ebt": 2012.0,
   "net_income": 1494.0
 }
-        }
-    ),
-    balance_sheets=finstmt.bs.main.BalanceSheets(
-        statements={
-            datetime.datetime(
-                2012,
-                3,
-                31
-            ): {
+            },
+            statement_name='Income Statement'
+        ),
+        'Balance Sheet': finstmt.core.statement_series.StatementSeries(
+            statements={
+                datetime.datetime(
+                    2012,
+                    3,
+                    31
+                ): {
   "cash": 2864.0,
   "cash_and_st_invest": 2864.0,
   "receivables": 10370.0,
@@ -575,9 +577,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 14571.0,
   "goodwill": 7081.0,
   "lt_invest": 139.0,
-  "def_tax_lt": 2082.0,
   "other_lt_assets": 2208.0,
-  "total_non_current_assets": 26081.0,
+  "total_non_current_assets": 23999.0,
   "total_assets": 83908.0,
   "payables": 8360.0,
   "st_debt": 696.0,
@@ -596,11 +597,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 15471.0,
   "total_liab_and_equity": 83908.0
 },
-            datetime.datetime(
-                2012,
-                6,
-                30
-            ): {
+                datetime.datetime(
+                    2012,
+                    6,
+                    30
+                ): {
   "cash": 2810.0,
   "cash_and_st_invest": 2810.0,
   "receivables": 10376.0,
@@ -611,9 +612,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 11832.0,
   "goodwill": 7303.0,
   "lt_invest": 124.0,
-  "def_tax_lt": 2032.0,
   "other_lt_assets": 860.0,
-  "total_non_current_assets": 22151.0,
+  "total_non_current_assets": 20119.0,
   "total_assets": 88838.0,
   "payables": 8470.0,
   "st_debt": 592.0,
@@ -632,11 +632,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 15981.0,
   "total_liab_and_equity": 88838.0
 },
-            datetime.datetime(
-                2012,
-                9,
-                30
-            ): {
+                datetime.datetime(
+                    2012,
+                    9,
+                    30
+                ): {
   "cash": 3363.0,
   "cash_and_st_invest": 3363.0,
   "receivables": 9713.0,
@@ -647,9 +647,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 12217.0,
   "goodwill": 7355.0,
   "lt_invest": 199.0,
-  "def_tax_lt": 1873.0,
   "other_lt_assets": 864.0,
-  "total_non_current_assets": 22508.0,
+  "total_non_current_assets": 20635.0,
   "total_assets": 90541.0,
   "payables": 7978.0,
   "st_debt": 607.0,
@@ -668,11 +667,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 17936.0,
   "total_liab_and_equity": 90541.0
 },
-            datetime.datetime(
-                2012,
-                12,
-                31
-            ): {
+                datetime.datetime(
+                    2012,
+                    12,
+                    31
+                ): {
   "cash": 3306.0,
   "cash_and_st_invest": 3306.0,
   "receivables": 9617.0,
@@ -685,9 +684,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 16461.0,
   "goodwill": 6925.0,
   "lt_invest": 272.0,
-  "def_tax_lt": 1863.0,
   "other_lt_assets": 584.0,
-  "total_non_current_assets": 26105.0,
+  "total_non_current_assets": 24242.0,
   "total_assets": 88970.0,
   "payables": 6753.0,
   "st_debt": 636.0,
@@ -708,11 +706,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 17582.0,
   "total_liab_and_equity": 88970.0
 },
-            datetime.datetime(
-                2013,
-                3,
-                31
-            ): {
+                datetime.datetime(
+                    2013,
+                    3,
+                    31
+                ): {
   "cash": 3594.0,
   "cash_and_st_invest": 3594.0,
   "receivables": 9733.0,
@@ -723,9 +721,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 12854.0,
   "goodwill": 6823.0,
   "lt_invest": 270.0,
-  "def_tax_lt": 2112.0,
   "other_lt_assets": 365.0,
-  "total_non_current_assets": 22424.0,
+  "total_non_current_assets": 20312.0,
   "total_assets": 88743.0,
   "payables": 6221.0,
   "st_debt": 667.0,
@@ -744,11 +741,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 18318.0,
   "total_liab_and_equity": 88743.0
 },
-            datetime.datetime(
-                2013,
-                6,
-                30
-            ): {
+                datetime.datetime(
+                    2013,
+                    6,
+                    30
+                ): {
   "cash": 3974.0,
   "cash_and_st_invest": 3974.0,
   "receivables": 9268.0,
@@ -759,9 +756,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 12814.0,
   "goodwill": 6797.0,
   "lt_invest": 288.0,
-  "def_tax_lt": 2153.0,
   "other_lt_assets": 381.0,
-  "total_non_current_assets": 22433.0,
+  "total_non_current_assets": 20280.0,
   "total_assets": 87375.0,
   "payables": 6343.0,
   "st_debt": 392.0,
@@ -780,11 +776,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 17678.0,
   "total_liab_and_equity": 87375.0
 },
-            datetime.datetime(
-                2013,
-                9,
-                30
-            ): {
+                datetime.datetime(
+                    2013,
+                    9,
+                    30
+                ): {
   "cash": 4108.0,
   "cash_and_st_invest": 4108.0,
   "receivables": 8533.0,
@@ -795,9 +791,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 12852.0,
   "goodwill": 6951.0,
   "lt_invest": 278.0,
-  "def_tax_lt": 1985.0,
   "other_lt_assets": 409.0,
-  "total_non_current_assets": 22475.0,
+  "total_non_current_assets": 20490.0,
   "total_assets": 87272.0,
   "payables": 6280.0,
   "st_debt": 290.0,
@@ -816,11 +811,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 18177.0,
   "total_liab_and_equity": 87272.0
 },
-            datetime.datetime(
-                2013,
-                12,
-                31
-            ): {
+                datetime.datetime(
+                    2013,
+                    12,
+                    31
+                ): {
   "cash": 4597.0,
   "cash_and_st_invest": 4597.0,
   "receivables": 8326.0,
@@ -833,9 +828,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 17075.0,
   "goodwill": 6939.0,
   "lt_invest": 272.0,
-  "def_tax_lt": 456.0,
   "other_lt_assets": 577.0,
-  "total_non_current_assets": 25319.0,
+  "total_non_current_assets": 24863.0,
   "total_assets": 84896.0,
   "payables": 6560.0,
   "st_debt": 16.0,
@@ -856,11 +850,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 20878.0,
   "total_liab_and_equity": 84896.0
 },
-            datetime.datetime(
-                2014,
-                3,
-                31
-            ): {
+                datetime.datetime(
+                    2014,
+                    3,
+                    31
+                ): {
   "cash": 4057.0,
   "cash_and_st_invest": 4057.0,
   "receivables": 8499.0,
@@ -871,9 +865,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 12773.0,
   "goodwill": 6969.0,
   "lt_invest": 266.0,
-  "def_tax_lt": 700.0,
   "other_lt_assets": 434.0,
-  "total_non_current_assets": 21142.0,
+  "total_non_current_assets": 20442.0,
   "total_assets": 84397.0,
   "payables": 6731.0,
   "st_debt": 18.0,
@@ -892,11 +885,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 20369.0,
   "total_liab_and_equity": 84397.0
 },
-            datetime.datetime(
-                2014,
-                6,
-                30
-            ): {
+                datetime.datetime(
+                    2014,
+                    6,
+                    30
+                ): {
   "cash": 6615.0,
   "cash_and_st_invest": 6615.0,
   "receivables": 7993.0,
@@ -907,9 +900,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 12578.0,
   "goodwill": 6952.0,
   "lt_invest": 259.0,
-  "def_tax_lt": 737.0,
   "other_lt_assets": 370.0,
-  "total_non_current_assets": 20896.0,
+  "total_non_current_assets": 20159.0,
   "total_assets": 87827.0,
   "payables": 6860.0,
   "st_debt": 20.0,
@@ -928,11 +920,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 20923.0,
   "total_liab_and_equity": 87827.0
 },
-            datetime.datetime(
-                2014,
-                9,
-                30
-            ): {
+                datetime.datetime(
+                    2014,
+                    9,
+                    30
+                ): {
   "cash": 4805.0,
   "cash_and_st_invest": 4805.0,
   "receivables": 7643.0,
@@ -943,9 +935,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 12350.0,
   "goodwill": 6784.0,
   "lt_invest": 265.0,
-  "def_tax_lt": 761.0,
   "other_lt_assets": 381.0,
-  "total_non_current_assets": 20541.0,
+  "total_non_current_assets": 19780.0,
   "total_assets": 84488.0,
   "payables": 6778.0,
   "st_debt": 7.0,
@@ -964,11 +955,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 18896.0,
   "total_liab_and_equity": 84488.0
 },
-            datetime.datetime(
-                2014,
-                12,
-                31
-            ): {
+                datetime.datetime(
+                    2014,
+                    12,
+                    31
+                ): {
   "cash": 6317.0,
   "cash_and_st_invest": 6317.0,
   "receivables": 7699.0,
@@ -981,9 +972,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 16577.0,
   "goodwill": 6677.0,
   "lt_invest": 257.0,
-  "def_tax_lt": 1267.0,
   "other_lt_assets": 528.0,
-  "total_non_current_assets": 25306.0,
+  "total_non_current_assets": 24039.0,
   "total_assets": 84681.0,
   "payables": 6515.0,
   "st_debt": 9.0,
@@ -1004,11 +994,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 16826.0,
   "total_liab_and_equity": 84681.0
 },
-            datetime.datetime(
-                2015,
-                3,
-                31
-            ): {
+                datetime.datetime(
+                    2015,
+                    3,
+                    31
+                ): {
   "cash": 6218.0,
   "cash_and_st_invest": 6218.0,
   "receivables": 7554.0,
@@ -1019,9 +1009,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 12156.0,
   "goodwill": 6476.0,
   "lt_invest": 230.0,
-  "def_tax_lt": 1342.0,
   "other_lt_assets": 398.0,
-  "total_non_current_assets": 20602.0,
+  "total_non_current_assets": 19260.0,
   "total_assets": 82490.0,
   "payables": 6328.0,
   "st_debt": 8.0,
@@ -1040,11 +1029,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 17038.0,
   "total_liab_and_equity": 82490.0
 },
-            datetime.datetime(
-                2015,
-                6,
-                30
-            ): {
+                datetime.datetime(
+                    2015,
+                    6,
+                    30
+                ): {
   "cash": 6466.0,
   "cash_and_st_invest": 6466.0,
   "receivables": 7185.0,
@@ -1055,9 +1044,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 11970.0,
   "goodwill": 6533.0,
   "lt_invest": 229.0,
-  "def_tax_lt": 1473.0,
   "other_lt_assets": 386.0,
-  "total_non_current_assets": 20591.0,
+  "total_non_current_assets": 19118.0,
   "total_assets": 82242.0,
   "payables": 5862.0,
   "st_debt": 14.0,
@@ -1076,11 +1064,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 17161.0,
   "total_liab_and_equity": 82242.0
 },
-            datetime.datetime(
-                2015,
-                9,
-                30
-            ): {
+                datetime.datetime(
+                    2015,
+                    9,
+                    30
+                ): {
   "cash": 4808.0,
   "cash_and_st_invest": 4808.0,
   "receivables": 6757.0,
@@ -1091,9 +1079,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 11816.0,
   "goodwill": 6529.0,
   "lt_invest": 231.0,
-  "def_tax_lt": 1559.0,
   "other_lt_assets": 1740.0,
-  "total_non_current_assets": 21875.0,
+  "total_non_current_assets": 20316.0,
   "total_assets": 78969.0,
   "payables": 5206.0,
   "st_debt": 12.0,
@@ -1112,11 +1099,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 15968.0,
   "total_liab_and_equity": 78969.0
 },
-            datetime.datetime(
-                2015,
-                12,
-                31
-            ): {
+                datetime.datetime(
+                    2015,
+                    12,
+                    31
+                ): {
   "cash": 5340.0,
   "cash_and_st_invest": 5340.0,
   "receivables": 6677.0,
@@ -1128,9 +1115,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 16090.0,
   "goodwill": 6598.0,
   "lt_invest": 246.0,
-  "def_tax_lt": 2367.0,
   "other_lt_assets": 1874.0,
-  "total_non_current_assets": 27175.0,
+  "total_non_current_assets": 24808.0,
   "total_assets": 78342.0,
   "payables": 5023.0,
   "st_debt": 9.0,
@@ -1149,11 +1135,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 14885.0,
   "total_liab_and_equity": 78342.0
 },
-            datetime.datetime(
-                2016,
-                3,
-                31
-            ): {
+                datetime.datetime(
+                    2016,
+                    3,
+                    31
+                ): {
   "cash": 4744.0,
   "cash_and_st_invest": 4744.0,
   "receivables": 6784.0,
@@ -1163,9 +1149,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 11668.0,
   "goodwill": 6693.0,
   "lt_invest": 246.0,
-  "def_tax_lt": 2486.0,
   "other_lt_assets": 1755.0,
-  "total_non_current_assets": 22848.0,
+  "total_non_current_assets": 20362.0,
   "total_assets": 78307.0,
   "payables": 5101.0,
   "st_debt": 13.0,
@@ -1184,11 +1169,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 15753.0,
   "total_liab_and_equity": 78307.0
 },
-            datetime.datetime(
-                2016,
-                6,
-                30
-            ): {
+                datetime.datetime(
+                    2016,
+                    6,
+                    30
+                ): {
   "cash": 5579.0,
   "cash_and_st_invest": 5579.0,
   "receivables": 6267.0,
@@ -1198,9 +1183,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 11432.0,
   "goodwill": 6660.0,
   "lt_invest": 246.0,
-  "def_tax_lt": 2536.0,
   "other_lt_assets": 1798.0,
-  "total_non_current_assets": 22672.0,
+  "total_non_current_assets": 20136.0,
   "total_assets": 78300.0,
   "payables": 5104.0,
   "st_debt": 263.0,
@@ -1219,11 +1203,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 15303.0,
   "total_liab_and_equity": 78300.0
 },
-            datetime.datetime(
-                2016,
-                9,
-                30
-            ): {
+                datetime.datetime(
+                    2016,
+                    9,
+                    30
+                ): {
   "cash": 4894.0,
   "cash_and_st_invest": 4894.0,
   "receivables": 5762.0,
@@ -1233,9 +1217,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 11194.0,
   "goodwill": 6708.0,
   "lt_invest": 247.0,
-  "def_tax_lt": 2579.0,
   "other_lt_assets": 1783.0,
-  "total_non_current_assets": 22511.0,
+  "total_non_current_assets": 19932.0,
   "total_assets": 76402.0,
   "payables": 4713.0,
   "st_debt": 263.0,
@@ -1254,11 +1237,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 15715.0,
   "total_liab_and_equity": 76402.0
 },
-            datetime.datetime(
-                2016,
-                12,
-                31
-            ): {
+                datetime.datetime(
+                    2016,
+                    12,
+                    31
+                ): {
   "cash": 5257.0,
   "cash_and_st_invest": 5257.0,
   "receivables": 5919.0,
@@ -1270,9 +1253,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 15322.0,
   "goodwill": 6003.0,
   "lt_invest": 249.0,
-  "def_tax_lt": 2683.0,
   "other_lt_assets": 1529.0,
-  "total_non_current_assets": 25786.0,
+  "total_non_current_assets": 23103.0,
   "total_assets": 74704.0,
   "payables": 4614.0,
   "st_debt": 209.0,
@@ -1291,11 +1273,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 13213.0,
   "total_liab_and_equity": 74704.0
 },
-            datetime.datetime(
-                2017,
-                3,
-                31
-            ): {
+                datetime.datetime(
+                    2017,
+                    3,
+                    31
+                ): {
   "cash": 8223.0,
   "cash_and_st_invest": 8223.0,
   "receivables": 6480.0,
@@ -1304,9 +1286,8 @@ finstmt.combined.statements.FinancialStatements(
   "total_current_assets": 35548.0,
   "net_ppe": 10427.0,
   "goodwill": 6034.0,
-  "def_tax_lt": 2940.0,
   "other_lt_assets": 561.0,
-  "total_non_current_assets": 19962.0,
+  "total_non_current_assets": 17022.0,
   "total_assets": 77549.0,
   "payables": 5302.0,
   "st_debt": 436.0,
@@ -1325,11 +1306,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 13660.0,
   "total_liab_and_equity": 77549.0
 },
-            datetime.datetime(
-                2017,
-                6,
-                30
-            ): {
+                datetime.datetime(
+                    2017,
+                    6,
+                    30
+                ): {
   "cash": 8926.0,
   "cash_and_st_invest": 8926.0,
   "receivables": 6583.0,
@@ -1338,9 +1319,8 @@ finstmt.combined.statements.FinancialStatements(
   "total_current_assets": 36991.0,
   "net_ppe": 10071.0,
   "goodwill": 6125.0,
-  "def_tax_lt": 2866.0,
   "other_lt_assets": 600.0,
-  "total_non_current_assets": 19662.0,
+  "total_non_current_assets": 16796.0,
   "total_assets": 78510.0,
   "payables": 5778.0,
   "st_debt": 5.0,
@@ -1359,11 +1339,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 14079.0,
   "total_liab_and_equity": 78510.0
 },
-            datetime.datetime(
-                2017,
-                9,
-                30
-            ): {
+                datetime.datetime(
+                    2017,
+                    9,
+                    30
+                ): {
   "cash": 8736.0,
   "cash_and_st_invest": 8736.0,
   "receivables": 6612.0,
@@ -1372,9 +1352,8 @@ finstmt.combined.statements.FinancialStatements(
   "total_current_assets": 37185.0,
   "net_ppe": 9851.0,
   "goodwill": 6179.0,
-  "def_tax_lt": 2845.0,
   "other_lt_assets": 627.0,
-  "total_non_current_assets": 19502.0,
+  "total_non_current_assets": 16657.0,
   "total_assets": 78560.0,
   "payables": 6113.0,
   "st_debt": 11.0,
@@ -1393,11 +1372,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 15697.0,
   "total_liab_and_equity": 78560.0
 },
-            datetime.datetime(
-                2017,
-                12,
-                31
-            ): {
+                datetime.datetime(
+                    2017,
+                    12,
+                    31
+                ): {
   "cash": 7381.0,
   "cash_and_st_invest": 7381.0,
   "receivables": 7376.0,
@@ -1408,9 +1387,8 @@ finstmt.combined.statements.FinancialStatements(
   "dep": 17383.0,
   "net_ppe": 14155.0,
   "goodwill": 6183.0,
-  "def_tax_lt": 1569.0,
   "other_lt_assets": 950.0,
-  "total_non_current_assets": 22857.0,
+  "total_non_current_assets": 21288.0,
   "total_assets": 76962.0,
   "payables": 6487.0,
   "st_debt": 1.0,
@@ -1429,11 +1407,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 13766.0,
   "total_liab_and_equity": 76962.0
 },
-            datetime.datetime(
-                2018,
-                3,
-                31
-            ): {
+                datetime.datetime(
+                    2018,
+                    3,
+                    31
+                ): {
   "cash": 7034.0,
   "cash_and_st_invest": 7034.0,
   "receivables": 7828.0,
@@ -1442,9 +1420,8 @@ finstmt.combined.statements.FinancialStatements(
   "total_current_assets": 37357.0,
   "net_ppe": 9486.0,
   "goodwill": 6359.0,
-  "def_tax_lt": 1579.0,
   "other_lt_assets": 974.0,
-  "total_non_current_assets": 18398.0,
+  "total_non_current_assets": 16819.0,
   "total_assets": 78014.0,
   "payables": 6938.0,
   "st_debt": 7.0,
@@ -1462,11 +1439,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 15272.0,
   "total_liab_and_equity": 78014.0
 },
-            datetime.datetime(
-                2018,
-                6,
-                30
-            ): {
+                datetime.datetime(
+                    2018,
+                    6,
+                    30
+                ): {
   "cash": 7786.0,
   "cash_and_st_invest": 7786.0,
   "receivables": 7922.0,
@@ -1475,9 +1452,8 @@ finstmt.combined.statements.FinancialStatements(
   "total_current_assets": 38641.0,
   "net_ppe": 9244.0,
   "goodwill": 6249.0,
-  "def_tax_lt": 1521.0,
   "other_lt_assets": 953.0,
-  "total_non_current_assets": 17967.0,
+  "total_non_current_assets": 16446.0,
   "total_assets": 78987.0,
   "payables": 6831.0,
   "st_debt": 35.0,
@@ -1495,11 +1471,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 14942.0,
   "total_liab_and_equity": 78987.0
 },
-            datetime.datetime(
-                2018,
-                9,
-                30
-            ): {
+                datetime.datetime(
+                    2018,
+                    9,
+                    30
+                ): {
   "cash": 7189.0,
   "cash_and_st_invest": 7189.0,
   "receivables": 7863.0,
@@ -1508,9 +1484,8 @@ finstmt.combined.statements.FinancialStatements(
   "total_current_assets": 38454.0,
   "net_ppe": 9106.0,
   "goodwill": 6233.0,
-  "def_tax_lt": 1190.0,
   "other_lt_assets": 927.0,
-  "total_non_current_assets": 17456.0,
+  "total_non_current_assets": 16266.0,
   "total_assets": 78209.0,
   "payables": 6788.0,
   "st_debt": 59.0,
@@ -1528,11 +1503,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 15890.0,
   "total_liab_and_equity": 78209.0
 },
-            datetime.datetime(
-                2018,
-                12,
-                31
-            ): {
+                datetime.datetime(
+                    2018,
+                    12,
+                    31
+                ): {
   "cash": 6968.0,
   "cash_and_st_invest": 6968.0,
   "receivables": 8714.0,
@@ -1543,9 +1518,8 @@ finstmt.combined.statements.FinancialStatements(
   "dep": 16207.0,
   "net_ppe": 13574.0,
   "goodwill": 6217.0,
-  "def_tax_lt": 1363.0,
   "other_lt_assets": 962.0,
-  "total_non_current_assets": 22116.0,
+  "total_non_current_assets": 20753.0,
   "total_assets": 78509.0,
   "payables": 7051.0,
   "current_lt_debt": 10.0,
@@ -1563,11 +1537,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 14080.0,
   "total_liab_and_equity": 78509.0
 },
-            datetime.datetime(
-                2019,
-                3,
-                31
-            ): {
+                datetime.datetime(
+                    2019,
+                    3,
+                    31
+                ): {
   "cash": 6358.0,
   "cash_and_st_invest": 6358.0,
   "receivables": 8881.0,
@@ -1577,9 +1551,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 9561.0,
   "goodwill": 6191.0,
   "lt_invest": 1225.0,
-  "def_tax_lt": 1257.0,
   "other_lt_assets": 1349.0,
-  "total_non_current_assets": 19583.0,
+  "total_non_current_assets": 18326.0,
   "total_assets": 78726.0,
   "payables": 7198.0,
   "st_debt": 4.0,
@@ -1598,11 +1571,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 15478.0,
   "total_liab_and_equity": 78726.0
 },
-            datetime.datetime(
-                2019,
-                6,
-                30
-            ): {
+                datetime.datetime(
+                    2019,
+                    6,
+                    30
+                ): {
   "cash": 6528.0,
   "cash_and_st_invest": 6528.0,
   "receivables": 8903.0,
@@ -1612,9 +1585,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 9327.0,
   "goodwill": 6211.0,
   "lt_invest": 1280.0,
-  "def_tax_lt": 1361.0,
   "other_lt_assets": 1370.0,
-  "total_non_current_assets": 19549.0,
+  "total_non_current_assets": 18188.0,
   "total_assets": 79187.0,
   "payables": 7022.0,
   "current_lt_debt": 13.0,
@@ -1632,11 +1604,11 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 14878.0,
   "total_liab_and_equity": 79187.0
 },
-            datetime.datetime(
-                2019,
-                9,
-                30
-            ): {
+                datetime.datetime(
+                    2019,
+                    9,
+                    30
+                ): {
   "cash": 6380.0,
   "cash_and_st_invest": 6380.0,
   "receivables": 8167.0,
@@ -1646,9 +1618,8 @@ finstmt.combined.statements.FinancialStatements(
   "net_ppe": 9131.0,
   "goodwill": 6142.0,
   "lt_invest": 1328.0,
-  "def_tax_lt": 1254.0,
   "other_lt_assets": 1400.0,
-  "total_non_current_assets": 19255.0,
+  "total_non_current_assets": 18001.0,
   "total_assets": 77993.0,
   "payables": 6141.0,
   "current_lt_debt": 25.0,
@@ -1666,7 +1637,281 @@ finstmt.combined.statements.FinancialStatements(
   "total_equity": 14993.0,
   "total_liab_and_equity": 77993.0
 }
-        }
-    )
+            },
+            statement_name='Balance Sheet'
+        ),
+        'Metrics': finstmt.core.statement_series.StatementSeries(
+            statements={
+                datetime.datetime(2012, 3, 31): {},
+                datetime.datetime(
+                    2012,
+                    6,
+                    30
+                ): {
+  "capex": -2739.0,
+  "non_cash_expenses": -1.0,
+  "fcf": 3708.0
+},
+                datetime.datetime(
+                    2012,
+                    9,
+                    30
+                ): {
+  "capex": 385.0,
+  "non_cash_expenses": 276.0,
+  "fcf": 1555.0
+},
+                datetime.datetime(
+                    2012,
+                    12,
+                    31
+                ): {
+  "capex": 17715.0,
+  "non_cash_expenses": 14056.0,
+  "fcf": -2088.0
+},
+                datetime.datetime(
+                    2013,
+                    3,
+                    31
+                ): {
+  "capex": -3607.0,
+  "non_cash_expenses": 1.0,
+  "fcf": 4313.0
+},
+                datetime.datetime(
+                    2013,
+                    6,
+                    30
+                ): {
+  "capex": -40.0,
+  "non_cash_expenses": -1.0,
+  "fcf": 2771.0
+},
+                datetime.datetime(
+                    2013,
+                    9,
+                    30
+                ): {
+  "capex": 38.0,
+  "fcf": 2077.0
+},
+                datetime.datetime(
+                    2013,
+                    12,
+                    31
+                ): {
+  "capex": 18464.0,
+  "non_cash_expenses": 14261.0,
+  "fcf": -1946.0
+},
+                datetime.datetime(
+                    2014,
+                    3,
+                    31
+                ): {
+  "capex": -4302.0,
+  "non_cash_expenses": 14.0,
+  "fcf": 4973.0
+},
+                datetime.datetime(
+                    2014,
+                    6,
+                    30
+                ): {
+  "capex": -195.0,
+  "fcf": 1662.0
+},
+                datetime.datetime(
+                    2014,
+                    9,
+                    30
+                ): {
+  "capex": -228.0,
+  "non_cash_expenses": 21.0,
+  "fcf": 1261.0
+},
+                datetime.datetime(
+                    2014,
+                    12,
+                    31
+                ): {
+  "capex": 19222.0,
+  "non_cash_expenses": 14996.0,
+  "fcf": -2665.0
+},
+                datetime.datetime(
+                    2015,
+                    3,
+                    31
+                ): {
+  "capex": -4421.0,
+  "non_cash_expenses": 124.0,
+  "fcf": 5854.0
+},
+                datetime.datetime(
+                    2015,
+                    6,
+                    30
+                ): {
+  "capex": -186.0,
+  "non_cash_expenses": 1.0,
+  "fcf": 1310.0
+},
+                datetime.datetime(
+                    2015,
+                    9,
+                    30
+                ): {
+  "capex": -154.0,
+  "non_cash_expenses": 31.0,
+  "fcf": 1047.0
+},
+                datetime.datetime(
+                    2015,
+                    12,
+                    31
+                ): {
+  "capex": 20161.0,
+  "non_cash_expenses": 15907.0,
+  "fcf": -3001.0
+},
+                datetime.datetime(
+                    2016,
+                    3,
+                    31
+                ): {
+  "capex": -4422.0,
+  "fcf": 4515.0
+},
+                datetime.datetime(
+                    2016,
+                    6,
+                    30
+                ): {
+  "capex": -236.0,
+  "non_cash_expenses": 31.0,
+  "fcf": 1728.0
+},
+                datetime.datetime(
+                    2016,
+                    9,
+                    30
+                ): {
+  "capex": -238.0,
+  "non_cash_expenses": 9.0,
+  "fcf": 624.0
+},
+                datetime.datetime(
+                    2016,
+                    12,
+                    31
+                ): {
+  "capex": 20746.0,
+  "non_cash_expenses": 17220.0,
+  "fcf": -4089.0
+},
+                datetime.datetime(
+                    2017,
+                    3,
+                    31
+                ): {
+  "capex": -4895.0,
+  "fcf": 4746.0
+},
+                datetime.datetime(
+                    2017,
+                    6,
+                    30
+                ): {
+  "capex": -356.0,
+  "non_cash_expenses": 85.0,
+  "fcf": 1310.0
+},
+                datetime.datetime(
+                    2017,
+                    9,
+                    30
+                ): {
+  "capex": -220.0,
+  "non_cash_expenses": 36.0,
+  "fcf": 797.0
+},
+                datetime.datetime(
+                    2017,
+                    12,
+                    31
+                ): {
+  "capex": 21687.0,
+  "non_cash_expenses": 17449.0,
+  "fcf": -5733.0
+},
+                datetime.datetime(
+                    2018,
+                    3,
+                    31
+                ): {
+  "capex": -4669.0,
+  "non_cash_expenses": -2.0,
+  "fcf": 5402.0
+},
+                datetime.datetime(
+                    2018,
+                    6,
+                    30
+                ): {
+  "capex": -242.0,
+  "non_cash_expenses": 7.0,
+  "fcf": 1447.0
+},
+                datetime.datetime(
+                    2018,
+                    9,
+                    30
+                ): {
+  "capex": -138.0,
+  "non_cash_expenses": 13.0,
+  "fcf": 1335.0
+},
+                datetime.datetime(
+                    2018,
+                    12,
+                    31
+                ): {
+  "capex": 20675.0,
+  "non_cash_expenses": 16174.0,
+  "fcf": -3756.0
+},
+                datetime.datetime(
+                    2019,
+                    3,
+                    31
+                ): {
+  "capex": -4013.0,
+  "non_cash_expenses": 39.0,
+  "fcf": 5102.0
+},
+                datetime.datetime(
+                    2019,
+                    6,
+                    30
+                ): {
+  "capex": -234.0,
+  "non_cash_expenses": 14.0,
+  "fcf": 2003.0
+},
+                datetime.datetime(
+                    2019,
+                    9,
+                    30
+                ): {
+  "capex": -196.0,
+  "non_cash_expenses": 2.0,
+  "fcf": 1374.0
+}
+            },
+            statement_name='Metrics'
+        )
+    }
 )
 '''

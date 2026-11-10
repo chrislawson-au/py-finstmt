@@ -1,0 +1,223 @@
+import dataclasses
+import operator
+from dataclasses import dataclass
+from typing import Any, Callable, Dict, Optional, Self, Sequence, Tuple, TypeVar, Union
+
+import matplotlib.pyplot as plt
+import pandas as pd
+
+from finstmt.config.forecast import ForecastConfig
+from finstmt.config.item import ItemConfig
+from finstmt.exceptions import ForecastNotFitException, ForecastNotPredictedException
+from finstmt.forecast.models.chooser import get_model
+from finstmt.forecast.models.manual import ManualForecastModel
+
+T = TypeVar("T")
+
+
+@dataclass
+class ForecastItemSeries:
+    """
+    The main class to represent a forecast of an individual item.
+    """
+
+    orig_series: pd.Series
+    config: ForecastConfig
+    item_config: ItemConfig
+    pct_of_series: Optional[pd.Series] = None
+    pct_of_config: Optional[ItemConfig] = None
+    _result: Optional[pd.Series] = None
+    _result_pct: Optional[pd.Series] = None
+
+    def __post_init__(self):
+        self.model = get_model(self.config, self.item_config)
+
+    def fit(self):
+        self.model.fit(self.series)
+
+    def predict(self) -> pd.Series:
+        if not self.model.has_been_fit:
+            raise ForecastNotFitException("call .fit before .predict")
+        result = self.model.predict()
+
+        # A pct-of item is forecasted as a ratio; the raw result is stored
+        # separately until the solver converts it back to a value
+        if self.item_config.forecast.pct_of is not None:
+            self._result_pct = result
+        else:
+            self._result = result
+
+        return result
+
+    def plot(
+        self, ax: Optional[plt.Axes] = None, figsize: Tuple[int, int] = (12, 5)
+    ) -> plt.Figure:
+        if not self.model.has_prediction:
+            raise ForecastNotPredictedException("call .predict before .plot")
+        return self.model.plot(ax=ax, figsize=figsize, title=self.name)
+
+    def to_manual(
+        self,
+        use_levels: bool = False,
+        adjustments: Optional[Union[Sequence[float], Dict[int, float]]] = None,
+        replacements: Optional[Union[Sequence[float], Dict[int, float]]] = None,
+    ):
+        if not self.model.has_prediction:
+            raise ForecastNotPredictedException(
+                "call .fit then .predict before .to_manual"
+            )
+
+        if self.item_config.forecast.pct_of is not None:
+            raise NotImplementedError(
+                f"to_manual does not support pct-of items yet: {self.item_config.key} "
+                f"is forecast as a percent of {self.item_config.forecast.pct_of}. Set "
+                "its forecast method to 'manual' and its manual_forecasts levels to "
+                "the ratios instead."
+            )
+        result = self._result
+        if result is None:
+            raise ForecastNotPredictedException(
+                "call .fit then .predict before .to_manual"
+            )
+
+        if use_levels:
+            # .values can be a read-only view under pandas copy-on-write;
+            # copy so the adjustment/replacement writes below are legal
+            values = result.to_numpy(copy=True)
+        else:
+            # Growth
+            values = result.pct_change().to_numpy(copy=True)
+            # Fill in first growth
+            values[0] = (result.iloc[0] - self.series.iloc[-1]) / self.series.iloc[-1]
+
+        self.item_config.forecast.method = "manual"
+
+        if adjustments is not None:
+            if not isinstance(adjustments, dict) and len(adjustments) != len(values):
+                raise ValueError(
+                    f"must pass equal length adjustments as number of periods. "
+                    f"Got {len(adjustments)} adjustments for {len(values)} periods"
+                )
+            adjustments = _adjust_to_dict(adjustments)
+            for i, adj in adjustments.items():
+                values[i] += adj
+
+        if replacements is not None:
+            if not isinstance(replacements, dict) and len(replacements) != len(values):
+                raise ValueError(
+                    f"must pass equal length adjustments as number of periods. "
+                    f"Got {len(replacements)} adjustments for {len(values)} periods"
+                )
+            replacements = _replace_to_dict(replacements)
+            for i, replace in replacements.items():
+                values[i] = replace
+
+        if use_levels:
+            self.item_config.forecast.manual_forecasts["levels"] = list(values)
+            self.item_config.forecast.manual_forecasts["growth"] = []
+        else:
+            self.item_config.forecast.manual_forecasts["levels"] = []
+            self.item_config.forecast.manual_forecasts["growth"] = list(values)
+        self.model = ManualForecastModel(self.config, self.item_config)
+        self.model.fit(self.series)
+        # Store the manual prediction so .result reflects the new values.
+        # Previously this happened by accident: .values returned a writable
+        # view and the replacement writes above mutated _result in place.
+        self._result = self.model.predict()
+
+    @property
+    def series(self) -> pd.Series:
+        if self.pct_of_series is None:
+            return self.orig_series
+        else:
+            return self.orig_series / self.pct_of_series
+
+    @property
+    def result(self) -> pd.Series:
+        if not self.model.has_prediction:
+            raise ForecastNotPredictedException(
+                "call .fit then .predict before .result"
+            )
+        return self._result
+
+    @property
+    def result_pct(self) -> Optional[pd.Series]:
+        """Get percentage forecast result if applicable"""
+        return self._result_pct
+
+    @property
+    def name(self) -> str:
+        if self.pct_of_config is None:
+            return self.item_config.display_name
+
+        # Percentage of series
+        return f"{self.item_config.display_name} % {self.pct_of_config.display_name}"
+
+    def copy(self, **updates) -> Self:
+        return dataclasses.replace(self, **updates)
+
+    def __round__(self, n: Optional[int] = None) -> "ForecastItemSeries":
+        return _apply_operation_to_forecast(self, n, round)  # type: ignore[arg-type]
+
+    def __add__(self, other: T) -> "ForecastItemSeries":
+        return _apply_operation_to_forecast(self, other, operator.add)
+
+    def __sub__(self, other: T) -> "ForecastItemSeries":
+        return _apply_operation_to_forecast(self, other, operator.sub)
+
+    def __mul__(self, other: T) -> "ForecastItemSeries":
+        return _apply_operation_to_forecast(self, other, operator.mul)
+
+    def __truediv__(self, other: T) -> "ForecastItemSeries":
+        return _apply_operation_to_forecast(self, other, operator.truediv)
+
+
+def _apply_operation_to_forecast(
+    forecast: ForecastItemSeries,
+    other: T,
+    func: Callable[[Any, T], Any],
+) -> ForecastItemSeries:
+    updates: Dict[str, Any] = {}
+    updates["orig_series"] = func(
+        forecast.orig_series, _get_attr_if_needed(other, "orig_series")
+    )
+    if forecast.pct_of_series is not None:
+        updates["pct_of_series"] = func(
+            forecast.pct_of_series, _get_attr_if_needed(other, "pct_of_series")
+        )
+    if forecast.pct_of_config is not None:
+        updates["pct_of_config"] = func(
+            forecast.pct_of_config, _get_attr_if_needed(other, "pct_of_config")
+        )
+    updates["item_config"] = func(
+        forecast.item_config, _get_attr_if_needed(other, "item_config")
+    )
+    return forecast.copy(**updates)
+
+
+def _get_attr_if_needed(other: Any, attr: str) -> Any:
+    if isinstance(other, ForecastItemSeries):
+        return getattr(other, attr)
+    else:
+        return other
+
+
+def _adjust_to_dict(
+    seq_or_dict: Union[Sequence[float], Dict[int, float]],
+) -> Dict[int, float]:
+    if isinstance(seq_or_dict, dict):
+        return seq_or_dict
+
+    # If adjustment is 0 or None, skip the entry, otherwise add to the dict
+    adjust_dict = {i: val for i, val in enumerate(seq_or_dict) if val}
+    return adjust_dict
+
+
+def _replace_to_dict(
+    seq_or_dict: Union[Sequence[float], Dict[int, float]],
+) -> Dict[int, float]:
+    if isinstance(seq_or_dict, dict):
+        return seq_or_dict
+
+    replace_dict = {i: val for i, val in enumerate(seq_or_dict)}
+    return replace_dict

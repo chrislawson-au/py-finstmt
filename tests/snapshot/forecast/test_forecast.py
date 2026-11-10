@@ -6,6 +6,7 @@ to make the snapshot consistent across different machines.
 
 When updating snapshots, check the generated folder for PDFs of the plots.
 """
+
 import sys
 from typing import Final, Sequence
 
@@ -15,13 +16,14 @@ from _pytest.fixtures import FixtureRequest
 from syrupy import SnapshotAssertion
 
 from finstmt import FinancialStatements
-from finstmt.exc import BalanceSheetNotBalancedException
+from finstmt.exceptions import BalanceSheetNotBalancedException
 from tests.config import GENERATED_PATH
 from tests.fixtures.forecast.adjust_config import (
     FORECAST_ADJUSTS,
     AdjustDict,
     adjust_forecast_methods,
 )
+from tests.markers import requires_prophet
 from tests.snapshot.forecast.snapshot_format import format_statement_for_snapshot
 
 matplotlib.use("Agg")
@@ -32,6 +34,7 @@ pdf_path = GENERATED_PATH / "test_forecast_pdfs"
 pdf_path.mkdir(parents=True, exist_ok=True)
 
 
+@requires_prophet
 def test_forecast_annual_stockrow_cat(
     annual_stockrow_stmts_cat: FinancialStatements, snapshot, request
 ):
@@ -46,6 +49,7 @@ def test_forecast_annual_stockrow_cat(
     )
 
 
+@requires_prophet
 def test_forecast_annual_stockrow_cat_no_balance(
     annual_stockrow_stmts_cat: FinancialStatements, snapshot, request
 ):
@@ -61,6 +65,7 @@ def test_forecast_annual_stockrow_cat_no_balance(
     )
 
 
+@requires_prophet
 def test_forecast_annual_stockrow_cat_change_bs_diff(
     annual_stockrow_stmts_cat: FinancialStatements, snapshot, request
 ):
@@ -76,16 +81,17 @@ def test_forecast_annual_stockrow_cat_change_bs_diff(
     )
 
 
+@requires_prophet
 def test_forecast_annual_stockrow_cat_make_forecast_and_plug(
     annual_stockrow_stmts_cat: FinancialStatements, snapshot, request
 ):
     stmts = annual_stockrow_stmts_cat.copy()
-    stmts.config.update("total_debt", ["forecast_config", "make_forecast"], True)
-    stmts.config.update("st_debt", ["forecast_config", "make_forecast"], False)
-    stmts.config.update("def_tax_lt", ["forecast_config", "method"], "manual")
+    stmts.config.update("total_debt", ["forecast", "make_forecast"], True)
+    stmts.config.update("st_debt", ["forecast", "make_forecast"], False)
+    stmts.config.update("def_tax_lt", ["forecast", "method"], "manual")
     stmts.config.update(
         "def_tax_lt",
-        ["forecast_config", "manual_forecasts"],
+        ["forecast", "manual_forecasts"],
         {"levels": [], "growth": [4, 5]},
     )
 
@@ -98,8 +104,8 @@ def test_forecast_annual_stockrow_cat_make_forecast_and_plug(
             exclude=("gross_ppe", "dep"),
         )
 
-    stmts.config.update("total_debt", ["forecast_config", "plug"], True)
-    stmts.config.update("lt_debt", ["forecast_config", "plug"], False)
+    stmts.config.update("total_debt", ["forecast", "plug"], True)
+    stmts.config.update("lt_debt", ["forecast", "plug"], False)
 
     _forecast_test(
         stmts,
@@ -110,10 +116,16 @@ def test_forecast_annual_stockrow_cat_make_forecast_and_plug(
     )
 
 
+@requires_prophet
 def test_forecast_quarterly_stockrow_cat(
     quarterly_stockrow_stmts_cat: FinancialStatements, snapshot, request
 ):
     stmts = quarterly_stockrow_stmts_cat
+    # Cash is empty in the quarterly CAT data, so cash_and_st_invest is
+    # forecasted directly rather than calculated and the plug must move there
+    # for it to flow through to total_assets.
+    stmts.config.update("cash", ["forecast", "plug"], False)
+    stmts.config.update("cash_and_st_invest", ["forecast", "plug"], True)
 
     _forecast_test(
         stmts,
@@ -128,8 +140,8 @@ def test_forecast_annual_stockrow_mar(
     annual_stockrow_stmts_mar: FinancialStatements, snapshot, request
 ):
     stmts = annual_stockrow_stmts_mar
-    stmts.config.update("cash", ["forecast_config", "plug"], False)
-    stmts.config.update("cash_and_st_invest", ["forecast_config", "plug"], True)
+    stmts.config.update("cash", ["forecast", "plug"], False)
+    stmts.config.update("cash_and_st_invest", ["forecast", "plug"], True)
 
     _forecast_test(
         stmts,
@@ -144,8 +156,9 @@ def test_forecast_quarterly_stockrow_mar(
     quarterly_stockrow_stmts_mar: FinancialStatements, snapshot, request
 ):
     stmts = quarterly_stockrow_stmts_mar
-    stmts.config.update("cash", ["forecast_config", "plug"], False)
-    stmts.config.update("cash_and_st_invest", ["forecast_config", "plug"], True)
+    stmts.config.update("cash", ["forecast", "plug"], False)
+    # I don't think this is valid any more. Cash is a plug and cash_and_st_invest is a calculated field
+    # stmts.config.update("cash_and_st_invest", ["forecast", "plug"], True)
 
     _forecast_test(
         stmts,
@@ -173,7 +186,7 @@ def test_forecast_quarterly_capiq_cat(
     quarterly_capiq_stmts: FinancialStatements, snapshot, request
 ):
     stmts = quarterly_capiq_stmts
-
+    print("REQUEST:", request)
     _forecast_test(
         stmts,
         snapshot,

@@ -1,69 +1,120 @@
+# py-finstmt
 
+[![CI](https://github.com/chrislawson-au/py-finstmt/actions/workflows/package.yml/badge.svg?branch=master)](https://github.com/chrislawson-au/py-finstmt/actions/workflows/package.yml)
+![Python 3.12 to 3.15](https://img.shields.io/badge/python-3.12%20%7C%203.13%20%7C%203.14%20%7C%203.15-blue)
+![MIT license](https://img.shields.io/badge/license-MIT-green)
 
-[![](https://codecov.io/gh/nickderobertis/py-finstmt/branch/master/graph/badge.svg)](https://codecov.io/gh/nickderobertis/py-finstmt)
-[![PyPI](https://img.shields.io/pypi/v/finstmt)](https://pypi.org/project/finstmt/)
-![PyPI - License](https://img.shields.io/pypi/l/finstmt)
-[![Documentation](https://img.shields.io/badge/documentation-pass-green)](https://nickderobertis.github.io/py-finstmt/)
-![Tests Run on Ubuntu Python Versions](https://img.shields.io/badge/Tests%20Ubuntu%2FPython-3.8%20%7C%203.9%20%7C%203.10-blue)
-![Tests Run on Macos Python Versions](https://img.shields.io/badge/Tests%20Macos%2FPython-3.8%20%7C%203.9%20%7C%203.10-blue)
-![Tests Run on Windows Python Versions](https://img.shields.io/badge/Tests%20Windows%2FPython-3.8%20%7C%203.9%20%7C%203.10-blue)
-[![Github Repo](https://img.shields.io/badge/repo-github-informational)](https://github.com/nickderobertis/py-finstmt/)
+Work with financial statement data in Python. finstmt loads income statements
+and balance sheets, calculates derived items such as free cash flow, forecasts
+the statements while keeping the balance sheet balanced, and models deals
+(transactions, debt waterfalls, IRR and MOIC) on top of a forecast.
 
+> **finstmt 2.0 is in alpha.** This fork of
+> [nickderobertis/py-finstmt](https://github.com/nickderobertis/py-finstmt)
+> restructures the API. Code written for 1.x needs changes: see
+> [MIGRATION.md](MIGRATION.md). The 1.x releases remain on PyPI.
 
-#  py-finstmt
+## Install
 
-## Overview
+2.0 is not on PyPI yet. Install the alpha from its tag (Python 3.12 or newer):
 
-Contains classes to work with financial statement data. Can calculate free cash flows and help project financial statements.
-
-## Getting Started
-
-Install `finstmt`:
-
-```
-pip install finstmt
+```bash
+pip install "finstmt @ git+https://github.com/chrislawson-au/py-finstmt@v2.0.0-alpha.1"
 ```
 
-A simple example:
+The `forecast` extra adds Prophet, which the `auto` forecast method uses:
+
+```bash
+pip install "finstmt[forecast] @ git+https://github.com/chrislawson-au/py-finstmt@v2.0.0-alpha.1"
+```
+
+## Quick start
+
+Describe the line items, load their history, and forecast:
 
 ```python
-from finstmt import BalanceSheets, IncomeStatements, FinancialStatements
 import pandas as pd
 
-bs_path = r'WMT Balance Sheet.xlsx'
-inc_path = r'WMT Income Statement.xlsx'
-bs_df = pd.read_excel(bs_path)
-inc_df = pd.read_excel(inc_path)
-bs_data = BalanceSheets.from_df(bs_df)
-inc_data = IncomeStatements.from_df(inc_df)
-stmts = FinancialStatements(inc_data, bs_data)
+from finstmt import FinancialStatements, ForecastItemConfig, ItemConfig, StatementConfig
+
+income = StatementConfig(
+    key="inc",
+    display_name="Income Statement",
+    items_config_list=[
+        ItemConfig(
+            "revenue",
+            "Revenue",
+            extract_names=["revenue"],
+            forecast=ForecastItemConfig(method="cagr"),
+        ),
+        ItemConfig(
+            "cogs",
+            "Cost of Goods Sold",
+            extract_names=["cogs"],
+            forecast=ForecastItemConfig(method="mean", pct_of="revenue"),
+        ),
+        ItemConfig(
+            "gross_profit",
+            "Gross Profit",
+            expr_str="revenue[t] - cogs[t]",
+            forecast=ForecastItemConfig(make_forecast=False),
+        ),
+    ],
+)
+
+history = pd.DataFrame(
+    {"2022-12-31": [100.0, 60.0], "2023-12-31": [110.0, 65.0], "2024-12-31": [121.0, 70.0]},
+    index=["Revenue", "COGS"],
+)
+stmts = FinancialStatements.from_df(history, [income], recompute_calculated=True)
+
+forecast = stmts.forecast(periods=2)
+assert forecast.revenue.round(2).tolist() == [133.1, 146.41]  # 10% CAGR
+assert forecast.gross_profit.round(2).tolist() == [54.6, 60.06]  # COGS at its mean share of revenue
 ```
 
-See a
-[more in-depth tutorial here.](
-https://nickderobertis.github.io/py-finstmt/tutorial.html
-)
+Rows match an item when their label equals one of its `extract_names` once
+the label is standardized (lower-cased, punctuation removed), so write
+`extract_names` in lower case. Calculated items use `expr_str`, where
+`[t]` is the current period and `[t-1]` the previous one.
 
-## Links
+Deal metrics work on any cash flow series:
 
-See the
-[documentation here.](
-https://nickderobertis.github.io/py-finstmt/
-)
+```python
+from finstmt.deals import irr, moic
 
-## Development Status
+flows = [-100, 10, 10, 120]
+assert round(irr(flows), 4) == 0.1294
+assert moic(flows) == 1.4
+```
 
-This project is currently in early-stage development. There may be
-breaking changes often. While the major version is 0, minor version
-upgrades will often have breaking changes.
+## Reported statements
 
-## Developing
+finstmt ships configs for a standard income statement, balance sheet and a
+metrics statement (free cash flow and friends). This uses the sample data in
+this repository:
 
-See the [development guide](
-https://github.com/nickderobertis/py-finstmt/blob/master/DEVELOPING.md
-) for development details.
+```python
+from finstmt.config.statement import STATEMENT_CONFIGS
 
-## Author
+income_df = pd.read_csv("tests/sources/stockrow/CAT/annual_income.csv", index_col=0)
+balance_df = pd.read_csv("tests/sources/stockrow/CAT/annual_bs.csv", index_col=0)
 
-Created by Nick DeRobertis. MIT License.
+cat = FinancialStatements.from_df(pd.concat([income_df, balance_df]), STATEMENT_CONFIGS)
+cat.revenue  # a pandas Series indexed by period end
+cat.fcf  # free cash flow
+```
 
+## More
+
+- [MIGRATION.md](MIGRATION.md): moving from 1.x to 2.0.
+- [nbexamples/](nbexamples/): notebooks on forecasting and on combining and
+  scaling statements.
+- [DEVELOPING.md](DEVELOPING.md): development setup, including the local Sphinx
+  docs (`just docs`).
+
+## Credits
+
+Created by Nick DeRobertis. The 2.0 restructure and the deals layer are
+developed in this fork by [chrislawson-au](https://github.com/chrislawson-au).
+MIT License.

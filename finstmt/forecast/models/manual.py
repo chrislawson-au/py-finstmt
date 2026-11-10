@@ -2,69 +2,68 @@ from typing import Optional
 
 import pandas as pd
 
-from finstmt.exc import ImproperManualForecastException
-from finstmt.forecast.config import ForecastConfig, ForecastItemConfig
+from finstmt.config.forecast import ForecastConfig
+from finstmt.config.item import ItemConfig
+from finstmt.exceptions import ImproperManualForecastException
 from finstmt.forecast.models.base import ForecastModel
-from finstmt.items.config import ItemConfig
 
 
+# TODO: updated this to be more generic, but could break backwards compatibility
+# could consider having "levels" and "growth" for backwards compatibility for some time
 class ManualForecastModel(ForecastModel):
     recent: Optional[float] = None
 
     def __init__(
         self,
         config: ForecastConfig,
-        item_config: ForecastItemConfig,
-        base_config: ItemConfig,
+        item_config: ItemConfig,
     ):
-        super().__init__(config, item_config, base_config)
-        self._set_growths_levels()
+        super().__init__(config, item_config)
+        self._set_manual_forecasts()
         self._validate()
 
     def _validate(self):
-        if not self.growths and not self.levels:
+        if not self.forecast_values:
             raise ImproperManualForecastException(
-                "must provide either growth or levels for manual forecast"
+                "must provide values for manual forecast"
             )
-        if self.growths and self.levels:
+        # If only one value is provided, then repeat it for all periods
+        if len(self.forecast_values) == 1:
+            self.forecast_values = [self.forecast_values[0]] * self.config.periods
+        elif len(self.forecast_values) != self.config.periods:
             raise ImproperManualForecastException(
-                "must only provide one of growth or levels for manual forecast"
+                f"{len(self.forecast_values)} values were provided for {self.config.periods} forecast periods"
             )
 
-        forecast_length_error_str = (
-            f"were provided for {self.config.periods} forecast periods"
-        )
-        if self.growths:
-            if len(self.growths) != self.config.periods:
-                raise ImproperManualForecastException(
-                    f"{len(self.growths)} growth rates {forecast_length_error_str}"
-                )
+    def _set_manual_forecasts(self):
+        manual = self.item_config.forecast.manual_forecasts
+        if manual.get("levels"):
+            self.forecast_type = "levels"
+            self.forecast_values = manual["levels"]
+        elif manual.get("growth"):
+            self.forecast_type = "growth"
+            self.forecast_values = manual["growth"]
         else:
-            if len(self.levels) != self.config.periods:
-                raise ImproperManualForecastException(
-                    f"{len(self.levels)} levels {forecast_length_error_str}"
-                )
-
-    def _set_growths_levels(self):
-        self.growths = self.item_config.manual_forecasts["growth"]
-        self.levels = self.item_config.manual_forecasts["levels"]
+            self.forecast_type = "levels"
+            self.forecast_values = []
 
     def fit(self, series: pd.Series):
         self.recent = series.iloc[-1]
         super().fit(series)
 
     def predict(self) -> pd.Series:
-        if self.growths:
+        if self.forecast_type == "growth":
             values = []
             last_value = self.recent
-            for growth in self.growths:
+            for growth in self.forecast_values:
                 next_value = last_value * (1 + growth)
                 values.append(next_value)
                 last_value = next_value
         else:
-            values = self.levels
+            values = self.forecast_values
 
-        self.result = pd.Series(values, index=self._future_date_range)
+        # name matches the "mean" column the other models' results carry
+        self.result = pd.Series(values, index=self._future_date_range, name="mean")
         self.result_df = pd.DataFrame(
             pd.concat([self.orig_series, self.result]), columns=["mean"]
         )

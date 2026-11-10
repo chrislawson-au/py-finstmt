@@ -3,7 +3,12 @@ import os
 import pandas as pd
 import pytest
 
-from finstmt import BalanceSheets, FinancialStatements, IncomeStatements
+from finstmt import FinancialStatements
+from finstmt.config.statement import (
+    BALANCE_SHEET_CONFIG,
+    INCOME_STATEMENT_CONFIG,
+)
+from finstmt.core.statement_series import StatementSeries
 from tests.fixtures.data.common import DATA_PATH
 
 STOCKROW_PATH = os.path.join(DATA_PATH, "stockrow")
@@ -17,8 +22,12 @@ def annual_stockrow_income_df_cat() -> pd.DataFrame:
 
 
 @pytest.fixture
-def annual_stockrow_income_stmt_cat() -> IncomeStatements:
-    stmt = IncomeStatements.from_df(annual_stockrow_income_df_cat())
+def annual_stockrow_income_stmt_cat() -> StatementSeries:
+    stmt = StatementSeries.from_df(
+        annual_stockrow_income_df_cat(),
+        INCOME_STATEMENT_CONFIG.display_name,
+        INCOME_STATEMENT_CONFIG.items_config_list,
+    )
     return stmt
 
 
@@ -29,8 +38,12 @@ def annual_stockrow_bs_df_cat() -> pd.DataFrame:
 
 
 @pytest.fixture
-def annual_stockrow_bs_stmt_cat() -> BalanceSheets:
-    stmt = BalanceSheets.from_df(annual_stockrow_bs_df_cat())
+def annual_stockrow_bs_stmt_cat() -> StatementSeries:
+    stmt = StatementSeries.from_df(
+        annual_stockrow_bs_df_cat(),
+        BALANCE_SHEET_CONFIG.display_name,
+        BALANCE_SHEET_CONFIG.items_config_list,
+    )
     return stmt
 
 
@@ -39,7 +52,7 @@ def annual_stockrow_stmts_cat(
     annual_stockrow_income_stmt_cat, annual_stockrow_bs_stmt_cat
 ) -> FinancialStatements:
     stmts = FinancialStatements(
-        annual_stockrow_income_stmt_cat, annual_stockrow_bs_stmt_cat
+        [annual_stockrow_income_stmt_cat, annual_stockrow_bs_stmt_cat]
     )
     return stmts
 
@@ -51,8 +64,12 @@ def quarterly_stockrow_income_df_cat() -> pd.DataFrame:
 
 
 @pytest.fixture
-def quarterly_stockrow_income_stmt_cat() -> IncomeStatements:
-    stmt = IncomeStatements.from_df(quarterly_stockrow_income_df_cat())
+def quarterly_stockrow_income_stmt_cat() -> StatementSeries:
+    stmt = StatementSeries.from_df(
+        quarterly_stockrow_income_df_cat(),
+        INCOME_STATEMENT_CONFIG.display_name,
+        INCOME_STATEMENT_CONFIG.items_config_list,
+    )
     return stmt
 
 
@@ -63,8 +80,12 @@ def quarterly_stockrow_bs_df_cat() -> pd.DataFrame:
 
 
 @pytest.fixture
-def quarterly_stockrow_bs_stmt_cat() -> BalanceSheets:
-    stmt = BalanceSheets.from_df(quarterly_stockrow_bs_df_cat())
+def quarterly_stockrow_bs_stmt_cat() -> StatementSeries:
+    stmt = StatementSeries.from_df(
+        quarterly_stockrow_bs_df_cat(),
+        BALANCE_SHEET_CONFIG.display_name,
+        BALANCE_SHEET_CONFIG.items_config_list,
+    )
     return stmt
 
 
@@ -73,6 +94,6 @@ def quarterly_stockrow_stmts_cat(
     quarterly_stockrow_income_stmt_cat, quarterly_stockrow_bs_stmt_cat
 ) -> FinancialStatements:
     stmts = FinancialStatements(
-        quarterly_stockrow_income_stmt_cat, quarterly_stockrow_bs_stmt_cat
+        [quarterly_stockrow_income_stmt_cat, quarterly_stockrow_bs_stmt_cat]
     )
     return stmts

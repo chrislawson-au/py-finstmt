@@ -27,13 +27,11 @@ FORECAST_ADJUSTS: Final = ForecastAdjustDicts(
             "other_income",
             "retained_earnings",
         ],
-        auto=[
-            "rd_exp",
-        ],
         recent=[
             "lt_invest",
         ],
         mean=[
+            "rd_exp",
             # Because zeroes
             "dep_exp",
             "other_op_exp",
@@ -150,4 +148,4 @@ FORECAST_ADJUSTS: Final = ForecastAdjustDicts(
 def adjust_forecast_methods(stmts: FinancialStatements, adjust_dict: AdjustDict):
     for method, var_list in adjust_dict.items():
         for var in var_list:
-            stmts.config.update(var, ["forecast_config", "method"], method)
+            stmts.config.update(var, ["forecast", "method"], method)

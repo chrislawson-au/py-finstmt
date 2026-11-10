@@ -1,0 +1,121 @@
+name: Packaging and compatibility checks
+
+on:
+  pull_request:
+  push:
+    branches: [master, alpha, beta]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  OPENBLAS_NUM_THREADS: "1"
+  # The test dependencies from pyproject's test group, for jobs that use plain pip
+  TEST_DEPS: pytest syrupy prettyprinter openpyxl
+
+jobs:
+  wheel:
+    name: Build the wheel and test it installed
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Install build tools
+        run: python -m pip install -r global-requirements.txt build
+      - name: Build with poetry (bundled poetry-core 1.x)
+        run: poetry build
+      - name: Build with PEP 517 (latest poetry-core)
+        run: python -m build --wheel --outdir dist-pep517
+      - name: Check wheel contents and metadata
+        run: python .github/scripts/check_wheel.py dist/*.whl dist-pep517/*.whl
+      - name: Test the installed wheel, outside the checkout
+        run: |
+          python -m venv "$RUNNER_TEMP/venv"
+          # shellcheck disable=SC2086
+          "$RUNNER_TEMP/venv/bin/pip" install "$(ls dist/*.whl)[forecast]" $TEST_DEPS
+          mkdir -p "$RUNNER_TEMP/wheel-tests" && cp -r tests "$RUNNER_TEMP/wheel-tests/"
+          cd "$RUNNER_TEMP/wheel-tests"
+          "$RUNNER_TEMP/venv/bin/python" -c "import finstmt; assert 'site-packages' in finstmt.__file__, finstmt.__file__"
+          "$RUNNER_TEMP/venv/bin/python" -m pytest -q -p no:cacheprovider tests
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+
+  min-versions:
+    name: Test the declared minimum versions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Install every runtime dependency at its lower bound
+        run: |
+          python .github/scripts/min_constraints.py pyproject.toml > "$RUNNER_TEMP/min.txt"
+          cat "$RUNNER_TEMP/min.txt"
+          # shellcheck disable=SC2086
+          python -m pip install -c "$RUNNER_TEMP/min.txt" . $TEST_DEPS
+          python -m pip list
+      - name: Run tests
+        run: python -m pytest -q -p no:cacheprovider
+
+  no-extras:
+    name: Test without optional extras
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Install finstmt without extras
+        run: python -m pip install . $TEST_DEPS
+      - name: Check prophet is absent
+        run: python -c "import importlib.util, sys; sys.exit(importlib.util.find_spec('prophet') is not None)"
+      - name: Run tests
+        run: python -m pytest -q -p no:cacheprovider
+
+  pyodide:
+    name: Install the wheel in Pyodide
+    needs: wheel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+      - name: Install Pyodide and run the smoke test
+        run: |
+          mkdir -p "$RUNNER_TEMP/pyodide" && cd "$RUNNER_TEMP/pyodide"
+          npm init -y >/dev/null
+          npm install pyodide@314.0.7
+          cp "$GITHUB_WORKSPACE/.github/scripts/pyodide_smoke.mjs" .
+          node pyodide_smoke.mjs "$GITHUB_WORKSPACE"/dist/*.whl "$GITHUB_WORKSPACE/.github/scripts/pyodide_smoke.py"
+
+  notebooks:
+    name: Execute the example notebooks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Install the root venv with the dev group (jupyterlab)
+        run: |
+          python -m pip install -r global-requirements.txt
+          poetry install --all-extras
+      - name: Execute notebooks
+        working-directory: nbexamples
+        run: |
+          for nb in *.ipynb; do
+            ../.venv/bin/jupyter nbconvert --to notebook --execute \
+              --ExecutePreprocessor.timeout=600 --output-dir "$RUNNER_TEMP/executed" "$nb"
+          done

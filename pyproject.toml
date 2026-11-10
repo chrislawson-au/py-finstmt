@@ -1,10 +1,3 @@
-[project]
-name = "finstmt"
-version = "1.2.2"
-
-[tool.setuptools]
-py-modules = ['finstmt']
-
 [tool.poetry]
 name = "finstmt"
 version = "1.4.0"
@@ -22,28 +15,37 @@ classifiers = [
     # Indicate who your project is intended for
     "Intended Audience :: Developers",
     # List supported python versions
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+    "Typing :: Typed",
 ]
-include = ["conf.py", "version.py"]
+# Repo tooling for the docs build; ship it in the sdist only, never in the wheel
+include = [
+    { path = "conf.py", format = "sdist" },
+    { path = "version.py", format = "sdist" },
+]
 
 [tool.poetry.urls]
-repository = "https://github.com/nickderobertis/py-finstmt"
-documentation = "https://nickderobertis.github.io/py-finstmt"
+repository = "https://github.com/chrislawson-au/py-finstmt"
+documentation = "https://github.com/chrislawson-au/py-finstmt#readme"
 
 [tool.poetry.dependencies]
-python = ">=3.8.1,<4.0"
-pandas = "*"
-sympy = "*"
-xlrd = "*"
-matplotlib = "*"
-tqdm = "*"
-statsmodels = "*"
-prophet = { version = "*", optional = true }
-typing-extensions = ">=4.0.1"
+python = ">=3.12,<4.0"
+# Every runtime dependency needs a ">=" lower bound: the min-versions CI job
+# installs exactly these bounds (see .github/scripts/min_constraints.py)
+pandas = ">=2.2"
+numpy = ">=1.26"
+sympy = ">=1.12"
+scipy = ">=1.11.2"
+statsmodels = ">=0.14.1"
+matplotlib = ">=3.8"
+pyyaml = ">=6.0.1"
+tqdm = ">=4.66"
+xlrd = ">=2.0.1"
+xlsxwriter = ">=3.1"
+prophet = { version = ">=1.1.5", optional = true }
 
 [tool.poetry.extras]
 forecast = ["prophet"]
@@ -51,8 +53,10 @@ forecast = ["prophet"]
 [tool.poetry.group.test.dependencies]
 pytest = "*"
 pytest-cov = "*"
-syrupy = "*"
+syrupy = ">=4.9"
 prettyprinter = "*"
+# Reads back the .xlsx files that finstmt writes with xlsxwriter
+openpyxl = "*"
 
 [tool.poetry.group.dev.dependencies]
 jupyterlab = "*"
@@ -62,5 +66,19 @@ include = 'finstmt.*\.pyi?$|tests.*\.pyi?$'
 
 [tool.isort]
 profile = "black"
+# Skip generated, gitignored files such as the docs build output
+skip_gitignore = true
 skip = ['.bzr', '.direnv', '.eggs', '.git', '.hg', '.mypy_cache', '.pants.d', '.svn', '.tox', '.venv', '__pypackages__', '_build', 'buck-out', 'build', 'dist', 'node_modules', '.venvs']
 
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+# pandas attributes deprecations to the calling module, so this catches only
+# finstmt's own use of deprecated pandas behavior (Pandas4Warning subclasses
+# DeprecationWarning on pandas 3); warnings raised inside dependencies pass
+filterwarnings = [
+    "error::FutureWarning:finstmt",
+    "error::DeprecationWarning:finstmt",
+]

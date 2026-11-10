@@ -3,7 +3,7 @@ from typing import Optional
 
 import pandas as pd
 
-from finstmt.exc import ForecastNotFitException
+from finstmt.exceptions import ForecastNotFitException
 from finstmt.forecast.models.base import ForecastModel
 
 
@@ -13,10 +13,12 @@ class CAGRModel(ForecastModel):
     last_value: Optional[float] = None
 
     def fit(self, series: pd.Series):
-        y_T = series.iloc[-1]
+        # None appears for calculated items with no solvable history; treat
+        # it like NaN so it propagates instead of crashing comparisons
+        y_T = float("nan") if series.iloc[-1] is None else series.iloc[-1]
         self.last_value = y_T
 
-        y_0 = series.iloc[0]
+        y_0 = float("nan") if series.iloc[0] is None else series.iloc[0]
 
         if y_0 <= 0 or y_T <= 0:
             # Invalid data for CAGR method
@@ -33,14 +35,24 @@ class CAGRModel(ForecastModel):
                 specific_messages.append("y_T is negative")
             specific_message = ", ".join(specific_messages)
             message = (
-                f"CAGR not an appropriate method for {self.base_config.display_name} "
+                f"CAGR not an appropriate method for {self.item_config.display_name} "
                 f"as {specific_message}. Setting to 0 growth (recent value forecast)"
             )
             warnings.warn(message)
+        elif len(series) < 2:
+            # A single observation has no growth periods to measure
+            self.cagr = 0
+            self.stderr = 0
+            warnings.warn(
+                f"CAGR not an appropriate method for {self.item_config.display_name} "
+                f"as there is only one period of history. "
+                f"Setting to 0 growth (recent value forecast)"
+            )
         else:
-            n = len(series)
-            self.cagr = (y_T / y_0) ** (1 / n) - 1
-            self.stderr = series.pct_change().std() / (n**0.5)
+            # T observations span T - 1 growth periods
+            n_periods = len(series) - 1
+            self.cagr = (y_T / y_0) ** (1 / n_periods) - 1
+            self.stderr = series.pct_change().std() / (n_periods**0.5)
         super().fit(series)
 
     def predict(self) -> pd.Series:
@@ -91,6 +103,6 @@ class CAGRModel(ForecastModel):
                 last_value = next_value
             past_df[col_name] = past_values
 
-        self.result_df = past_df.append(future_df).sort_index()
+        self.result_df = pd.concat([past_df, future_df]).sort_index()
         super().predict()
         return self.result

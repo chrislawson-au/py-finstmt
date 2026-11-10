@@ -3,7 +3,7 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-from finstmt.exc import ForecastNotFitException
+from finstmt.exceptions import ForecastNotFitException
 from finstmt.forecast.models.base import ForecastModel
 
 

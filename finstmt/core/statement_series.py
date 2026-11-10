@@ -1,0 +1,358 @@
+import operator
+from dataclasses import dataclass, field
+from typing import Callable, Dict, List, Optional
+
+import pandas as pd
+from tqdm import tqdm
+
+from finstmt._logging import logger
+from finstmt.check import item_series_is_empty
+from finstmt.config.forecast import ForecastConfig
+from finstmt.config.item import ItemConfig
+from finstmt.core.statement_item_series import StatementItemSeries
+from finstmt.core.statement_period_data import StatementPeriodData
+from finstmt.exceptions import (
+    CouldNotParseException,
+    MixedFrequencyException,
+    NoSuchItemException,
+)
+from finstmt.forecast.forecast_item_series import ForecastItemSeries
+from finstmt.freq import infer_freq_or_default
+
+
+@dataclass
+class StatementSeries:
+    """A time-series of a single financial statement type (e.g. Income Statement).
+
+    Holds one :class:`StatementPeriodData` per date. Item values are accessible
+    as attributes: ``series.revenue`` returns a ``pd.Series`` indexed by date.
+
+    Examples:
+        >>> series = StatementSeries.from_df(df, "Income Statement", configs)
+        >>> series.revenue  # pd.Series of revenue over time
+    """
+
+    statements: Dict[pd.Timestamp, StatementPeriodData]
+    items_config_list: List[ItemConfig] = field(repr=False)
+    statement_name: str
+
+    def __post_init__(self):
+        self.df = self.to_df()
+
+    def update_statement_item_calculated_value(
+        self, statement_item_key, period_index, statement_item_value
+    ):
+        if period_index >= len(self.statements):
+            return
+        list(self.statements.values())[
+            period_index
+        ].update_statement_item_calculated_value(
+            statement_item_key, statement_item_value
+        )
+
+    def _repr_html_(self):
+        return self._formatted_df._repr_html_()
+
+    def _get_item_config(self, item_key: str) -> ItemConfig:
+        """Look up an ItemConfig by key from items_config_list."""
+        for config in self.items_config_list:
+            if config.key == item_key:
+                return config
+        raise NoSuchItemException(item_key)
+
+    def __getattr__(self, item):
+        data_dict = {}
+        for date, statement in self.statements.items():
+            try:
+                data_dict[date] = getattr(statement, item)
+            except AttributeError:
+                raise AttributeError(item)
+        try:
+            display_name = self._get_item_config(item).display_name
+        except NoSuchItemException:
+            display_name = item
+        return pd.Series(data_dict, name=display_name)
+
+    def get_statement_item_series(self, item_key: str) -> StatementItemSeries:
+        return StatementItemSeries(
+            series=getattr(self, item_key), item_config=self._get_item_config(item_key)
+        )
+
+    def __getitem__(self, item):
+        if not isinstance(item, (list, tuple)):
+            date_item = pd.to_datetime(item)
+            return self.statements[date_item]
+
+        # Got multiple dates
+        all_series = []
+        for date_str in item:
+            series = self.to_df(index_as_display_name=False)[date_str]
+            date = pd.to_datetime(date_str)
+            series.name = date
+            all_series.append(series)
+        df = pd.concat(all_series, axis=1)
+
+        return self.from_df(
+            df, self.statement_name, self.items_config_list, disp_unextracted=False
+        )
+
+    def __dir__(self):
+        normal_attrs = [
+            "statements",
+            "to_df",
+            "freq",
+            "dates",
+        ]
+        item_attrs = dir(list(self.statements.values())[0])
+        return normal_attrs + item_attrs
+
+    @classmethod
+    def from_dict(
+        cls,
+        dict: dict,
+        statement_name: str,
+        items_config_list: List[ItemConfig],
+        disp_unextracted: bool = True,
+    ):
+        df = pd.DataFrame(dict)
+        return cls.from_df(
+            df,
+            statement_name,
+            items_config_list,
+            disp_unextracted,
+        )
+
+    @classmethod
+    def from_df(
+        cls,
+        df: pd.DataFrame,
+        statement_name: str,
+        items_config_list: List[ItemConfig],
+        disp_unextracted: bool = True,
+    ):
+        """
+        DataFrame must have columns as dates and index as names of financial statement items
+        """
+        statements_dict = {}
+        dates = list(df.columns)
+        dates.sort(key=lambda t: pd.to_datetime(t))
+
+        configs = list(items_config_list)
+
+        for col in dates:
+            try:
+                statement = StatementPeriodData.from_series(df[col], configs)
+            except CouldNotParseException:
+                raise CouldNotParseException(
+                    "Passed DataFrame did not have any statement items in the index. "
+                    "Did you set the column with statement items to the index? Got index:",
+                    df.index,
+                )
+            statement_date = pd.to_datetime(col)
+            statements_dict[statement_date] = statement
+
+        if disp_unextracted:
+            # Warn about unextracted names
+            all_unextracted_names = set()
+            for stmt_data in statements_dict.values():
+                all_unextracted_names.update(stmt_data.unextracted_names)
+            if all_unextracted_names:
+                logger.info(
+                    f"Was not able to extract data from the following names: {all_unextracted_names}"
+                )
+
+        return cls(statements_dict, configs, statement_name)
+
+    # get a dataframe with a column for each date and the rows for each datapoint in the statements
+    def to_df(self, index_as_display_name=True) -> pd.DataFrame:
+        all_series = []
+        for date, statement in self.statements.items():
+            series = statement.to_series(index_as_display_name)
+            series.name = date
+            all_series.append(series)
+        return pd.concat(all_series, axis=1)
+
+    @property
+    def _formatted_df(self) -> pd.DataFrame:
+        out_df = self.df.copy()
+        out_df.fillna(0, inplace=True)
+        out_df.columns = [col.strftime("%m/%d/%Y") for col in out_df.columns]
+        return out_df.map(lambda x: f"${x:,.0f}" if not x == 0 else " - ")
+
+    def _forecast(self, statements, **kwargs) -> Dict[str, ForecastItemSeries]:
+        if "freq" not in kwargs:
+            freq = self.freq
+            if freq is None:
+                raise MixedFrequencyException(
+                    "Could not automatically determine frequency of history. Likely there are mixed "
+                    "frequencies in the data. Either pass an explicit freq to forecast or remove the "
+                    "periods which do not match the frequency before running the forecast."
+                )
+            kwargs["freq"] = freq
+
+        forecast_config = ForecastConfig(**kwargs)
+        forecast_dict: Dict[str, ForecastItemSeries] = {}
+        logger.info(f"Forecasting {self.statement_name}")
+        # Use configs from FinancialStatements.config (which has adjustments
+        # from _adjust_config_based_on_data) rather than self.items_config_list
+        adjusted_configs = statements.config.configs.get(
+            self.statement_name, self.items_config_list
+        )
+        item: ItemConfig
+        for item in tqdm(adjusted_configs):
+            if not item.forecast.make_forecast:
+                # If user set to skip the forecast, skip it as well
+                # By default, all calculated items will be skipped
+                continue
+            data = getattr(statements, item.key)
+            pct_of_series = None
+            pct_of_config = None
+            if item.forecast.pct_of is not None:
+                pct_of_series = getattr(statements, item.forecast.pct_of)
+                pct_of_config = statements.config.get(item.forecast.pct_of)
+            forecast = ForecastItemSeries(
+                data,
+                forecast_config,
+                item,
+                pct_of_series=pct_of_series,
+                pct_of_config=pct_of_config,
+            )
+            forecast.fit()
+            forecast.predict()
+            forecast_dict[item.key] = forecast
+
+        return forecast_dict
+
+    @property
+    def freq(self) -> Optional[str]:
+        return infer_freq_or_default(self.dates)
+
+    @property
+    def dates(self) -> List[pd.Timestamp]:
+        return list(self.statements.keys())
+
+    def item_is_empty(self, key: str) -> bool:
+        item: pd.Series = getattr(self, key)
+        return item_series_is_empty(item)
+
+    def __add__(self, other):
+        if isinstance(other, (float, int)):
+            new_df = self.to_df(index_as_display_name=False) + other
+        elif isinstance(other, StatementSeries):
+            new_df = combine_statement_dfs(
+                self.to_df(index_as_display_name=False),
+                other.to_df(index_as_display_name=False),
+                operation=operator.add,
+            )
+        else:
+            raise NotImplementedError(
+                f"cannot add type {type(other)} to type {type(self)}"
+            )
+
+        # TODO [#42]: combined statements retain only item config of first statements
+        #
+        # Think about the best way to handle this. This applies to all math dunder methods.
+        new_statements = type(self).from_df(
+            new_df, self.statement_name, self.items_config_list, disp_unextracted=False
+        )
+        return new_statements
+
+    def __radd__(self, other):
+        return self.__add__(other)
+
+    def __mul__(self, other):
+        if isinstance(other, (float, int)):
+            new_df = self.to_df(index_as_display_name=False) * other
+        elif isinstance(other, StatementSeries):
+            new_df = combine_statement_dfs(
+                self.to_df(index_as_display_name=False),
+                other.to_df(index_as_display_name=False),
+                operation=operator.mul,
+            )
+        else:
+            raise NotImplementedError(
+                f"cannot multiply type {type(other)} to type {type(self)}"
+            )
+
+        new_statements = type(self).from_df(
+            new_df, self.statement_name, self.items_config_list, disp_unextracted=False
+        )
+        return new_statements
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
+    def __sub__(self, other):
+        if isinstance(other, (float, int)):
+            new_df = self.to_df(index_as_display_name=False) - other
+        elif isinstance(other, StatementSeries):
+            new_df = combine_statement_dfs(
+                self.to_df(index_as_display_name=False),
+                other.to_df(index_as_display_name=False),
+                operation=operator.sub,
+            )
+        else:
+            raise NotImplementedError(
+                f"cannot subtract type {type(other)} to type {type(self)}"
+            )
+
+        new_statements = type(self).from_df(
+            new_df, self.statement_name, self.items_config_list, disp_unextracted=False
+        )
+        return new_statements
+
+    def __rsub__(self, other):
+        return (-1 * self) + other
+
+    def __truediv__(self, other):
+        if isinstance(other, (float, int)):
+            new_df = self.to_df(index_as_display_name=False) / other
+        elif isinstance(other, StatementSeries):
+            new_df = combine_statement_dfs(
+                self.to_df(index_as_display_name=False),
+                other.to_df(index_as_display_name=False),
+                operation=operator.truediv,
+            )
+        else:
+            raise NotImplementedError(
+                f"cannot divide type {type(other)} to type {type(self)}"
+            )
+
+        new_statements = type(self).from_df(
+            new_df, self.statement_name, self.items_config_list, disp_unextracted=False
+        )
+        return new_statements
+
+    def __rtruediv__(self, other):
+        if isinstance(other, (float, int)):
+            new_df = other / self.to_df(index_as_display_name=False)
+        else:
+            raise NotImplementedError(
+                f"cannot divide type {type(other)} to type {type(self)}"
+            )
+
+        new_statements = type(self).from_df(
+            new_df, self.statement_name, self.items_config_list, disp_unextracted=False
+        )
+        return new_statements
+
+    def __round__(self, n=None) -> "StatementSeries":
+        new_df = round(self.to_df(index_as_display_name=False), n)
+        new_statements = type(self).from_df(
+            new_df, self.statement_name, self.items_config_list, disp_unextracted=False
+        )
+        return new_statements
+
+
+def combine_statement_dfs(
+    df: pd.DataFrame,
+    df2: pd.DataFrame,
+    operation: Callable[[pd.DataFrame, pd.DataFrame], pd.DataFrame] = operator.add,
+) -> pd.DataFrame:
+    common_cols = [col for col in df.columns if col in df2.columns]
+    df_unique_cols = [col for col in df.columns if col not in df2.columns]
+    df2_unique_cols = [col for col in df2.columns if col not in df.columns]
+    common_df = operation(df[common_cols], df2[common_cols])
+    result = pd.concat([common_df, df[df_unique_cols], df2[df2_unique_cols]], axis=1)
+    cols = sorted(list(result.columns))
+    return result[cols]

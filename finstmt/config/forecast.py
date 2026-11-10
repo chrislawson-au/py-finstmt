@@ -1,0 +1,26 @@
+from dataclasses import dataclass, field
+from typing import Dict, Union
+
+
+@dataclass
+class ForecastConfig:
+    periods: int = 5
+    freq: str = "Y"
+    prophet_kwargs: dict = field(default_factory=lambda: {})
+    balance: bool = True
+    timeout: float = 180
+
+    # TODO [#45]: after handling units, adjust default allowed BS difference for units
+    bs_diff_max: float = 10000
+
+    def __post_init__(self):
+        # pandas >= 2.2 spells month-end offsets "ME"; pandas 3 rejects the old
+        # lower-case "m" (month end) alias
+        if self.freq.casefold() == "y":
+            self.freq = "12ME"
+        elif self.freq.casefold() == "q":
+            self.freq = "3ME"
+
+    @property
+    def make_future_df_kwargs(self) -> Dict[str, Union[int, str]]:
+        return dict(periods=self.periods, freq=self.freq)

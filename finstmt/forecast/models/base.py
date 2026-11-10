@@ -5,10 +5,15 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from pandas import DatetimeIndex
 
-from finstmt.exc import ForecastNotFitException, ForecastNotPredictedException
-from finstmt.forecast.config import ForecastConfig, ForecastItemConfig
+from finstmt.config.forecast import ForecastConfig
+from finstmt.config.item import ItemConfig
+from finstmt.exceptions import (
+    ForecastNotFitException,
+    ForecastNotPredictedException,
+    MixedFrequencyException,
+)
 from finstmt.forecast.plot import plot_forecast
-from finstmt.items.config import ItemConfig
+from finstmt.freq import infer_freq_or_default
 
 
 class ForecastModel:
@@ -20,12 +25,10 @@ class ForecastModel:
     def __init__(
         self,
         config: ForecastConfig,
-        item_config: ForecastItemConfig,
-        base_config: ItemConfig,
+        item_config: ItemConfig,
     ):
         self.config = config
         self.item_config = item_config
-        self.base_config = base_config
         self.has_been_fit = False
         self.has_prediction = False
 
@@ -49,7 +52,7 @@ class ForecastModel:
         if xlabel is None:
             xlabel = "Time"
         if title is None:
-            title = self.base_config.display_name
+            title = self.item_config.display_name
 
         if self.orig_series is None:
             raise ForecastNotPredictedException("call .fit then .predict before .plot")
@@ -69,18 +72,19 @@ class ForecastModel:
     def _future_date_range(self) -> DatetimeIndex:
         if not self.has_been_fit:
             raise ForecastNotFitException("call .fit before ._future_date_range")
+
         return pd.date_range(
             start=self.last_historical_period,
             periods=self.config.periods + 1,
             freq=self.config.freq,
-            closed="right",
+            inclusive="right",
         )
 
     @property
-    def historical_freq(self) -> str:
+    def historical_freq(self) -> Optional[str]:
         if self.orig_series is None:
             raise ForecastNotFitException("call .fit before .historical_freq")
-        return pd.infer_freq(self.orig_series.index)
+        return infer_freq_or_default(self.orig_series.index)
 
     @property
     def desired_freq_t_multiplier(self) -> float:
@@ -92,8 +96,17 @@ class ForecastModel:
         """
         if self.orig_series is None:
             raise ForecastNotFitException("call .fit before .desired_freq_t_multiplier")
+        historical_freq = self.historical_freq
+        if historical_freq is None:
+            # pd.date_range treats freq=None as daily, which would silently
+            # produce a meaningless multiplier
+            raise MixedFrequencyException(
+                f"Could not determine the frequency of the history of "
+                f"{self.item_config.display_name}. Likely there are mixed frequencies "
+                "in the data; remove the periods that do not match before forecasting."
+            )
         return compare_freq_strs(
-            self.config.freq, self.historical_freq, ref_date=self.orig_series.index[-1]
+            self.config.freq, historical_freq, ref_date=self.orig_series.index[-1]
         )
 
 

@@ -4,14 +4,19 @@ inputs:
   python-version:
     required: true
     description: "The Python version to install dependencies for."
+  pandas-major:
+    required: false
+    default: ""
+    description: "Optional pandas major version (2 or 3) to install over the locked one."
 
 runs:
   using: composite
   steps:
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+    - name: Set up Python ${{ inputs.python-version }}
+      uses: actions/setup-python@v7
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: ${{ inputs.python-version }}
+        allow-prereleases: true
         cache: pip
         cache-dependency-path: global-requirements.txt
     - name: Install Global Dependencies
@@ -22,16 +27,36 @@ runs:
       uses: taiki-e/install-action@v2
       with:
         tool: just@1.13.0
-    - uses: actions/cache@v3
+    - uses: actions/cache@v6
       id: cache-venvs
       name: Cache venvs
       with:
         path: |
           .venv
-          .venvs
-        key: ${{ env.pythonLocation }}-venvs-${{ hashFiles('**/poetry.lock') }}
+          .venvs/lint/.venv
+        # Cache keys cannot contain commas, so the pandas pin is keyed by major
+        key: ${{ runner.os }}-${{ runner.arch }}-${{ env.pythonLocation }}-pandas${{ inputs.pandas-major }}-venvs-${{ hashFiles('**/poetry.lock') }}
     - name: Create venvs
       shell: bash
       if: steps.cache-venvs.outputs.cache-hit != 'true'
       run: |
-        just poetry-all install --all-extras
+        # Create the venvs with the stdlib so their pip is the one bundled with this
+        # Python. poetry 1.3.2 caps platformdirs below 3, which holds virtualenv at
+        # 20.21, and the pip that virtualenv seeds cannot install wheels on Python
+        # 3.15. poetry reuses existing in-project venvs.
+        python -m venv .venv
+        python -m venv .venvs/lint/.venv
+        # Root and lint only: CI needs neither jupyterlab (dev group) nor the docs stack
+        poetry install --all-extras --without dev
+        poetry --directory .venvs/lint install
+    - name: Install pandas ${{ inputs.pandas-major }}.x over the locked version
+      shell: bash
+      if: inputs.pandas-major != ''
+      run: |
+        case "${{ inputs.pandas-major }}" in
+          2) spec="pandas>=2.2,<3" ;;
+          3) spec="pandas>=3,<4" ;;
+          *) echo "unsupported pandas-major: ${{ inputs.pandas-major }}"; exit 1 ;;
+        esac
+        .venv/bin/python -m pip install "$spec"
+        .venv/bin/python -c "import pandas; print('pandas', pandas.__version__)"

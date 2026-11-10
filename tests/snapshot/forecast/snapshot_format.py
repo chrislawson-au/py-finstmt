@@ -6,6 +6,7 @@ import prettyprinter
 from finstmt import FinancialStatements
 
 always_exclude: Final[Sequence[str]] = ("_combinator",)
+NEGATIVE_ZERO: Final = re.compile(r"-0\.0\b")
 
 
 def format_statement_for_snapshot(
@@ -25,4 +26,7 @@ def format_statement_for_snapshot(
         quotes_pattern = re.compile(rf'\s*"{attr}":.*$', re.MULTILINE)
         formatted_str = quotes_pattern.sub("", formatted_str)
 
-    return formatted_str
+    # The sign of a zero result differs between CPU architectures (x86_64 vs
+    # aarch64 BLAS); -0.0 == 0.0, so snapshot both as 0.0 (same width keeps
+    # pandas' column alignment)
+    return NEGATIVE_ZERO.sub(" 0.0", formatted_str)
