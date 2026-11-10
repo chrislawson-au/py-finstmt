@@ -3,7 +3,7 @@ Work with financial statement data in Python. Can calculate free cash flows and 
 financial statements, automatically balancing the balance sheet.
 """
 
-__version__ = "1.4.0"
+__version__ = "2.0.0-alpha.1"
 
 from finstmt.config.forecast import ForecastConfig
 from finstmt.config.item import ForecastItemConfig, ItemConfig

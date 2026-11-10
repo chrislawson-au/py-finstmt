@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2.0.0-alpha.1 (2026-11-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* finstmt 2.0 requires Python 3.12+ and replaces the 1.x BalanceSheets, IncomeStatements and CONFIG API with config-driven StatementSeries; see MIGRATION.md.
+
+### Features
+
+* Release finstmt 2.0 restructure with deals layer and CI ([#4](https://github.com/chrislawson-au/py-finstmt/issues/4)) ([d889b50](https://github.com/chrislawson-au/py-finstmt/commit/d889b50baef33a1de4e32b6dc5ab357448f2a15b))
+
 ## [1.4.0](https://github.com/nickderobertis/py-finstmt/compare/v1.3.0...v1.4.0) (2023-04-22)
 
 
